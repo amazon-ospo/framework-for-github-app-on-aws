@@ -2,7 +2,7 @@
   "name": "framework-for-github-app-on-aws",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ajestharl/framework-for-github-app-on-aws.git"
+    "url": "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git"
   },
   "scripts": {
     "build": "npx projen build",
