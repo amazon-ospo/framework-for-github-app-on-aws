@@ -27,10 +27,27 @@ const project = new awscdk.AwsCdkConstructLibrary({
   release: false,
   autoMerge: false,
   releaseToNpm: false,
-
-  // deps: [],                /* Runtime dependencies of this module. */
-  // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
-  // devDeps: [],             /* Build dependencies for this module. */
-  // packageName: undefined,  /* The "name" in package.json. */
+  workflowNodeVersion: '18.x', // Specify Node.js version for workflows
+  githubOptions: {
+    workflows: true,
+    pullRequestLint: true,
+    mergify: false,
+  },
+  workflowGitIdentity: {
+    name: 'github-actions',
+    email: 'github-actions@github.com',
+  },
 });
+
+// Modify the existing build workflow
+if (project.github) {
+  const buildWorkflow = project.github.tryFindWorkflow('build');
+  if (buildWorkflow && buildWorkflow.file) {
+    buildWorkflow.file.addOverride('jobs.build.steps.0.with', {
+      token: '${{ secrets.GITHUB_TOKEN }}',
+      fetchDepth: 1,
+    });
+  }
+}
+
 project.synth();
