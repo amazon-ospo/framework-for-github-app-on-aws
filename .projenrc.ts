@@ -27,7 +27,7 @@ const project = new awscdk.AwsCdkConstructLibrary({
   release: false,
   autoMerge: false,
   releaseToNpm: false,
-  workflowNodeVersion: '18.x', // Specify Node.js version for workflows
+  workflowNodeVersion: '18.x',
   githubOptions: {
     workflows: true,
     pullRequestLint: true,
@@ -44,8 +44,9 @@ if (project.github) {
   const buildWorkflow = project.github.tryFindWorkflow('build');
   if (buildWorkflow && buildWorkflow.file) {
     buildWorkflow.file.addOverride('jobs.build.steps.0.with', {
-      token: '${{ secrets.GITHUB_TOKEN }}',
-      fetchDepth: 1,
+      token: '${{ secrets.PROJEN_GITHUB_TOKEN }}',
+      'fetch-depth': 1,
+      ref: '${{ github.event.pull_request.head.ref }}',
     });
   }
 }
