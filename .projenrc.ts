@@ -33,4 +33,10 @@ const project = new awscdk.AwsCdkConstructLibrary({
   // devDeps: [],             /* Build dependencies for this module. */
   // packageName: undefined,  /* The "name" in package.json. */
 });
+if (project.github) {
+  const buildWorkflow = project.github?.tryFindWorkflow("build");
+  if (buildWorkflow && buildWorkflow.file) {
+    buildWorkflow.file.addOverride("jobs.build.permissions.contents", "read");
+  }
+}
 project.synth();
