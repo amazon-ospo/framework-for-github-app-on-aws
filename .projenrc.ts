@@ -27,10 +27,17 @@ const project = new awscdk.AwsCdkConstructLibrary({
   release: false,
   autoMerge: false,
   releaseToNpm: false,
-
-  // deps: [],                /* Runtime dependencies of this module. */
-  // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */
-  // devDeps: [],             /* Build dependencies for this module. */
-  // packageName: undefined,  /* The "name" in package.json. */
 });
+
+// Modify the existing build workflow
+if (project.github) {
+  const buildWorkflow = project.github.tryFindWorkflow('build');
+  if (buildWorkflow && buildWorkflow.file) {
+    buildWorkflow.file.addOverride('jobs.build.steps.0.with', {
+      'fetch-depth': 0,
+      ref: '${{ github.event.pull_request.head.ref }}',
+    });
+  }
+}
+
 project.synth();
