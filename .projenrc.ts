@@ -33,4 +33,17 @@ const project = new awscdk.AwsCdkConstructLibrary({
   // devDeps: [],             /* Build dependencies for this module. */
   // packageName: undefined,  /* The "name" in package.json. */
 });
+// Modify the existing build workflow
+if (project.github) {
+  const buildWorkflow = project.github.tryFindWorkflow('build');
+  if (buildWorkflow && buildWorkflow.file) {
+    buildWorkflow.file.addOverride('jobs.build.steps.0.with', {
+      'fetch-depth': 0,
+      ref: '${{ github.event.pull_request.head.ref }}',
+    });
+    buildWorkflow.file.addOverride('jobs.build.permissions.checks', 'write');
+    buildWorkflow.file.addOverride('jobs.build.permissions.pull-requests', 'write');
+    buildWorkflow.file.addOverride('jobs.build.permissions.id-token', 'write');
+  }
+}
 project.synth();
