@@ -2,7 +2,7 @@
   "name": "framework-for-github-app-on-aws",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ajestharl/framework-for-github-app-on-aws.git"
+    "url": "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git"
   },
   "scripts": {
     "build": "npx projen build",
@@ -53,7 +53,7 @@
     "projen": "^0.91.13",
     "ts-jest": "^29.2.6",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2"
+    "typescript": "~5.7.0"
   },
   "peerDependencies": {
     "aws-cdk-lib": "^2.1.0",
