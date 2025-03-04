@@ -8,7 +8,7 @@ const project = new awscdk.AwsCdkConstructLibrary({
   name: "framework-for-github-app-on-aws",
   projenrcTs: true,
   repositoryUrl:
-    "https://github.com/ajestharl/framework-for-github-app-on-aws.git",
+    "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git",
   docgen: true,
   github: true,
   gitignore: [".idea"],
