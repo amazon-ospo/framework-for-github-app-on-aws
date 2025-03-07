@@ -129,6 +129,12 @@
   "overrides": [
     {
       "files": [
+        "*.md"
+      ],
+      "parser": "markdown-eslint-parser"
+    },
+    {
+      "files": [
         ".projenrc.ts"
       ],
       "rules": {
