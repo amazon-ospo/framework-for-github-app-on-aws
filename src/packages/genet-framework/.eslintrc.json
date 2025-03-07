@@ -17,7 +17,9 @@
     "project": "./tsconfig.dev.json"
   },
   "extends": [
-    "plugin:import/typescript"
+    "plugin:import/typescript",
+    "plugin:md/recommended",
+    "plugin:prettier/recommended"
   ],
   "settings": {
     "import/parsers": {
@@ -216,7 +218,38 @@
           "method"
         ]
       }
+    ],
+    "prettier/prettier": "error",
+    "md/remark": [
+      "error",
+      {
+        "plugins": [
+          "preset-lint-markdown-style-guide",
+          [
+            "lint-list-item-indent",
+            "space"
+          ]
+        ]
+      }
     ]
   },
-  "overrides": []
+  "overrides": [
+    {
+      "files": [
+        "*.md"
+      ],
+      "parser": "markdown-eslint-parser",
+      "rules": {
+        "prettier/prettier": [
+          "error",
+          {
+            "parser": "markdown"
+          }
+        ],
+        "@typescript-eslint/no-floating-promises": "off",
+        "@typescript-eslint/return-await": "off",
+        "quotes": "off"
+      }
+    }
+  ]
 }

@@ -32,8 +32,11 @@
     "eslint": "^9",
     "eslint-import-resolver-typescript": "^3.8.3",
     "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-md": "^1.0.19",
+    "eslint-plugin-prettier": "^5.2.3",
     "jest": "^29.7.0",
     "jest-junit": "^16",
+    "markdown-eslint-parser": "^1.2.1",
     "ts-jest": "^29.2.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
