@@ -1,4 +1,4 @@
-import { NestedStack } from 'aws-cdk-lib';
+import { NestedStack, Tags } from 'aws-cdk-lib';
 import { AttributeType, Table, BillingMode } from 'aws-cdk-lib/aws-dynamodb';
 import { Construct } from 'constructs';
 export interface InstallationManagerProps {}
@@ -10,6 +10,7 @@ export class InstallationManager extends NestedStack {
   readonly installationTable: Table;
   constructor(scope: Construct, id: string, props: InstallationManagerProps) {
     super(scope, id, props);
+    Tags.of(this).add('GenetComponent', 'InstallationManager');
     // Table for storing the pre-approval target list GitHub App installation.
     this.targetTable = new Table(this, 'PreApprovalTargetTable', {
       partitionKey: {
@@ -19,6 +20,7 @@ export class InstallationManager extends NestedStack {
       billingMode: BillingMode.PAY_PER_REQUEST,
       pointInTimeRecoverySpecification: { pointInTimeRecoveryEnabled: true },
     });
+    Tags.of(this.targetTable).add('InstallationManager', 'PreApprovalTable');
     // Global secondary index to query targets by Node ID.
     this.targetTable.addGlobalSecondaryIndex({
       indexName: 'NodeID',
@@ -42,6 +44,10 @@ export class InstallationManager extends NestedStack {
       billingMode: BillingMode.PAY_PER_REQUEST,
       pointInTimeRecoverySpecification: { pointInTimeRecoveryEnabled: true },
     });
+    Tags.of(this.installationTable).add(
+      'InstallationManager',
+      'AppInstallationTable',
+    );
     // Global secondary index for looking up installations by Node ID.
     this.installationTable.addGlobalSecondaryIndex({
       indexName: 'NodeID',

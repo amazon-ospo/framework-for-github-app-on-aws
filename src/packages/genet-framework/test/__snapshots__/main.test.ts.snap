@@ -13,6 +13,12 @@ exports[`Snapshot 1`] = `
     "CredentialManagerNestedStackCredentialManagerNestedStackResource341E8524": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "Tags": [
+          {
+            "Key": "GenetComponent",
+            "Value": "CredentialManager",
+          },
+        ],
         "TemplateURL": {
           "Fn::Join": [
             "",
@@ -29,7 +35,7 @@ exports[`Snapshot 1`] = `
               {
                 "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
               },
-              "/64000c6d26a8305020bbe18761ba30c5edfa6e13d0a3378ba46c42b2207d5b2e.json",
+              "/9f06c961e293933484614f20b0b74d239b8f66be81f09e80a6807bfb10fbac18.json",
             ],
           ],
         },
@@ -40,6 +46,12 @@ exports[`Snapshot 1`] = `
     "InstallationManagerNestedStackInstallationManagerNestedStackResourceBB60C6B1": {
       "DeletionPolicy": "Delete",
       "Properties": {
+        "Tags": [
+          {
+            "Key": "GenetComponent",
+            "Value": "InstallationManager",
+          },
+        ],
         "TemplateURL": {
           "Fn::Join": [
             "",
@@ -56,7 +68,7 @@ exports[`Snapshot 1`] = `
               {
                 "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
               },
-              "/2e3adab6523c374cc20e2261596dafde83b85c4bba8ccd931010f38102202926.json",
+              "/2b0e505a938375e140c37059df9b6202ad088afbab0790da26c40ebfa7be3f94.json",
             ],
           ],
         },
