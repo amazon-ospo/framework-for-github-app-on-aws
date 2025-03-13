@@ -35,7 +35,7 @@ exports[`Snapshot 1`] = `
               {
                 "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
               },
-              "/9f06c961e293933484614f20b0b74d239b8f66be81f09e80a6807bfb10fbac18.json",
+              "/ad713d4e978f839cee6211a8140e4fdc722fb58b487565a266e3f29573f8e052.json",
             ],
           ],
         },
@@ -68,7 +68,7 @@ exports[`Snapshot 1`] = `
               {
                 "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
               },
-              "/2b0e505a938375e140c37059df9b6202ad088afbab0790da26c40ebfa7be3f94.json",
+              "/e9aa1c2a22ef3b492f1a21103200cecf7a84aee7235149d536ff4df4aa4fdd3f.json",
             ],
           ],
         },
