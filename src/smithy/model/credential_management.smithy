@@ -9,11 +9,12 @@ resource CredentialManagementService{
 operation GetInstallationToken {
     input: GetInstallationTokenInput,
     output: GetInstallationTokenOutput
-    errors:[ServerSideError, AccessDeniedError, RateLimitError, GatewayTimeoutError]
+    errors:[ServerSideError, ClientSideError, AccessDeniedError, RateLimitError, GatewayTimeoutError, ServiceUnavailableError]
 }
 
 structure GetInstallationTokenOutput {
     installationToken: String
+    nodeId: String
 }
 
 @readonly
@@ -21,7 +22,7 @@ structure GetInstallationTokenOutput {
 operation GetAppToken {
     input: GetAppTokenInput,
     output: GetAppTokenOutput
-    errors:[ServerSideError, AccessDeniedError, GatewayTimeoutError]
+    errors:[ServerSideError, ClientSideError, AccessDeniedError, GatewayTimeoutError, ServiceUnavailableError]
 }
 
 structure GetInstallationTokenInput {
@@ -42,6 +43,7 @@ structure GetAppTokenInput {
 
 structure GetAppTokenOutput {
     appToken: String
+    appId: String
 }
 
 @httpError(500)
@@ -50,10 +52,23 @@ structure ServerSideError {
     message: String,
 }
 
+@httpError(400)
+@error("client")
+structure ClientSideError {
+    message: String,
+}
+
 // Error that can occur when unable to access AWS resources
 @httpError(403)
 @error("client")
 structure AccessDeniedError {
+    message: String,
+}
+
+// Error that can occur when not authorized to access AWS resources
+@httpError(401)
+@error("client")
+structure NotAuthorizedError {
     message: String,
 }
 
@@ -67,5 +82,12 @@ structure RateLimitError {
 @httpError(504)
 @error("server")
 structure GatewayTimeoutError {
+    message: String,
+}
+
+// Error that can occur when AWS service is unavailable
+@httpError(503)
+@error("server")
+structure ServiceUnavailableError {
     message: String,
 }
