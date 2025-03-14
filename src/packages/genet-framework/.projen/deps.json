@@ -41,14 +41,6 @@
       "type": "build"
     },
     {
-      "name": "eslint-plugin-md",
-      "type": "build"
-    },
-    {
-      "name": "eslint-plugin-prettier",
-      "type": "build"
-    },
-    {
       "name": "eslint",
       "version": "^9",
       "type": "build"
@@ -60,10 +52,6 @@
     {
       "name": "jest-junit",
       "version": "^16",
-      "type": "build"
-    },
-    {
-      "name": "markdown-eslint-parser",
       "type": "build"
     },
     {

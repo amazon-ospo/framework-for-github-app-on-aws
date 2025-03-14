@@ -58,16 +58,16 @@ new JsonFile(genetFramework, ".prettierrc.json", {
     trailingComma: "all",
   },
 });
-genetFramework.addDevDeps(
+project.addDevDeps(
   "eslint-plugin-md",
   "markdown-eslint-parser",
   "eslint-plugin-prettier",
 );
-genetFramework.eslint?.addExtends(
+project.eslint?.addExtends(
   "plugin:md/recommended",
   "plugin:prettier/recommended",
 );
-genetFramework.eslint?.addOverride({
+project.eslint?.addOverride({
   files: ["*.md"],
   parser: "markdown-eslint-parser",
   rules: {
@@ -77,7 +77,7 @@ genetFramework.eslint?.addOverride({
     quotes: "off",
   },
 });
-genetFramework.eslint?.addRules({
+project.eslint?.addRules({
   "prettier/prettier": "error",
   "md/remark": [
     "error",
