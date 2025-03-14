@@ -10,7 +10,7 @@
     },
     "plugins": {
         "typescript-ssdk-codegen": {
-            "package": "@genet.api/genet-ssdk-client",
+            "package": "@genet.api/genet-smithy-ssdk",
             "packageVersion": "0.0.1"
         }
     }

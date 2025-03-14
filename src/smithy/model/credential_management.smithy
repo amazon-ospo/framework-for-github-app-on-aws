@@ -15,6 +15,7 @@ operation GetInstallationToken {
 structure GetInstallationTokenOutput {
     installationToken: String
     nodeId: String
+    appId: String
 }
 
 @readonly
