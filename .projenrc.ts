@@ -33,6 +33,39 @@ export const project = new awscdk.AwsCdkConstructLibrary({
   // devDeps: [],             /* Build dependencies for this module. */
   // packageName: undefined,  /* The "name" in package.json. */
 });
+
+project.addDevDeps(
+  "eslint-plugin-md",
+  "markdown-eslint-parser",
+  "eslint-plugin-prettier",
+);
+project.eslint?.addExtends(
+  "plugin:md/recommended",
+  "plugin:prettier/recommended",
+);
+project.eslint?.addOverride({
+  files: ["*.md"],
+  parser: "markdown-eslint-parser",
+  rules: {
+    "prettier/prettier": ["error", { parser: "markdown" }],
+    "@typescript-eslint/no-floating-promises": "off",
+    "@typescript-eslint/return-await": "off",
+    quotes: "off",
+  },
+});
+project.eslint?.addRules({
+  "prettier/prettier": "error",
+  "md/remark": [
+    "error",
+    {
+      plugins: [
+        "preset-lint-markdown-style-guide",
+        ["lint-list-item-indent", "space"],
+      ],
+    },
+  ],
+});
+
 if (project.github) {
   const buildWorkflow = project.github?.tryFindWorkflow("build");
   if (buildWorkflow && buildWorkflow.file) {
@@ -58,6 +91,7 @@ new JsonFile(genetFramework, ".prettierrc.json", {
     trailingComma: "all",
   },
 });
+
 genetFramework.addDevDeps(
   "eslint-plugin-md",
   "markdown-eslint-parser",
