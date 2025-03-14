@@ -31,6 +31,10 @@
       "type": "build"
     },
     {
+      "name": "eslint-plugin-md",
+      "type": "build"
+    },
+    {
       "name": "eslint-plugin-prettier",
       "type": "build"
     },
@@ -69,6 +73,10 @@
     {
       "name": "jsii",
       "version": "~5.7.0",
+      "type": "build"
+    },
+    {
+      "name": "markdown-eslint-parser",
       "type": "build"
     },
     {
