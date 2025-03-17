@@ -2,12 +2,6 @@ import { awscdk, JsonFile } from 'projen';
 import { TypeScriptAppProject } from 'projen/lib/typescript';
 
 export const configureMarkDownLinting = (tsProject: TypeScriptAppProject) => {
-  new JsonFile(tsProject, '.prettierrc.json', {
-    obj: {
-      singleQuote: true,
-      trailingComma: 'all',
-    },
-  });
   tsProject.addDevDeps(
     'eslint-plugin-md',
     'markdown-eslint-parser',
@@ -79,6 +73,10 @@ if (project.github) {
   const buildWorkflow = project.github?.tryFindWorkflow('build');
   if (buildWorkflow && buildWorkflow.file) {
     buildWorkflow.file.addOverride('jobs.build.permissions.contents', 'read');
+    buildWorkflow.file.addOverride('jobs.build.env', {
+      CI: 'true',
+      NODE_OPTIONS: '--max-old-space-size=8192',
+    });
   }
 }
 configureMarkDownLinting(project);
@@ -100,6 +98,12 @@ export const createPackage = (config: PackageConfig) => {
     projenrcTs: false,
     deps: config.deps || [],
     devDeps: config.devDeps || [],
+  });
+  new JsonFile(tsProject, '.prettierrc.json', {
+    obj: {
+      singleQuote: true,
+      trailingComma: 'all',
+    },
   });
   configureMarkDownLinting(tsProject);
   return tsProject;
