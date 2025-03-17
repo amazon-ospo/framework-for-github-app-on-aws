@@ -1,5 +1,15 @@
-import { awscdk, JsonFile } from "projen";
+import { awscdk, JsonFile, Project } from "projen";
 import { TypeScriptAppProject } from "projen/lib/typescript";
+
+const projectMetadata = {
+  author: "Amazon OSPO",
+  authorAddress: "osa-dev+puzzleglue@amazon.com",
+  repositoryUrl:
+    "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git",
+  cdkVersion: "2.1.0",
+  defaultReleaseBranch: "main",
+  name: "framework-for-github-app-on-aws",
+};
 
 export const configureMarkDownLinting = (tsProject: TypeScriptAppProject) => {
   tsProject.addDevDeps(
@@ -35,16 +45,10 @@ export const configureMarkDownLinting = (tsProject: TypeScriptAppProject) => {
   });
 };
 
+// Main Project Configuration
 export const project = new awscdk.AwsCdkConstructLibrary({
-  author: "Amazon OSPO",
-  authorAddress: "osa-dev+puzzleglue@amazon.com",
-  cdkVersion: "2.1.0",
-  defaultReleaseBranch: "main",
-  jsiiVersion: "~5.7.0",
-  name: "framework-for-github-app-on-aws",
+  ...projectMetadata,
   projenrcTs: true,
-  repositoryUrl:
-    "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git",
   docgen: true,
   github: true,
   gitignore: [".idea"],
@@ -91,24 +95,25 @@ interface PackageConfig {
   deps?: string[];
   devDeps?: string[];
 }
-
-export const createPackage = (config: PackageConfig) => {
-  const tsProject = new awscdk.AwsCdkTypeScriptApp({
-    parent: project,
-    outdir: config.outdir,
-    cdkVersion: "2.1.0",
-    defaultReleaseBranch: "main",
-    name: config.name,
-    projenrcTs: false,
-    deps: config.deps || [],
-    devDeps: config.devDeps || [],
-  });
-  new JsonFile(tsProject, ".prettierrc.json", {
+const addPrettierConfig = (projectType: Project) => {
+  new JsonFile(projectType, ".prettierrc.json", {
     obj: {
       singleQuote: true,
       trailingComma: "all",
     },
   });
+};
+
+export const createPackage = (config: PackageConfig) => {
+  const tsProject = new awscdk.AwsCdkConstructLibrary({
+    ...projectMetadata,
+    name: config.name,
+    outdir: config.outdir,
+    parent: project,
+    deps: config.deps,
+    devDeps: config.devDeps,
+  });
+  addPrettierConfig(tsProject);
   configureMarkDownLinting(tsProject);
   return tsProject;
 };
@@ -117,9 +122,15 @@ createPackage({
   name: "genet-framework",
   outdir: "src/packages/genet-framework",
 });
-createPackage({
+
+const genetOpsTools = new awscdk.AwsCdkTypeScriptApp({
+  ...projectMetadata,
   name: "genet-ops-tools",
   outdir: "src/packages/genet-ops-tools",
+  parent: project,
+  projenrcTs: false,
 });
+addPrettierConfig(genetOpsTools);
+configureMarkDownLinting(genetOpsTools);
 
 project.synth();

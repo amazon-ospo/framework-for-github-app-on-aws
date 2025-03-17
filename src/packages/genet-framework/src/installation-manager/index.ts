@@ -21,7 +21,7 @@ export class InstallationManager extends NestedStack {
         type: AttributeType.STRING,
       },
       billingMode: BillingMode.PAY_PER_REQUEST,
-      pointInTimeRecoverySpecification: { pointInTimeRecoveryEnabled: true },
+      pointInTimeRecovery: true,
     });
     Tags.of(this.targetTable).add('InstallationManager', 'PreApprovalTable');
     // Global secondary index to query targets by Node ID.
