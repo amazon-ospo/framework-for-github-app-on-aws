@@ -73,10 +73,6 @@ if (project.github) {
   const buildWorkflow = project.github?.tryFindWorkflow("build");
   if (buildWorkflow && buildWorkflow.file) {
     buildWorkflow.file.addOverride("jobs.build.permissions.contents", "read");
-    buildWorkflow.file.addOverride("jobs.build.env", {
-      CI: "true",
-      NODE_OPTIONS: "--max-old-space-size=8192",
-    });
   }
 }
 configureMarkDownLinting(project);
