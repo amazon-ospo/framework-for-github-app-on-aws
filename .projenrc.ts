@@ -48,6 +48,7 @@ export const configureMarkDownLinting = (tsProject: TypeScriptAppProject) => {
 // Main Project Configuration
 export const project = new awscdk.AwsCdkConstructLibrary({
   ...projectMetadata,
+  jsiiVersion: "~5.7.0",
   projenrcTs: true,
   docgen: true,
   github: true,
