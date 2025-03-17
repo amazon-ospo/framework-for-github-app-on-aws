@@ -75,6 +75,8 @@ if (project.github) {
     buildWorkflow.file.addOverride("jobs.build.permissions.contents", "read");
     buildWorkflow.file.addOverride("jobs.build.env", {
       CI: "true",
+      // Increasing heap size to mitigate potential "heap out of memory" errors during ESLint execution.
+      // TODO: Need to find a better way to do this, but this works for now.
       NODE_OPTIONS: "--max-old-space-size=8192",
     });
   }
