@@ -78,6 +78,8 @@ if (project.github) {
       NODE_OPTIONS: "--max-old-space-size=8192",
     });
   }
+  project.package.file.addOverride("private", true);
+  project.package.file.addOverride("workspaces", ["src/packages/*"]);
 }
 configureMarkDownLinting(project);
 
