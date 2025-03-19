@@ -1,6 +1,7 @@
 {
   "name": "genet-ops-tools",
   "scripts": {
+    "accept": "npx projen accept",
     "build": "npx projen build",
     "bundle": "npx projen bundle",
     "compile": "npx projen compile",
@@ -19,7 +20,9 @@
     "test:watch": "npx projen test:watch",
     "upgrade": "npx projen upgrade",
     "watch": "npx projen watch",
-    "projen": "npx projen"
+    "projen": "npx projen",
+    "import-private-key": "ts-node ../../../src/packages/genet-ops-tools/src/importPrivateKey.ts",
+    "get-table-name": "ts-node ../../../src/packages/genet-ops-tools/src/getTableName.ts"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^2",
@@ -28,6 +31,7 @@
     "@typescript-eslint/eslint-plugin": "^8",
     "@typescript-eslint/parser": "^8",
     "aws-cdk": "^2",
+    "aws-sdk-client-mock": "^4.1.0",
     "esbuild": "^0.25.1",
     "eslint": "^9",
     "eslint-import-resolver-typescript": "^4.1.1",
@@ -43,7 +47,10 @@
   },
   "dependencies": {
     "aws-cdk-lib": "^2.184.0",
-    "constructs": "^10.4.2"
+    "constructs": "^10.4.2",
+    "@aws-sdk/client-dynamodb": "^3.767.0",
+    "@aws-sdk/client-kms": "^3.758.0",
+    "@aws-sdk/client-resource-groups-tagging-api": "^3.758.0"
   },
   "license": "Apache-2.0",
   "publishConfig": {

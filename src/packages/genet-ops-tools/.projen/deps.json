@@ -29,6 +29,10 @@
       "type": "build"
     },
     {
+      "name": "aws-sdk-client-mock",
+      "type": "build"
+    },
+    {
       "name": "esbuild",
       "type": "build"
     },
@@ -77,6 +81,18 @@
     {
       "name": "typescript",
       "type": "build"
+    },
+    {
+      "name": "@aws-sdk/client-dynamodb",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-kms",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-resource-groups-tagging-api",
+      "type": "runtime"
     },
     {
       "name": "aws-cdk-lib",
