@@ -1,14 +1,11 @@
 import { App, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { CredentialManager } from './credential-manager';
-import { InstallationManager } from './installation-manager';
 
-// CDK App entry for Genet acceptance test.
-export class Genet extends Stack {
+export class MyStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps = {}) {
     super(scope, id, props);
-    new CredentialManager(this, 'CredentialManager', {});
-    new InstallationManager(this, 'InstallationManager', {});
+
+    // define resources here...
   }
 }
 
@@ -20,6 +17,7 @@ const devEnv = {
 
 const app = new App();
 
-new Genet(app, 'genet-framework', { env: devEnv });
+new MyStack(app, 'genet-ops-tools-dev', { env: devEnv });
+// new MyStack(app, 'genet-ops-tools-prod', { env: prodEnv });
 
 app.synth();

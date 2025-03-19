@@ -1,0 +1,107 @@
+{
+  "version": "40.0.0",
+  "artifacts": {
+    "genet-framework.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "genet-framework.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "genet-framework": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://unknown-account/us-west-2",
+      "properties": {
+        "templateFile": "genet-framework.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-us-west-2",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-us-west-2",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-west-2/440fffd863c7d7841bd13ac54956e9e626fea9b29d4ad08b0292075d7eb73091.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "genet-framework.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-lookup-role-${AWS::AccountId}-us-west-2",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "genet-framework.assets"
+      ],
+      "metadata": {
+        "/genet-framework/CredentialManager/AppTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AppTable815C50BC"
+          }
+        ],
+        "/genet-framework/CredentialManager/AppInstallationTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AppInstallationTableA0A9C84B"
+          }
+        ],
+        "/genet-framework/CredentialManager/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/genet-framework/CredentialManager.NestedStack/CredentialManager.NestedStackResource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CredentialManagerNestedStackCredentialManagerNestedStackResource341E8524"
+          }
+        ],
+        "/genet-framework/InstallationManager/PreApprovalTargetTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PreApprovalTargetTable51649C72"
+          }
+        ],
+        "/genet-framework/InstallationManager/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/genet-framework/InstallationManager.NestedStack/InstallationManager.NestedStackResource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "InstallationManagerNestedStackInstallationManagerNestedStackResourceBB60C6B1"
+          }
+        ],
+        "/genet-framework/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/genet-framework/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/genet-framework/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "genet-framework"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    }
+  }
+}
