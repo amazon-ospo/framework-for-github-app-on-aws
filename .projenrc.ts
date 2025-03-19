@@ -6,7 +6,8 @@ const projectMetadata = {
   authorAddress: "osa-dev+puzzleglue@amazon.com",
   repositoryUrl:
     "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git",
-  cdkVersion: "2.1.0",
+  cdkVersion: "2.184.0",
+  constructsVersion: "10.4.2",
   defaultReleaseBranch: "main",
   name: "framework-for-github-app-on-aws",
 };
@@ -68,6 +69,7 @@ export const project = new awscdk.AwsCdkConstructLibrary({
   release: false,
   autoMerge: false,
   releaseToNpm: false,
+  constructsVersion: "10.4.2",
 
   // deps: [],                /* Runtime dependencies of this module. /
   // description: undefined,  / The description is just a string that helps people understand the purpose of the package. /
@@ -113,6 +115,7 @@ export const createPackage = (config: PackageConfig) => {
     parent: project,
     deps: config.deps,
     devDeps: config.devDeps,
+    docgen: false,
   });
   addPrettierConfig(tsProject);
   configureMarkDownLinting(tsProject);
@@ -134,4 +137,15 @@ const genetOpsTools = new awscdk.AwsCdkTypeScriptApp({
 addPrettierConfig(genetOpsTools);
 configureMarkDownLinting(genetOpsTools);
 
+const genetTestApp = new awscdk.AwsCdkTypeScriptApp({
+  ...projectMetadata,
+  name: "genet-test-app",
+  outdir: "src/packages/genet-test-app",
+  parent: project,
+  projenrcTs: false,
+  cdkVersion: "2.184.1",
+});
+addPrettierConfig(genetTestApp);
+configureMarkDownLinting(genetTestApp);
+genetTestApp.addDeps("genet-framework");
 project.synth();

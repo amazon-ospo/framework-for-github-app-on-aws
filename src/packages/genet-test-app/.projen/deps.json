@@ -80,12 +80,16 @@
     },
     {
       "name": "aws-cdk-lib",
-      "version": "^2.184.0",
+      "version": "^2.184.1",
       "type": "runtime"
     },
     {
       "name": "constructs",
       "version": "^10.4.2",
+      "type": "runtime"
+    },
+    {
+      "name": "genet-framework",
       "type": "runtime"
     }
   ],

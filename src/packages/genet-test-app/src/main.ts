@@ -1,10 +1,11 @@
 import { App, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { CredentialManager } from './credential-manager';
-import { InstallationManager } from './installation-manager';
+import { CredentialManager, InstallationManager } from 'genet-framework';
 
 // CDK App entry for Genet acceptance test.
-export class Genet extends Stack {
+// This stack is intended for testing genet-framework library.
+// In a real use case, it should be a stack defined by customer.
+export class GenetFrameworkTestStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps = {}) {
     super(scope, id, props);
     new CredentialManager(this, 'CredentialManager', {});
@@ -20,6 +21,6 @@ const devEnv = {
 
 const app = new App();
 
-new Genet(app, 'genet-framework', { env: devEnv });
+new GenetFrameworkTestStack(app, 'genet-framework-test-stack', { env: devEnv });
 
 app.synth();
