@@ -10,8 +10,8 @@ The Genet Service Smithy model consists of:
       for a specific App and target installation from
       GitHub based on the App ID and the Node ID as input.
 
-    - `/tokens/app` API endpoint:
-      - Retrieves a JWT token for a GitHub App based on the App ID as input.
+  - `/tokens/app` API endpoint:
+    - Retrieves a JWT token for a GitHub App based on the App ID as input.
 
 To build the smithy model and generate the ssdk run the following commands:
 
