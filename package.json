@@ -50,6 +50,7 @@
     "jsii-docgen": "^10.5.0",
     "jsii-pacmak": "^1.108.0",
     "jsii-rosetta": "~5.7.0",
+    "lerna": "^8.2.1",
     "markdown-eslint-parser": "^1.2.1",
     "prettier": "^3.5.2",
     "projen": "^0.91.13",
