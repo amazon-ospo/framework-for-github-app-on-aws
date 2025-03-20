@@ -70,6 +70,7 @@ export const project = new awscdk.AwsCdkConstructLibrary({
   autoMerge: false,
   releaseToNpm: false,
   constructsVersion: "10.4.2",
+  devDeps: ["lerna"],
 
   // deps: [],                /* Runtime dependencies of this module. /
   // description: undefined,  / The description is just a string that helps people understand the purpose of the package. /
@@ -88,8 +89,19 @@ if (project.github) {
     });
   }
 }
+// Add Lerna configuration file (lerna.json)
+new JsonFile(project, "lerna.json", {
+  obj: {
+    packages: ["src/packages/*"],
+    version: "0.0.0",
+    npmClient: "yarn",
+  },
+});
 project.package.file.addOverride("private", true);
 project.package.file.addOverride("workspaces", ["src/packages/*"]);
+// Run Lerna build one package at a time and,
+// waits for each package to complete before showing its logs.
+project.preCompileTask.exec("npx lerna run build --concurrency=1 --no-stream");
 configureMarkDownLinting(project);
 
 interface PackageConfig {

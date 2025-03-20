@@ -46,4 +46,5 @@ junit.xml
 .jsii
 tsconfig.json
 !/API.md
+!/lerna.json
 !/.projenrc.ts
