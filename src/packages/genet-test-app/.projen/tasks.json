@@ -21,23 +21,13 @@
         }
       ]
     },
-    "compat": {
-      "name": "compat",
-      "description": "Perform API compatibility check against latest version",
-      "steps": [
-        {
-          "exec": "jsii-diff npm:$(node -p \"require('./package.json').name\") -k --ignore-file .compatignore || (echo \"\nUNEXPECTED BREAKING CHANGES: add keys such as 'removed:constructs.Node.of' to .compatignore to skip.\n\" && exit 1)"
-        }
-      ]
+    "bundle": {
+      "name": "bundle",
+      "description": "Prepare assets"
     },
     "compile": {
       "name": "compile",
-      "description": "Only compile",
-      "steps": [
-        {
-          "exec": "jsii --silence-warnings=reserved-word"
-        }
-      ]
+      "description": "Only compile"
     },
     "default": {
       "name": "default",
@@ -46,6 +36,35 @@
         {
           "exec": "npx projen default",
           "cwd": "../../.."
+        }
+      ]
+    },
+    "deploy": {
+      "name": "deploy",
+      "description": "Deploys your CDK app to the AWS cloud",
+      "steps": [
+        {
+          "exec": "cdk deploy",
+          "receiveArgs": true
+        }
+      ]
+    },
+    "destroy": {
+      "name": "destroy",
+      "description": "Destroys your cdk app in the AWS cloud",
+      "steps": [
+        {
+          "exec": "cdk destroy",
+          "receiveArgs": true
+        }
+      ]
+    },
+    "diff": {
+      "name": "diff",
+      "description": "Diffs the currently deployed app against your code",
+      "steps": [
+        {
+          "exec": "cdk diff"
         }
       ]
     },
@@ -82,39 +101,16 @@
     },
     "package": {
       "name": "package",
-      "description": "Creates the distribution package",
-      "steps": [
-        {
-          "spawn": "package:js",
-          "condition": "node -e \"if (!process.env.CI) process.exit(1)\""
-        },
-        {
-          "spawn": "package-all",
-          "condition": "node -e \"if (process.env.CI) process.exit(1)\""
-        }
-      ]
-    },
-    "package-all": {
-      "name": "package-all",
-      "description": "Packages artifacts for all target languages",
-      "steps": [
-        {
-          "spawn": "package:js"
-        }
-      ]
-    },
-    "package:js": {
-      "name": "package:js",
-      "description": "Create js language bindings",
-      "steps": [
-        {
-          "exec": "jsii-pacmak -v --target js"
-        }
-      ]
+      "description": "Creates the distribution package"
     },
     "post-compile": {
       "name": "post-compile",
-      "description": "Runs after successful compilation"
+      "description": "Runs after successful compilation",
+      "steps": [
+        {
+          "spawn": "synth:silent"
+        }
+      ]
     },
     "post-upgrade": {
       "name": "post-upgrade",
@@ -123,6 +119,24 @@
     "pre-compile": {
       "name": "pre-compile",
       "description": "Prepare the project for compilation"
+    },
+    "synth": {
+      "name": "synth",
+      "description": "Synthesizes your cdk app into cdk.out",
+      "steps": [
+        {
+          "exec": "cdk synth"
+        }
+      ]
+    },
+    "synth:silent": {
+      "name": "synth:silent",
+      "description": "Synthesizes your cdk app into cdk.out and suppresses the template in stdout (part of \"yarn build\")",
+      "steps": [
+        {
+          "exec": "cdk synth -q"
+        }
+      ]
     },
     "test": {
       "name": "test",
@@ -154,13 +168,13 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@types/jest,@types/node,eslint-import-resolver-typescript,eslint-plugin-import,eslint-plugin-md,eslint-plugin-prettier,jest,jsii-diff,jsii-pacmak,markdown-eslint-parser,ts-jest,typescript"
+          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@types/jest,@types/node,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,eslint-plugin-md,eslint-plugin-prettier,jest,markdown-eslint-parser,ts-jest,ts-node,typescript,genet-framework"
         },
         {
           "exec": "yarn install --check-files"
         },
         {
-          "exec": "yarn upgrade @stylistic/eslint-plugin @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-import-resolver-typescript eslint-plugin-import eslint-plugin-md eslint-plugin-prettier eslint jest jest-junit jsii-diff jsii-pacmak jsii-rosetta jsii markdown-eslint-parser ts-jest typescript aws-cdk-lib constructs"
+          "exec": "yarn upgrade @stylistic/eslint-plugin @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk esbuild eslint-import-resolver-typescript eslint-plugin-import eslint-plugin-md eslint-plugin-prettier eslint jest jest-junit markdown-eslint-parser ts-jest ts-node typescript aws-cdk-lib constructs genet-framework"
         },
         {
           "exec": "npx projen"
@@ -172,10 +186,13 @@
     },
     "watch": {
       "name": "watch",
-      "description": "Watch & compile in the background",
+      "description": "Watches changes in your source code and rebuilds and deploys to the current account",
       "steps": [
         {
-          "exec": "jsii -w --silence-warnings=reserved-word"
+          "exec": "cdk deploy --hotswap"
+        },
+        {
+          "exec": "cdk watch"
         }
       ]
     }
