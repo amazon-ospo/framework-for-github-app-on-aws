@@ -3,12 +3,7 @@ import {
   GetResourcesCommand,
   GetResourcesCommandOutput,
 } from '@aws-sdk/client-resource-groups-tagging-api';
-import {
-  GENET_COMPONENT,
-  CREDENTIAL_MANAGER,
-  APP_TABLE,
-  RESOURCES_PER_PAGE,
-} from './constants';
+import { TagName, RESOURCES_PER_PAGE } from './constants';
 const taggingClient = new ResourceGroupsTaggingAPIClient({});
 
 /**
@@ -23,8 +18,8 @@ export const listTablesByTags = async (): Promise<string[]> => {
     const command = new GetResourcesCommand({
       ResourceTypeFilters: ['dynamodb:table'],
       TagFilters: [
-        { Key: GENET_COMPONENT, Values: [CREDENTIAL_MANAGER] },
-        { Key: CREDENTIAL_MANAGER, Values: [APP_TABLE] },
+        { Key: TagName.GENET_COMPONENT, Values: [TagName.CREDENTIAL_MANAGER] },
+        { Key: TagName.CREDENTIAL_MANAGER, Values: [TagName.APP_TABLE] },
       ],
       PaginationToken: paginationToken,
       ResourcesPerPage: RESOURCES_PER_PAGE,
@@ -33,7 +28,7 @@ export const listTablesByTags = async (): Promise<string[]> => {
     try {
       const response: GetResourcesCommandOutput =
         await taggingClient.send(command);
-      if (response && response.ResourceTagMappingList) {
+      if (!!response && response.ResourceTagMappingList) {
         const tableNames = response.ResourceTagMappingList.map(
           (resource) => resource.ResourceARN?.split('/').pop()!,
         );
@@ -56,13 +51,14 @@ export type DisplayDynamoDBTables = ({
 }) => Promise<void>;
 
 /**
- * Displays a list of DynamoDB tables that match specific criteria.
+ * Displays a list of DynamoDB tables that match Tags
+ * with GENET_COMPONENT, CREDENTIAL_MANAGER and APP_TABLE.
  * Lists tables in a numbered format and shows the total count.
  *
  * ---
  * dependency injection parameters:
  *
- * @param listTables Function that fetches the dynamoDB tables tagged with GENET_COMPONENT and CREDENTIAL_MANAGER
+ * @param listTables Function that fetches the dynamoDB tables tagged with GENET_COMPONENT, CREDENTIAL_MANAGER and APP_TABLE
  *
  * @example
  * // Output:
@@ -77,8 +73,7 @@ export const displayDynamoDBTables: DisplayDynamoDBTables = async ({
   try {
     const tables = await listTables();
     if (tables.length === 0) {
-      console.log('No tables found with the specified tags');
-      return;
+      throw new Error('No tables found with the GENET_COMPONENT-APP_TABLE tag');
     }
     console.log('\nAvailable tables:');
     tables.forEach((name, index) => {
@@ -86,8 +81,7 @@ export const displayDynamoDBTables: DisplayDynamoDBTables = async ({
     });
     console.log(`\nTotal tables found: ${tables.length}\n`);
   } catch (error) {
-    console.error('Failed to list tables:', error);
-    process.exit(1);
+    throw error;
   }
 };
 

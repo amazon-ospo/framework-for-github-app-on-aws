@@ -148,6 +148,7 @@ project.package.file.addOverride("workspaces", ["src/packages/*"]);
 // Run Lerna build one package at a time and,
 // waits for each package to complete before showing its logs.
 project.preCompileTask.exec("npx lerna run build --concurrency=1 --no-stream");
+// TODO: Publish these ops tools as a CLI
 project.addScripts({
   "import-private-key":
     "ts-node src/packages/genet-ops-tools/src/importPrivateKey.ts",

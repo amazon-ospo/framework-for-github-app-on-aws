@@ -1,4 +1,8 @@
-import { existsSync, unlinkSync } from 'fs';
+import { generateKeyPairSync } from 'crypto';
+import { copyFileSync, existsSync, mkdtempSync } from 'fs';
+import { unlink, writeFile } from 'fs/promises';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
 import {
   DescribeKeyCommand,
@@ -6,14 +10,6 @@ import {
   ListResourceTagsCommand,
 } from '@aws-sdk/client-kms';
 import { importPrivateKey } from '../src/importPrivateKey';
-
-jest.mock('fs', () => ({
-  ...jest.requireActual('fs'),
-  unlinkSync: jest.fn(),
-}));
-
-// To permanently delete the PEM file after execution of all tests
-const realUnlinkSync = jest.requireActual('fs').unlinkSync;
 
 /**
  * Acceptance Test for `importPrivateKey.ts`
@@ -37,7 +33,7 @@ const realUnlinkSync = jest.requireActual('fs').unlinkSync;
  * Running the tests:
  * 1. This test suite contains acceptance tests of importPrivateKey.ts.
  * 2. Before running acceptance tests:
- * 3. Set up PEM file path, GitHub App ID and Table name as environment variables to pass the tests
+ * 3. Set up PEM file path, GitHub App ID, and Table name as environment variables to pass the tests
  *    or tests fail.
  * 4. For Table name run the below command, and pick the table name from the list displayed
  *    ```
@@ -69,13 +65,13 @@ describe('importPrivateKey Acceptance Tests', () => {
   let kmsClient: KMSClient;
   let createdKeyArn: string | null = null;
   let dynamoClient: DynamoDBClient;
+  let tempPemFile: string;
   const invalidTableName = 'invalidTableName';
   const invalidPrivateKeyPath = './invalidPEMPath.pem';
   const invalidAppId = 'invalidAppID';
   const pemFile = process.env.GITHUB_PEM_FILE_PATH!;
   const appId = process.env.GITHUB_APPID ?? '';
   const tableName = process.env.DYNAMODB_TABLE_NAME ?? '';
-  const mockUnlinkFileSync = unlinkSync as jest.Mock;
 
   beforeEach(() => {
     if (!pemFile || !appId || !tableName) {
@@ -107,35 +103,30 @@ describe('importPrivateKey Acceptance Tests', () => {
             2. The file exists and is in a valid path.
         `);
     }
-    if (!pemFile.endsWith('.pem')) {
-      throw new Error(`
-            Invalid PEM file: ${pemFile}
-            The GITHUB_PEM_FILE_PATH must point to a .pem file
-        `);
-    }
-    mockUnlinkFileSync.mockImplementation((path) => {
-      console.log(`Skipping deletion of ${path} during tests`);
-    });
+    const tempDir = mkdtempSync(tmpdir());
+    tempPemFile = join(tempDir, 'github-private-key.pem');
+    copyFileSync(pemFile, tempPemFile);
     kmsClient = new KMSClient({});
     dynamoClient = new DynamoDBClient({});
   });
-
+  afterEach(async () => {
+    if (existsSync(tempPemFile)) {
+      await unlink(tempPemFile);
+    }
+  });
   afterAll(async () => {
     if (createdKeyArn) {
       console.log(`
-        You should manually delete the imported AWS KMS key: ${createdKeyArn} \n
-        Upon rotation, imported old keys are automatically scheduled for deletion`);
+        Upon rotation, imported old keys are automatically scheduled for deletion
+        The most recently created KMS key: ${createdKeyArn} remains active and will incur AWS charges. 
+        You can manually delete it to avoid ongoing costs if you don't plan to use it further \n`);
     }
     jest.clearAllMocks();
-    if (existsSync(pemFile)) {
-      realUnlinkSync(pemFile);
-      console.log('PEM file deleted after all tests completed');
-    }
   });
 
   it('should successfully import private key and store in AWS KMS', async () => {
     await importPrivateKey({
-      pemFilePath: pemFile,
+      pemFilePath: tempPemFile,
       appId: appId,
       tableName,
     });
@@ -166,7 +157,7 @@ describe('importPrivateKey Acceptance Tests', () => {
     const existingKeyArn = existingKeyResponse.Item?.KmsKeyArn?.S;
     // Rotation
     await importPrivateKey({
-      pemFilePath: pemFile,
+      pemFilePath: tempPemFile,
       appId: appId,
       tableName,
     });
@@ -250,39 +241,21 @@ describe('importPrivateKey Acceptance Tests', () => {
     },
   );
 
-  it('should fail when imported private key fails JWT authentication', async () => {
-    const mockFetch = jest.spyOn(global, 'fetch');
-    mockFetch.mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          id: appId,
-          name: 'test-app',
-        }),
-        {
-          status: 200,
-          headers: new Headers({
-            'content-type': 'application/json',
-          }),
-        },
-      ),
-    );
-    mockFetch.mockResolvedValueOnce(
-      new Response('Invalid token', {
-        status: 401,
-        statusText: 'Unauthorized',
-        headers: new Headers({
-          'content-type': 'text/plain',
-        }),
-      }),
-    );
+  it('should fail when using an invalid private key for JWT authentication', async () => {
+    const { privateKey } = generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+      publicKeyEncoding: { type: 'spki', format: 'pem' },
+      privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+    });
+    await writeFile(tempPemFile, privateKey);
     await expect(
       importPrivateKey({
-        pemFilePath: pemFile,
+        pemFilePath: tempPemFile,
         appId,
         tableName,
       }),
     ).rejects.toThrow(
-      'Key material import successful but JWT authentication failed',
+      'GitHub authentication failed - invalid private key or App ID mismatch',
     );
   });
 });

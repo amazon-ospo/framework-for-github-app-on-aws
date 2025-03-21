@@ -141,7 +141,7 @@ type ValidateInputs = ({
 }) => Promise<void>;
 
 /**
- * Function that checks the validation of GitHub App ID, PEM file and DynamoDB table.
+ * Function that checks the validation of GitHub App ID, PEM file, and DynamoDB table.
  * This function performs the following validations:
  * 1. Checks if the PEM file exists at the specified path
  * 2. Validates the private key and App ID combination by:
@@ -295,26 +295,22 @@ type GetKmsImportParameters = ({
 export const getKmsImportParametersImpl: GetKmsImportParameters = async ({
   appKeyArn,
 }) => {
-  try {
-    const importParams = await kms.send(
-      new GetParametersForImportCommand({
-        KeyId: appKeyArn,
-        WrappingAlgorithm: 'RSA_AES_KEY_WRAP_SHA_256',
-        WrappingKeySpec: WRAPPING_SPEC,
-      }),
-    );
+  const importParams = await kms.send(
+    new GetParametersForImportCommand({
+      KeyId: appKeyArn,
+      WrappingAlgorithm: 'RSA_AES_KEY_WRAP_SHA_256',
+      WrappingKeySpec: WRAPPING_SPEC,
+    }),
+  );
 
-    if (!importParams.PublicKey || !importParams.ImportToken) {
-      throw new Error('Failed to retrieve wrapping key or import token');
-    }
-
-    return {
-      publicKey: importParams.PublicKey,
-      importToken: importParams.ImportToken,
-    };
-  } catch (error) {
-    throw error;
+  if (!importParams.PublicKey || !importParams.ImportToken) {
+    throw new Error('Failed to retrieve wrapping key or import token');
   }
+
+  return {
+    publicKey: importParams.PublicKey,
+    importToken: importParams.ImportToken,
+  };
 };
 
 type EncryptKeyMaterial = ({
@@ -515,7 +511,7 @@ export const updateAppsTableImpl: UpdateAppsTable = async ({
         ReturnValues: 'ALL_OLD',
       }),
     );
-    if (putResult.Attributes && putResult.Attributes?.KmsKeyArn?.S) {
+    if (!!putResult.Attributes && !!putResult.Attributes?.KmsKeyArn?.S) {
       const oldKeyArn = putResult.Attributes.KmsKeyArn.S;
       try {
         await handleOldKey({ oldKeyArn, appKeyArn, appId });
@@ -563,10 +559,14 @@ export const handleOldKeyImpl: HandleOldKey = async ({
   scheduleOldKeyDeletion = scheduleOldKeyDeletionImpl,
 }) => {
   try {
+    const oldKeyDeletionDate = new Date(
+      new Date().getTime() +
+        SCHEDULE_OLD_KEY_DELETION_DAYS * 24 * 60 * 60 * 1000,
+    );
     await tagOldKeyArn({ oldKeyArn, appKeyArn, appId });
     await scheduleOldKeyDeletion({ oldKeyArn });
     console.log(
-      'Successfully tagged old key as inactive and scheduled it for deletion',
+      `Successfully tagged old key "${oldKeyArn}" as inactive and scheduled it for deletion on ${oldKeyDeletionDate.toISOString()}`,
     );
   } catch (error) {
     console.error('Could not process old key:', error);
@@ -661,10 +661,15 @@ export type ValidateJWT = ({
 
 /**
  * Function that validates JWT authentication with GitHub API using provided signing function.
+ * Docs: https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app
+ *
+ * The signFunction parameter is abstracted to support below signing methods:
+ * - signing with a private key from PEM file
+ * - signing with a private key from AWS KMS
  *
  * ---
  * @param appId GitHub App ID
- * @param signFunction Function to sign JWT with private key.
+ * @param signFunction Function to sign JWT with private key from both PEM file and AWS KMS .
  * @returns True if validation succeeds, false otherwise.
  */
 export const validateJWTImpl: ValidateJWT = async ({ appId, signFunction }) => {
@@ -788,9 +793,14 @@ export const pemSignImpl: PemSign = async ({ pemFile, message }) => {
 export async function main(): Promise<void> {
   const [, , pemFilePath, appId, tableName] = process.argv;
   if (!pemFilePath || !appId || !tableName) {
-    console.error(
-      'Please provide GitHub App PEM file path, GitHub AppId and the table name to store the AppId and Key ARN\n\nUsage: npm run import-private-key <path-to-private-key.pem> <GitHubAppId> <TableName>\n\nNOTE: For TableName, `npm run get-table-name` should list the available tables\n',
-    );
+    const errorMessage = [
+      'Please provide GitHub App PEM file path, GitHub AppId and the table name to store the AppId and Key ARN',
+      'Usage: npm run import-private-key <path-to-private-key.pem> <GitHubAppId> <TableName>',
+      'NOTE: For TableName, `npm run get-table-name` should list the available tables',
+      '',
+    ].join('\n\n');
+
+    console.error(errorMessage);
     process.exit(1);
   }
   try {

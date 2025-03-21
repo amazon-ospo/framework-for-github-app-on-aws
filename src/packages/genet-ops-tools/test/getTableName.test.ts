@@ -68,9 +68,6 @@ describe('listTablesByTags', () => {
 describe('displayDynamoDBTables', () => {
   let mockListTables = jest.fn();
   const mockConsoleLog = jest.spyOn(console, 'log');
-  const mockExit = jest
-    .spyOn(process, 'exit')
-    .mockImplementation((): never => undefined as never);
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -89,23 +86,22 @@ describe('displayDynamoDBTables', () => {
       '\nTotal tables found: 3\n',
     );
   });
-  it('should handle empty table list', async () => {
+  it('should throw an error if table list is empty', async () => {
     mockListTables.mockResolvedValue([]);
-    await displayDynamoDBTables({
-      listTables: mockListTables,
-    });
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      'No tables found with the specified tags',
-    );
+    await expect(
+      displayDynamoDBTables({
+        listTables: mockListTables,
+      }),
+    ).rejects.toThrow('No tables found with the GENET_COMPONENT-APP_TABLE tag');
   });
-  it('should log and error and exit when listTables  fails', async () => {
+  it('should throw an error when listTables  fails', async () => {
     mockListTables.mockRejectedValue(
       new Error('Failed to list the tables found'),
     );
-    await displayDynamoDBTables({
-      listTables: mockListTables,
-    });
-    expect(mockExit).toHaveBeenCalled();
-    expect(mockExit).toHaveBeenCalledWith(1);
+    await expect(
+      displayDynamoDBTables({
+        listTables: mockListTables,
+      }),
+    ).rejects.toThrow('Failed to list the tables found');
   });
 });

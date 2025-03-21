@@ -20,7 +20,7 @@ export class CredentialManager extends NestedStack {
       },
       billingMode: BillingMode.PAY_PER_REQUEST,
       removalPolicy: RemovalPolicy.RETAIN,
-      pointInTimeRecoverySpecification: { pointInTimeRecoveryEnabled: true },
+      pointInTimeRecovery: true,
     });
     Tags.of(this.appTable).add('CredentialManager', 'AppTable');
     // Table for tracking GitHub App installations.
@@ -36,7 +36,7 @@ export class CredentialManager extends NestedStack {
         type: AttributeType.STRING,
       },
       billingMode: BillingMode.PAY_PER_REQUEST,
-      pointInTimeRecoverySpecification: { pointInTimeRecoveryEnabled: true },
+      pointInTimeRecovery: true,
     });
     Tags.of(this.installationTable).add(
       'CredentialManager',
