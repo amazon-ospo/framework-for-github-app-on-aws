@@ -41,6 +41,7 @@ export type ImportPrivateKey = ({
   encryptKeyMaterial,
   importKeyMaterialAndValidate,
   updateAppsTable,
+  tagKeyAsFailed,
 }: {
   pemFilePath: string;
   appId: string;
@@ -52,6 +53,7 @@ export type ImportPrivateKey = ({
   encryptKeyMaterial?: EncryptKeyMaterial;
   importKeyMaterialAndValidate?: ImportKeyMaterialAndValidate;
   updateAppsTable?: UpdateAppsTable;
+  tagKeyAsFailed?: TagKeyAsFailed;
 }) => Promise<void>;
 
 /**
@@ -92,12 +94,15 @@ export const importPrivateKey: ImportPrivateKey = async ({
   encryptKeyMaterial = encryptKeyMaterialImpl,
   importKeyMaterialAndValidate = importKeyMaterialAndValidateImpl,
   updateAppsTable = updateAppsTableImpl,
+  tagKeyAsFailed = tagKeyAsFailedImpl,
 }) => {
+  let appKeyArn: string | undefined;
   try {
+    console.log('Starting GitHub App Private Key Import Process');
     const resolvedPemFile = resolve(pemFilePath);
     await validateInputs({ pemFile: resolvedPemFile, appId, tableName });
     const privateKeyInDerFormat = convertPemToDer({ pemFile: resolvedPemFile });
-    const appKeyArn = await createKmsKey({ appId });
+    appKeyArn = await createKmsKey({ appId });
     const { publicKey, importToken } = await getKmsImportParameters({
       appKeyArn,
     });
@@ -115,12 +120,58 @@ export const importPrivateKey: ImportPrivateKey = async ({
       importToken,
     });
     await updateAppsTable({ appKeyArn, appId, tableName });
+    console.log(
+      `Table "${tableName}" successfully updated with ${appKeyArn} for AppId ${appId}`,
+    );
     // Remove PEM file from location after all steps pass successfully
     unlinkSync(pemFilePath);
     console.log('Permanently deleted PEM file from the downloaded location');
-  } catch (error) {
-    console.error('Error', error);
+    console.log('Import Private key process completed successfully');
+  } catch (error: any) {
+    let errorMessages = [
+      'Error during import process:',
+      error.message,
+      '',
+      'Please fix the error and retry the import process.',
+    ];
+    if (appKeyArn) {
+      errorMessages.push(
+        'Cleanup Required:',
+        `- KMS Key created but import failed: ${appKeyArn}`,
+        '- Note: Cleanup needed for keys created during this failed import',
+        '- Check AWS KMS for newly created keys and delete them to avoid incurring costs.',
+      );
+      try {
+        await tagKeyAsFailed({ appKeyArn });
+      } catch (tagError: any) {
+        errorMessages.push(
+          `- Failed to tag key as "Failed": ${tagError.message}`,
+        );
+      }
+    }
+
+    const errorMessage = errorMessages.join('\n');
+    console.error(errorMessage);
     throw error;
+
+    // console.error('Error during import process:', error);
+    // if (appKeyArn) {
+    //   console.error('\nCleanup Required:');
+    //   console.error(`KMS Key created but import failed: ${appKeyArn}`);
+    //   try {
+    //     await tagKeyAsFailed({ appKeyArn });
+    //   } catch (tagError) {
+    //     console.error('Failed to tag key as failed import:', tagError);
+    //   }
+    // }
+    // console.error('Please fix the error and retry the import process');
+    // console.error(
+    //   '\nNote: Cleanup needed for keys created during this failed import.',
+    // );
+    // console.error(
+    //   '\nCheck AWS KMS for newly created keys and delete them to avoid incurring costs.',
+    // );
+    // throw error;
   }
 };
 
@@ -267,7 +318,9 @@ export const createKmsKeyImpl: CreateKmsKey = async ({ appId }) => {
     if (!appKeyArn) {
       throw new Error('Failed to retrieve KMS Key Arn');
     }
-    console.log(`Created a new KMS key for GitHub AppId: ${appId}`);
+    console.log(
+      `Created new KMS key with ARN ${appKeyArn} for GitHub AppId: ${appId}`,
+    );
     return appKeyArn;
   } catch (error) {
     throw error;
@@ -463,7 +516,7 @@ export const importKeyMaterialAndValidateImpl: ImportKeyMaterialAndValidate =
         );
       }
       console.log(
-        'Key material imported successfully and verified JWT signing',
+        `Key material imported successfully and verified JWT signing for KMS key ARN: ${appKeyArn}`,
       );
     } catch (error) {
       throw error;
@@ -645,6 +698,37 @@ export const tagOldKeyArnImpl: TagOldKeyArn = async ({
         {
           TagKey: 'Genet-Managed',
           TagValue: 'true',
+        },
+      ],
+    }),
+  );
+};
+
+export type TagKeyAsFailed = ({
+  appKeyArn,
+}: {
+  appKeyArn: string;
+}) => Promise<void>;
+
+/**
+ * Function that tags failed imports created KMS keys as Failed.
+ *
+ * ---
+ * @param appKeyArn ARN of the new key created
+ * @param appId GitHub App ID
+ */
+export const tagKeyAsFailedImpl: TagKeyAsFailed = async ({ appKeyArn }) => {
+  await kms.send(
+    new TagResourceCommand({
+      KeyId: appKeyArn,
+      Tags: [
+        {
+          TagKey: 'Status',
+          TagValue: 'Failed',
+        },
+        {
+          TagKey: 'Failed At',
+          TagValue: new Date().toISOString(),
         },
       ],
     }),

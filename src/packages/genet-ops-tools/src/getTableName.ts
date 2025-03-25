@@ -28,7 +28,7 @@ export const listTablesByTags = async (): Promise<string[]> => {
     try {
       const response: GetResourcesCommandOutput =
         await taggingClient.send(command);
-      if (!!response && response.ResourceTagMappingList) {
+      if (!!response && !!response.ResourceTagMappingList) {
         const tableNames = response.ResourceTagMappingList.map(
           (resource) => resource.ResourceARN?.split('/').pop()!,
         );
@@ -58,7 +58,8 @@ export type DisplayDynamoDBTables = ({
  * ---
  * dependency injection parameters:
  *
- * @param listTables Function that fetches the dynamoDB tables tagged with GENET_COMPONENT, CREDENTIAL_MANAGER and APP_TABLE
+ * @param listTables Function that fetches the dynamoDB tables tagged with
+ * GENET_COMPONENT, CREDENTIAL_MANAGER and APP_TABLE
  *
  * @example
  * // Output:

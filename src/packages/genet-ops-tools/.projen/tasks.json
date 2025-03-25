@@ -43,13 +43,14 @@
         }
       ]
     },
-    "bundle": {
-      "name": "bundle",
-      "description": "Prepare assets"
-    },
     "compile": {
       "name": "compile",
-      "description": "Only compile"
+      "description": "Only compile",
+      "steps": [
+        {
+          "exec": "tsc --build"
+        }
+      ]
     },
     "default": {
       "name": "default",
@@ -58,35 +59,6 @@
         {
           "exec": "npx projen default",
           "cwd": "../../.."
-        }
-      ]
-    },
-    "deploy": {
-      "name": "deploy",
-      "description": "Deploys your CDK app to the AWS cloud",
-      "steps": [
-        {
-          "exec": "cdk deploy",
-          "receiveArgs": true
-        }
-      ]
-    },
-    "destroy": {
-      "name": "destroy",
-      "description": "Destroys your cdk app in the AWS cloud",
-      "steps": [
-        {
-          "exec": "cdk destroy",
-          "receiveArgs": true
-        }
-      ]
-    },
-    "diff": {
-      "name": "diff",
-      "description": "Diffs the currently deployed app against your code",
-      "steps": [
-        {
-          "exec": "cdk diff"
         }
       ]
     },
@@ -123,16 +95,19 @@
     },
     "package": {
       "name": "package",
-      "description": "Creates the distribution package"
+      "description": "Creates the distribution package",
+      "steps": [
+        {
+          "exec": "mkdir -p dist/js"
+        },
+        {
+          "exec": "npm pack --pack-destination dist/js"
+        }
+      ]
     },
     "post-compile": {
       "name": "post-compile",
-      "description": "Runs after successful compilation",
-      "steps": [
-        {
-          "spawn": "synth:silent"
-        }
-      ]
+      "description": "Runs after successful compilation"
     },
     "post-upgrade": {
       "name": "post-upgrade",
@@ -141,24 +116,6 @@
     "pre-compile": {
       "name": "pre-compile",
       "description": "Prepare the project for compilation"
-    },
-    "synth": {
-      "name": "synth",
-      "description": "Synthesizes your cdk app into cdk.out",
-      "steps": [
-        {
-          "exec": "cdk synth"
-        }
-      ]
-    },
-    "synth:silent": {
-      "name": "synth:silent",
-      "description": "Synthesizes your cdk app into cdk.out and suppresses the template in stdout (part of \"yarn build\")",
-      "steps": [
-        {
-          "exec": "cdk synth -q"
-        }
-      ]
     },
     "test": {
       "name": "test",
@@ -190,13 +147,13 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@types/jest,@types/node,aws-sdk-client-mock,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,eslint-plugin-md,eslint-plugin-prettier,jest,markdown-eslint-parser,ts-jest,ts-node,typescript,@aws-sdk/client-dynamodb,@aws-sdk/client-kms,@aws-sdk/client-resource-groups-tagging-api"
+          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@types/jest,@types/node,aws-sdk-client-mock,eslint-import-resolver-typescript,eslint-plugin-import,eslint-plugin-md,eslint-plugin-prettier,jest,markdown-eslint-parser,ts-jest,typescript,@aws-sdk/client-dynamodb,@aws-sdk/client-kms,@aws-sdk/client-resource-groups-tagging-api"
         },
         {
           "exec": "yarn install --check-files"
         },
         {
-          "exec": "yarn upgrade @stylistic/eslint-plugin @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk aws-sdk-client-mock esbuild eslint-import-resolver-typescript eslint-plugin-import eslint-plugin-md eslint-plugin-prettier eslint jest jest-junit markdown-eslint-parser ts-jest ts-node typescript @aws-sdk/client-dynamodb @aws-sdk/client-kms @aws-sdk/client-resource-groups-tagging-api aws-cdk-lib constructs"
+          "exec": "yarn upgrade @stylistic/eslint-plugin @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-sdk-client-mock eslint-import-resolver-typescript eslint-plugin-import eslint-plugin-md eslint-plugin-prettier eslint jest jest-junit markdown-eslint-parser ts-jest typescript @aws-sdk/client-dynamodb @aws-sdk/client-kms @aws-sdk/client-resource-groups-tagging-api"
         },
         {
           "exec": "npx projen"
@@ -208,13 +165,10 @@
     },
     "watch": {
       "name": "watch",
-      "description": "Watches changes in your source code and rebuilds and deploys to the current account",
+      "description": "Watch & compile in the background",
       "steps": [
         {
-          "exec": "cdk deploy --hotswap"
-        },
-        {
-          "exec": "cdk watch"
+          "exec": "tsc --build -w"
         }
       ]
     }

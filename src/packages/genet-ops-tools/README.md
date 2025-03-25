@@ -1,58 +1,92 @@
-# Import GitHub App's Private Key into AWS KMS
+# GitHub App Private Key Management Scripts
+
+## Introduction
+
+This tool is part of Genet,
+a framework developed by Amazon's Open Source Program Office (OSPO)
+that simplifies and secures GitHub App management.
+While GitHub Apps offer significant advantages
+over Personal Access Tokens (PATs) and OAuth Apps,
+they require secure handling of private keys and proper credential management.
+
+GitHub Apps use public-key cryptography for authentication,
+using private keys to sign JSON Web Tokens (JWTs) for API requests.
+When creating a GitHub App,
+GitHub generates an RSA key pair:
+
+- GitHub retains the public key for verification
+- The app owner receives the private key for JWT signing
+
+GitHub generates private keys through their platform
+as PEM (Privacy Enhanced Mail) files.
+This tool securely imports these keys into AWS KMS
+for enhanced security and management.
+
+For more information about GitHub Apps, see:
+[About GitHub Apps](https://docs.github.com/en/apps/overview#about-github-apps)
 
 ## Overview
 
-A secure tool for importing GitHub App private keys into AWS KMS
-for enhanced security and management.
+This tool implements Genet's Credential Management component
+for secure import of GitHub App private keys into AWS KMS.
 It handles the complete lifecycle of key management
 including validation, encryption, import, and rotation.
 
 This tool consists of two scripts that work together:
 
-1. A table listing script(`getTable.ts`) that shows available DynamoDB tables.
+1. **`getTable.ts`** - Lists available DynamoDB tables
 
-1. A key import script (`import-private-key`) that securely imports a
-   **GitHub App private key** into **AWS KMS**,
-   allowing the GitHub App to sign authentication tokens securely.
+1. **`importPrivateKey.ts`** - Securely imports GitHub App private keys
+   into AWS KMS
 
-The tool performs the following actions:
+The tool performs these key actions:
 
 - Lists available DynamoDB tables for key storage
-- Validates the private key and GitHub App ID
-- Creates a new KMS key for signing GitHub tokens
-- Encrypts the private key and imports it into KMS
-- Stores the KMS key ARN in the selected DynamoDB table
-- Deletes any old KMS keys that were previously used.
-- Manages key rotation by safely handling old keys
+
+- Validates PEM file path, GitHub App ID, and target tableName
+
+- Creates a new KMS key for JWT signing
+
+- Encrypts and imports private key into KMS
+
+- Stores KMS key ARN in DynamoDB
+
+- Manages key rotation:
+
+  - Supports importing new private keys
+  - Tags old keys as inactive
+  - Schedules old keys for deletion
+
+- Deletes the PEM file after successful import
+
+Key advantages of using this tool as part of Genet:
+
+1. Eliminates exposure of private keys after secure import
+1. Leverages AWS KMS HSMs for secure key storage
+1. Automates secure key material wrapping and import
+1. Enables systematic key rotation and lifecycle management
 
 ---
 
 ## Prerequisites
 
-### 1. Install Node.js and npm
+### 1. Install Node.js
 
 Node.js version **16 or higher** is recommended.
 
 1. Visit [nodejs.org](https://nodejs.org/)
-1. Download and install the recom mended version
-1. Verify installation :
+1. Download and install the recommended version
+1. Verify installation:
 
 ```sh
-
 node --version
-
-```
-
-```sh
-
-npm --version
 ```
 
 ### 2. Set Up AWS Credentials
 
-The scripts need access to **AWS KMS and DynamoDB**.
-Configure your AWS credentials using your preferred method as described in the
-[AWS SDK for JavaScript Configuration Guide](https://docs.aws.amazon.com/cli/v1/userguide/cli-chap-configure.html).
+The scripts require access to **AWS KMS and DynamoDB**.
+Configure your AWS credentials using your preferred method described in the
+[AWS Credentials Configuration Guide](https://docs.aws.amazon.com/cli/v1/userguide/cli-chap-configure.html).
 
 ---
 
@@ -60,11 +94,11 @@ Configure your AWS credentials using your preferred method as described in the
 
 ### Get the GitHub App ID
 
-1. Go to your GitHub App Settings
+1. Go to GitHub App Settings
 
    - Open [GitHub Developer Settings](https://github.com/settings/apps)
    - Select "GitHub Apps"
-   - Click on your application
+   - Click on your GitHub application
 
 1. Find your App ID
    - Located at the top of the settings page
@@ -85,6 +119,32 @@ A private key is required to authenticate your GitHub App.
    - If lost, you'll need to generate a new key
    - Keep track of the file location for the import process
 
+For more details, see:
+[Managing private keys for GitHub Apps](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps)
+
+## Required AWS Permissions
+
+Ensure AWS credentials have these required permissions:
+
+### Resource Groups Tagging API Permissions
+
+- `tag:GetResources` - Lists and filters tagged DynamoDB tables
+
+### KMS Permissions
+
+- `kms:CreateKey` - Creates new KMS keys
+- `kms:DescribeKey` - Retrieves key metadata
+- `kms:GetParametersForImport` - Obtains key import parameters
+- `kms:ImportKeyMaterial` - Imports private key material
+- `kms:Sign` - Sign JWT tokens for GitHub App authentication
+- `kms:ScheduleKeyDeletion` - Schedule deletion of old keys during rotation
+- `kms:TagResource` - Tag keys with metadata and for tracking status
+
+### DynamoDB Permissions
+
+- `dynamodb:PutItem` - Stores KMS key ARN mappings
+- `dynamodb:GetItem` - Retrieve existing key mappings for validation
+
 ## Running Scripts
 
 ### Step 1: List Available Tables
@@ -98,54 +158,77 @@ npm run get-table-name
 Example Output:
 
 ```sh
-
 Available tables:
 
-1. GithubAppStack-GitHubAppNestedStack-PrivateKeysTable-1A2B3C4D5E6FS
+1. GithubAppStack-GitHubAppNestedStack-AppTable-1A2B3C4D5E6FS
 1. GithubAppStack-GitHubAppNestedStack-SomeOtherTable-7G8H9I0J1K2L
 
 Total tables found: 2
-
 ```
 
 ### Step 2: Import the Private key
 
 Use the downloaded pem file path, GitHub App ID and
-the table name chosen from Step 1
-as the arguments to the import script.
+the table name chosen
+as the arguments to the `npm run import-private-key` command.
 
 ```sh
-
 npm run import-private-key <path-to-private-key.pem> <GitHubAppId> <tableName>
 ```
 
 Example Usage:
 
 ```sh
-
-npm run import-private-key /Users/${user}/Downloads/private-key.pem 12345 GithubAppStack-GitHubAppNestedStack-PrivateKeysTable-1A2B3C4D5E6FS
+npm run import-private-key ~/Downloads/private-key.pem 12345 GithubAppStack-GitHubAppNestedStack-AppTable-1A2B3C4D5E6FS
 ```
+
+### Step 3: Cleanup Incomplete or Failed Imports
+
+If the import process fails or is interrupted,
+you may need to clean up pending or failed keys.
+This includes keys that were created but not fully imported,
+or keys that were imported but failed to update the DynamoDB table.
 
 ---
 
-### Resource Groups Tagging API Permissions
+## Key Rotation
 
-- `tag:GetResources` - For listing tagged DynamoDB tables
+### Why Rotate Keys
 
-### **KMS Permissions (Required for Key Management)**
+Private key rotation is a crucial security practice for GitHub Apps.
 
-- `kms:CreateKey`
-- `kms:DescribeKey`
-- `kms:GetParametersForImport`
-- `kms:ImportKeyMaterial`
-- `kms:Sign`
-- `kms:ScheduleKeyDeletion`
-- `kms:TagResource`
+Regular rotation helps mitigate the risk of key compromise
+and limits the potential damage if a key is exposed.
 
-### **DynamoDB Permissions (Required for Storing Key ARN)**
+### When to Rotate Keys
 
-- `dynamodb:PutItem`
-- `dynamodb:GetItem`
+Regular rotation is not mandatory
+since keys are securely stored and used within KMS,
+but this tool supports rotation when needed for your specific requirements.
+
+As a best practice, you can rotate your GitHub App's private key:
+
+1. Immediately if you suspect the key has been compromised
+1. After any security incident, even if unrelated
+
+### Rotation Process
+
+Genet simplifies the key rotation process:
+
+1. Generate a new private key in your GitHub App settings
+
+1. Run the [import process steps](https://github.com/amazon-ospo/framework-for-github-app-on-aws/edit/main/README.md#running-scripts)
+
+1. The tool automatically:
+   - Creates a new KMS key
+   - Securely imports the private key
+   - Updates the DynamoDB table with the new key's information
+   - Tags the old key as inactive in AWS KMS
+   - Schedules the old key for deletion after a set period of 30 days
+   - Permanently deletes the newly downloaded PEM file
+
+This process ensures a smooth transition
+while maintaining security and preventing disruption to your app's operations.
 
 ## FAQs
 
@@ -157,7 +240,14 @@ npm run import-private-key /Users/${user}/Downloads/private-key.pem 12345 Github
 1. Lost Private Key?
 
    - If you lost the .pem file, you need to generate a
-     new one in the GitHub App settings.
+     new one in the GitHub App settings and perform the import process again.
 
    - Generating a new key will invalidate any previously
      generated keys.
+
+1. Need more information?
+
+- [GitHub Apps documentation](https://docs.github.com/en/apps)
+- [Best practices for creating a GitHub App](https://docs.github.com/en/apps/creating-github-apps/setting-up-a-github-app/best-practices-for-creating-a-github-app#securing-your-github-app)
+- [GitHub App authentication](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-github-apps)
+- [AWS KMS documentation](https://docs.aws.amazon.com/kms/latest/developerguide/overview.html)

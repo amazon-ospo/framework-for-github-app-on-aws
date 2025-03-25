@@ -1,4 +1,4 @@
-import { awscdk, JsonFile, Project } from "projen";
+import { awscdk, JsonFile, Project, typescript } from "projen";
 import { TypeScriptAppProject } from "projen/lib/typescript";
 
 const projectMetadata = {
@@ -80,8 +80,9 @@ export const addTestTargets = (subProject: Project) => {
   });
 };
 
+// TODO: Publish these ops tools as a CLI
 const genetScripts = (
-  subProject: awscdk.AwsCdkConstructLibrary | awscdk.AwsCdkTypeScriptApp,
+  subProject: awscdk.AwsCdkConstructLibrary | typescript.TypeScriptProject,
 ) => {
   subProject.addScripts({
     "import-private-key":
@@ -148,7 +149,6 @@ project.package.file.addOverride("workspaces", ["src/packages/*"]);
 // Run Lerna build one package at a time and,
 // waits for each package to complete before showing its logs.
 project.preCompileTask.exec("npx lerna run build --concurrency=1 --no-stream");
-// TODO: Publish these ops tools as a CLI
 project.addScripts({
   "import-private-key":
     "ts-node src/packages/genet-ops-tools/src/importPrivateKey.ts",
@@ -194,7 +194,7 @@ createPackage({
   outdir: "src/packages/genet-framework",
 });
 
-const genetOpsTools = new awscdk.AwsCdkTypeScriptApp({
+const genetOpsTools = new typescript.TypeScriptProject({
   ...projectMetadata,
   name: "genet-ops-tools",
   outdir: "src/packages/genet-ops-tools",

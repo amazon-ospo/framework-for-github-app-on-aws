@@ -1,22 +1,23 @@
 # Acceptance Tests for Importing Private Key into AWS KMS
 
-This document describes running of acceptance tests for importing private key,
-which performs end-to-end testing of the GitHub App private key import
-functionality against real AWS and GitHub resources.
+This document describes running acceptance tests
+for importing GitHub App's private key into AWS KMS,
+performing end-to-end testing against real AWS and GitHub resources.
 
 ## Overview
 
-The test suite validates the complete workflow
-from importing a private key to using it for JWT signing.
+This test suite validates the complete workflow
+of importing a private key into AWS KMS
+and using it for JWT signing.
 
 **IMPORTANT:** These tests interact with live AWS services and will:
 
 - Create AWS resources (which may incur costs)
 
-  - Each execution of tests create 2 KMS keys
+- Each test run creates 2 KMS keys
 
-  - Each subsequent test run keeps on adding 2 KMS keys while
-    keeping old ones in pending deletion state for a window of 30 days.
+- Each subsequent test run keeps on adding 2 more KMS keys while
+  keeping old ones in pending deletion state for a window of 30 days.
 
 - Store data in DynamoDB table
 
@@ -26,8 +27,8 @@ from importing a private key to using it for JWT signing.
 
 - Delete the PEM file after successful import
 
-- **Note:** Monitor your AWS costs carefully as multiple test runs will
-  accumulate KMS keys.
+**Note:** Monitor your AWS costs carefully as multiple test runs will
+accumulate KMS keys.
 
 ## Prerequisites
 
@@ -36,7 +37,25 @@ from importing a private key to using it for JWT signing.
 
 1. Keep a track of the file location for the import process
 
-1. Configure AWS credentials with appropriate permissions
+## Required AWS Permissions
+
+Ensure AWS credentials have these required permissions:
+
+### **KMS Permissions (Required for Key Management)**
+
+- `kms:CreateKey` - Create new KMS keys
+- `kms:DescribeKey` - Get key metadata and status
+- `kms:GetParametersForImport` - Get import parameters for key material
+- `kms:ImportKeyMaterial` - Import external key material into KMS
+- `kms:ListResourceTags` - List tags associated with KMS keys
+- `kms:ScheduleKeyDeletion` - Schedule deletion of old keys
+- `kms:TagResource` - Tag keys for tracking status and metadata
+
+### **DynamoDB Permissions (Required for Table Operations)**
+
+- `dynamodb:PutItem` - Store KMS key ARNs in DynamoDB
+- `dynamodb:GetItem` - Retrieve KMS key ARNs from DynamoDB
+- `dynamodb:ListTables` - List available tables for validation
 
 ## Running Tests
 
@@ -44,17 +63,16 @@ from importing a private key to using it for JWT signing.
 
 ```sh
    npm run get-table-name
-   ```
+```
 
 1. Set required environment variables:
 
-For `DYNAMODB_TABLE_NAME`, select an appropriate table name from the output of above command.
+For `DYNAMODB_TABLE_NAME`, select an appropriate table name from `npm run get-table-name`.
 
 ```sh
 export GITHUB_PEM_FILE_PATH=<path-to-your-private-key.pem>
 export GITHUB_APPID=<your-github-app-id>
 export DYNAMODB_TABLE_NAME=<your-dynamo-table-name> # Use the table name you picked from step 1
-
 ```
 
 1. Execute acceptance tests:

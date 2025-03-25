@@ -24,16 +24,7 @@
       "type": "build"
     },
     {
-      "name": "aws-cdk",
-      "version": "^2",
-      "type": "build"
-    },
-    {
       "name": "aws-sdk-client-mock",
-      "type": "build"
-    },
-    {
-      "name": "esbuild",
       "type": "build"
     },
     {
@@ -75,10 +66,6 @@
       "type": "build"
     },
     {
-      "name": "ts-node",
-      "type": "build"
-    },
-    {
       "name": "typescript",
       "type": "build"
     },
@@ -92,16 +79,6 @@
     },
     {
       "name": "@aws-sdk/client-resource-groups-tagging-api",
-      "type": "runtime"
-    },
-    {
-      "name": "aws-cdk-lib",
-      "version": "^2.184.0",
-      "type": "runtime"
-    },
-    {
-      "name": "constructs",
-      "version": "^10.4.2",
       "type": "runtime"
     }
   ],
