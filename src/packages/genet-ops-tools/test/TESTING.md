@@ -14,9 +14,9 @@ and using it for JWT signing.
 
 - Create AWS resources (which may incur costs)
 
-- Each test run creates 2 KMS keys
+- Each execution of tests creates 2 KMS keys
 
-- Each subsequent test run keeps on adding 2 more KMS keys while
+- Each subsequent execution keeps on adding 2 more KMS keys while
   keeping old ones in pending deletion state for a window of 30 days.
 
 - Store data in DynamoDB table
@@ -66,6 +66,9 @@ Ensure AWS credentials have these required permissions:
 ```
 
 1. Set required environment variables:
+
+1. Set up PEM file path, GitHub App ID,
+   and Table name as environment variables to pass the tests
 
 For `DYNAMODB_TABLE_NAME`, select an appropriate table name from `npm run get-table-name`.
 

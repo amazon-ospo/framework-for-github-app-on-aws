@@ -188,6 +188,7 @@ If the import process fails or is interrupted,
 you may need to clean up pending or failed keys.
 This includes keys that were created but not fully imported,
 or keys that were imported but failed to update the DynamoDB table.
+These incomplete/failed keys will be tagged as Status: "Failed" in AWS KMS.
 
 ---
 

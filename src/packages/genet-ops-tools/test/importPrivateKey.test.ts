@@ -92,13 +92,20 @@ afterEach(() => {
 describe('validateInputsImpl', () => {
   let mockValidateJWT = jest.fn();
   let mockListTables = jest.fn();
+  let tempDir: string;
+  let tempPemFile: string;
   const mockExistsSync = fs.existsSync as jest.Mock;
   const mockPemFilePath = '/path/to/privatekey.pem';
   const mockWrongPrivateKeyPath = 'path/to/wrongPrivateKey.pem';
   const mockAppId = '12345';
   const mockTableName = 'validTable';
   beforeEach(() => {
+    tempDir = mkdtempSync(tmpdir());
+    tempPemFile = join(tempDir, 'github-private-key.pem');
     jest.resetAllMocks();
+  });
+  afterAll(() => {
+    rmdirSync(tempDir);
   });
   it('should validate inputs successfully when PEM file exists, GitHub authentication succeeds and valid table name is provided', async () => {
     mockExistsSync.mockReturnValue(true);
@@ -120,8 +127,6 @@ describe('validateInputsImpl', () => {
     expect(mockListTables).toHaveBeenCalled();
   });
   it('should throw error when PEM file does not exist', async () => {
-    const tempDir = mkdtempSync(tmpdir());
-    const tempPemFile = join(tempDir, 'github-private-key.pem');
     mockExistsSync.mockReturnValue(false);
     await expect(
       validateInputsImpl({
@@ -133,7 +138,6 @@ describe('validateInputsImpl', () => {
     expect(mockExistsSync).toHaveBeenCalledWith(tempPemFile);
     expect(mockValidateJWT).not.toHaveBeenCalled();
     expect(mockListTables).not.toHaveBeenCalled();
-    rmdirSync(tempDir);
   });
   it.each([
     [

@@ -149,29 +149,9 @@ export const importPrivateKey: ImportPrivateKey = async ({
         );
       }
     }
-
     const errorMessage = errorMessages.join('\n');
     console.error(errorMessage);
     throw error;
-
-    // console.error('Error during import process:', error);
-    // if (appKeyArn) {
-    //   console.error('\nCleanup Required:');
-    //   console.error(`KMS Key created but import failed: ${appKeyArn}`);
-    //   try {
-    //     await tagKeyAsFailed({ appKeyArn });
-    //   } catch (tagError) {
-    //     console.error('Failed to tag key as failed import:', tagError);
-    //   }
-    // }
-    // console.error('Please fix the error and retry the import process');
-    // console.error(
-    //   '\nNote: Cleanup needed for keys created during this failed import.',
-    // );
-    // console.error(
-    //   '\nCheck AWS KMS for newly created keys and delete them to avoid incurring costs.',
-    // );
-    // throw error;
   }
 };
 
