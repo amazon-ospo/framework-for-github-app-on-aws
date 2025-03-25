@@ -220,6 +220,7 @@ const genetTestApp = new awscdk.AwsCdkTypeScriptApp({
   projenrcTs: false,
   cdkVersion: "2.184.1",
 });
+addTestTargets(genetTestApp);
 addPrettierConfig(genetTestApp);
 configureMarkDownLinting(genetTestApp);
 genetTestApp.addDeps("genet-framework");

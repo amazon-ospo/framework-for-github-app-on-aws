@@ -100,7 +100,7 @@ describe('validateInputsImpl', () => {
   const mockAppId = '12345';
   const mockTableName = 'validTable';
   beforeEach(() => {
-    tempDir = mkdtempSync(tmpdir());
+    tempDir = mkdtempSync(join(tmpdir(), 'test-'));
     tempPemFile = join(tempDir, 'github-private-key.pem');
     jest.resetAllMocks();
   });
