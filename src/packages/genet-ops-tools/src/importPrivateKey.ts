@@ -69,7 +69,8 @@ export type ImportPrivateKey = ({
  * 6. Imports the encrypted key material into KMS and validates it
  * 7. Updates the DynamoDB table with the KMS key ARN
  * 8. Upon rotation, old key is tagged as inactive and scheduled for deletion.
- * 8. PEM file is permanently deleted from the local path provided.
+ * 9. PEM file is permanently deleted from the local path provided.
+ * 10. Tags failed imports created KMS keys as status "Failed"
  *
  * ---
  * dependency injection parameters:
@@ -81,6 +82,7 @@ export type ImportPrivateKey = ({
  * @param encryptKeyMaterial Function that encrypts the key material using public key from AWS KMS.
  * @param importKeyMaterialAndValidate Function that uses importToken to import the private key and validate JWT Auth.
  * @param updateAppsTable Function that updates the DynamoDB table with imported key ARN.
+ * @param tagKeyAsFailed Function that tags failed imports created KMS keys as Failed
  *
  */
 export const importPrivateKey: ImportPrivateKey = async ({
@@ -127,10 +129,10 @@ export const importPrivateKey: ImportPrivateKey = async ({
     unlinkSync(pemFilePath);
     console.log('Permanently deleted PEM file from the downloaded location');
     console.log('Import Private key process completed successfully');
-  } catch (error: any) {
+  } catch (error) {
     let errorMessages = [
       'Error during import process:',
-      error.message,
+      error,
       '',
       'Please fix the error and retry the import process.',
     ];
@@ -143,10 +145,8 @@ export const importPrivateKey: ImportPrivateKey = async ({
       );
       try {
         await tagKeyAsFailed({ appKeyArn });
-      } catch (tagError: any) {
-        errorMessages.push(
-          `- Failed to tag key as "Failed": ${tagError.message}`,
-        );
+      } catch (tagError) {
+        errorMessages.push('- Failed to tag key as "Failed":', tagError);
       }
     }
     const errorMessage = errorMessages.join('\n');
@@ -695,7 +695,6 @@ export type TagKeyAsFailed = ({
  *
  * ---
  * @param appKeyArn ARN of the new key created
- * @param appId GitHub App ID
  */
 export const tagKeyAsFailedImpl: TagKeyAsFailed = async ({ appKeyArn }) => {
   await kms.send(

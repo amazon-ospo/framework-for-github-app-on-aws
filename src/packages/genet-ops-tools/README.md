@@ -119,6 +119,8 @@ A private key is required to authenticate your GitHub App.
    - If lost, you'll need to generate a new key
    - Keep track of the file location for the import process
 
+**NOTE:** GitHub Apps are subject to a limit of 25 private keys per application
+
 For more details, see:
 [Managing private keys for GitHub Apps](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps)
 
@@ -161,9 +163,8 @@ Example Output:
 Available tables:
 
 1. GithubAppStack-GitHubAppNestedStack-AppTable-1A2B3C4D5E6FS
-1. GithubAppStack-GitHubAppNestedStack-SomeOtherTable-7G8H9I0J1K2L
 
-Total tables found: 2
+Total tables found: 1
 ```
 
 ### Step 2: Import the Private key
@@ -184,11 +185,13 @@ npm run import-private-key ~/Downloads/private-key.pem 12345 GithubAppStack-GitH
 
 ### Step 3: Cleanup Incomplete or Failed Imports
 
-If the import process fails or is interrupted,
-you may need to clean up pending or failed keys.
-This includes keys that were created but not fully imported,
-or keys that were imported but failed to update the DynamoDB table.
-These incomplete/failed keys will be tagged as Status: "Failed" in AWS KMS.
+- If the import process fails or is interrupted,
+  you need to clean up pending or failed keys to avoid incurring costs.
+
+- This includes keys that were created but not fully imported,
+  or keys that were imported but failed to update the DynamoDB table.
+
+- These incomplete/failed keys will be tagged as Status: **Failed** in AWS KMS.
 
 ---
 
@@ -240,7 +243,7 @@ while maintaining security and preventing disruption to your app's operations.
 
 1. Lost Private Key?
 
-   - If you lost the .pem file, you need to generate a
+   - If you lost the `.pem` file, you need to generate a
      new one in the GitHub App settings and perform the import process again.
 
    - Generating a new key will invalidate any previously

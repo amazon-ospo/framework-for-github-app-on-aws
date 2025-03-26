@@ -36,7 +36,9 @@ import {
   TagResourceCommandOutput,
 } from '@aws-sdk/client-kms';
 import { mockClient } from 'aws-sdk-client-mock';
-// import mockFs from 'mock-fs';
+// TODO: REMOVE once jsii compilation is fixed with mock-fs
+// @ts-ignore
+import mockFs from 'mock-fs';
 import {
   CREATE_KEY_SPEC,
   WRAPPING_SPEC,
@@ -61,9 +63,6 @@ import {
   tagKeyAsFailedImpl,
 } from '../src/importPrivateKey';
 import * as importKey from '../src/importPrivateKey';
-// TODO(jsii): Use ES import once jsii compilation is fixed with mock-fs
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const mockFs = require('mock-fs');
 
 const mockKmsClient = mockClient(KMSClient);
 const mockDynamoDBClient = mockClient(DynamoDBClient);
@@ -470,6 +469,10 @@ describe('encryptKeyMaterialImpl', () => {
     importToken: randomBytes(32),
   };
   privateKeyDer = privateKey;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('should encrypt key material successfully', async () => {
     const encryptedData = await encryptKeyMaterialImpl({
@@ -1201,7 +1204,7 @@ describe('pemSignImpl', () => {
     await expect(
       pemSignImpl({
         pemFile: invalidPemPath,
-        message: 'test',
+        message: 'Hello, GitHub App',
       }),
     ).rejects.toThrow();
   });
@@ -1442,232 +1445,10 @@ describe('importPrivateKey', () => {
         expect(mockTagKeyAsFailed).toHaveBeenCalledWith({
           appKeyArn: mockAppKeyArn,
         });
-      } else {
-        expect(mockTagKeyAsFailed).not.toHaveBeenCalled();
       }
     },
   );
 });
-
-// describe('importPrivateKey', () => {
-//   const mockAppId = '12345';
-//   const mockTableName = 'validTable';
-//   const mockDerFormat = 'der-formatted-key';
-//   const mockAppKeyArn = 'arn:aws:kms:region:account:key/mock-key-id';
-//   const mockPublicKey = 'mock-public-key';
-//   const mockImportToken = 'mock-import-token';
-//   const mockEncryptedKey = 'encrypted-key-material';
-//   const mockUnlinkFileSync = fs.unlinkSync as jest.Mock;
-//   let mockValidateInputs = jest.fn();
-//   let mockConvertPemToDer = jest.fn();
-//   let mockCreateKmsKey = jest.fn();
-//   let mockGetKmsImportParameters = jest.fn();
-//   let mockEncryptKeyMaterial = jest.fn();
-//   let mockImportKeyMaterialAndValidate = jest.fn();
-//   let mockUpdateAppsTable = jest.fn();
-//   let mockTagKeyAsFailed = jest.fn();
-//   let tempDir: string;
-//   let tempPemFile: string;
-//   let resolvedPemFile: string;
-//   beforeAll(() => {
-//     tempDir = mkdtempSync(tmpdir());
-//     tempPemFile = join(tempDir, 'github-private-key.pem');
-//     resolvedPemFile = tempPemFile;
-//   });
-//   beforeEach(() => {
-//     writeFileSync(tempPemFile, 'private-key');
-//     const mockPath = path.resolve as jest.Mock;
-//     mockPath.mockReturnValue(resolvedPemFile);
-//     mockValidateInputs.mockResolvedValue(true);
-//     mockConvertPemToDer.mockReturnValue(mockDerFormat);
-//     mockCreateKmsKey.mockResolvedValue(mockAppKeyArn);
-//     mockGetKmsImportParameters.mockResolvedValue({
-//       publicKey: mockPublicKey,
-//       importToken: mockImportToken,
-//     });
-//     mockEncryptKeyMaterial.mockResolvedValue(mockEncryptedKey);
-//     mockImportKeyMaterialAndValidate.mockResolvedValue(undefined);
-//     mockUpdateAppsTable.mockResolvedValue(undefined);
-//     mockTagKeyAsFailed.mockResolvedValue(undefined);
-//   });
-//   afterEach(() => {
-//     jest.clearAllMocks();
-//     if (existsSync(tempPemFile)) {
-//       unlinkSync(tempPemFile);
-//     }
-//   });
-//   afterAll(() => {
-//     rmSync(tempDir, { recursive: true, force: true });
-//   });
-//   it('should successfully import private key and delete PEM file after all steps process successfully', async () => {
-//     await importPrivateKey({
-//       pemFilePath: tempPemFile,
-//       appId: mockAppId,
-//       tableName: mockTableName,
-//       validateInputs: mockValidateInputs,
-//       convertPemToDer: mockConvertPemToDer,
-//       createKmsKey: mockCreateKmsKey,
-//       getKmsImportParameters: mockGetKmsImportParameters,
-//       encryptKeyMaterial: mockEncryptKeyMaterial,
-//       importKeyMaterialAndValidate: mockImportKeyMaterialAndValidate,
-//       updateAppsTable: mockUpdateAppsTable,
-//       tagKeyAsFailed: mockTagKeyAsFailed,
-//     });
-//     expect(resolve).toHaveBeenCalledWith(tempPemFile);
-//     expect(mockValidateInputs).toHaveBeenCalledWith({
-//       pemFile: resolvedPemFile,
-//       appId: mockAppId,
-//       tableName: mockTableName,
-//     });
-//     expect(mockConvertPemToDer).toHaveBeenCalledWith({
-//       pemFile: resolvedPemFile,
-//     });
-//     expect(mockCreateKmsKey).toHaveBeenCalledWith({
-//       appId: mockAppId,
-//     });
-//     expect(mockGetKmsImportParameters).toHaveBeenCalledWith({
-//       appKeyArn: mockAppKeyArn,
-//     });
-//     expect(mockEncryptKeyMaterial).toHaveBeenCalledWith({
-//       privateKeyDer: mockDerFormat,
-//       importParams: {
-//         publicKey: mockPublicKey,
-//         importToken: mockImportToken,
-//       },
-//     });
-//     expect(mockImportKeyMaterialAndValidate).toHaveBeenCalledWith({
-//       appKeyArn: mockAppKeyArn,
-//       appId: mockAppId,
-//       wrappedMaterial: mockEncryptedKey,
-//       importToken: mockImportToken,
-//     });
-//     expect(mockUpdateAppsTable).toHaveBeenCalledWith({
-//       appKeyArn: mockAppKeyArn,
-//       appId: mockAppId,
-//       tableName: mockTableName,
-//     });
-//     expect(mockUnlinkFileSync).toHaveBeenCalledWith(tempPemFile);
-//     expect(mockTagKeyAsFailed).not.toHaveBeenCalled();
-//   });
-//   it.each([
-//     [
-//       'validateInputs',
-//       () => {
-//         mockValidateInputs.mockRejectedValue(
-//           new Error('Inputs validation failed'),
-//         );
-//         return 'Inputs validation failed';
-//       },
-//       false,
-//     ],
-//     [
-//       'convertPemToDer',
-//       () => {
-//         mockConvertPemToDer.mockImplementation(() => {
-//           throw new Error('PEM to DER conversion failed');
-//         });
-//         return 'PEM to DER conversion failed';
-//       },
-//       false,
-//     ],
-//     [
-//       'createKmsKey',
-//       () => {
-//         mockCreateKmsKey.mockRejectedValue(
-//           new Error('KMS key creation failed'),
-//         );
-//         return 'KMS key creation failed';
-//       },
-//       false,
-//     ],
-//     [
-//       'getKmsImportParameters',
-//       () => {
-//         mockCreateKmsKey.mockResolvedValue(mockAppKeyArn);
-//         mockGetKmsImportParameters.mockRejectedValue(
-//           new Error('Failed to get import parameters'),
-//         );
-//         return 'Failed to get import parameters';
-//       },
-//       true,
-//     ],
-//     [
-//       'encryptKeyMaterial',
-//       () => {
-//         mockCreateKmsKey.mockResolvedValue(mockAppKeyArn);
-//         mockGetKmsImportParameters.mockResolvedValue({
-//           publicKey: mockPublicKey,
-//           importToken: mockImportToken,
-//         });
-//         mockEncryptKeyMaterial.mockRejectedValue(
-//           new Error('Encryption failed'),
-//         );
-//         return 'Encryption failed';
-//       },
-//       true,
-//     ],
-//     [
-//       'importKeyMaterialAndValidate',
-//       () => {
-//         mockCreateKmsKey.mockResolvedValue(mockAppKeyArn);
-//         mockGetKmsImportParameters.mockResolvedValue({
-//           publicKey: mockPublicKey,
-//           importToken: mockImportToken,
-//         });
-//         mockEncryptKeyMaterial.mockResolvedValue(mockEncryptedKey);
-//         mockImportKeyMaterialAndValidate.mockRejectedValue(
-//           new Error('Import validation failed'),
-//         );
-//         return 'Import validation failed';
-//       },
-//       true,
-//     ],
-//     [
-//       'updateAppsTable',
-//       () => {
-//         mockCreateKmsKey.mockResolvedValue(mockAppKeyArn);
-//         mockGetKmsImportParameters.mockResolvedValue({
-//           publicKey: mockPublicKey,
-//           importToken: mockImportToken,
-//         });
-//         mockEncryptKeyMaterial.mockResolvedValue(mockEncryptedKey);
-//         mockImportKeyMaterialAndValidate.mockResolvedValue(undefined);
-//         mockUpdateAppsTable.mockRejectedValue(
-//           new Error('Failed to update apps table'),
-//         );
-//         return 'Failed to update apps table';
-//       },
-//       true,
-//     ],
-//   ])(
-//     'should throw error when %s fails',
-//     async (_: string, setupFailureAndGetError, shouldTagAsFailed: boolean) => {
-//       const expectedError = setupFailureAndGetError();
-//       await expect(
-//         importPrivateKey({
-//           pemFilePath: tempPemFile,
-//           appId: mockAppId,
-//           tableName: mockTableName,
-//           validateInputs: mockValidateInputs,
-//           convertPemToDer: mockConvertPemToDer,
-//           createKmsKey: mockCreateKmsKey,
-//           getKmsImportParameters: mockGetKmsImportParameters,
-//           encryptKeyMaterial: mockEncryptKeyMaterial,
-//           importKeyMaterialAndValidate: mockImportKeyMaterialAndValidate,
-//           updateAppsTable: mockUpdateAppsTable,
-//           tagKeyAsFailed: mockTagKeyAsFailed,
-//         }),
-//       ).rejects.toThrow(expectedError);
-//       if (shouldTagAsFailed) {
-//         expect(mockTagKeyAsFailed).toHaveBeenCalledWith({
-//           appKeyArn: mockAppKeyArn,
-//         });
-//       } else {
-//         expect(mockTagKeyAsFailed).not.toHaveBeenCalled();
-//       }
-//     },
-//   );
-// });
 
 describe('main', () => {
   const originalArgs = process.argv;

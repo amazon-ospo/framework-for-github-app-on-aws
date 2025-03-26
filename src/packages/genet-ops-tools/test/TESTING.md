@@ -12,7 +12,7 @@ and using it for JWT signing.
 
 **IMPORTANT:** These tests interact with live AWS services and will:
 
-- Create AWS resources (which may incur costs)
+- Create AWS resources (which incur costs)
 
 - Each execution of tests creates 2 KMS keys
 
@@ -64,8 +64,6 @@ Ensure AWS credentials have these required permissions:
 ```sh
    npm run get-table-name
 ```
-
-1. Set required environment variables:
 
 1. Set up PEM file path, GitHub App ID,
    and Table name as environment variables to pass the tests
