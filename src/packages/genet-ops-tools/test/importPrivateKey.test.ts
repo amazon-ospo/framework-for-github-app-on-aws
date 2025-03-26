@@ -36,7 +36,7 @@ import {
   TagResourceCommandOutput,
 } from '@aws-sdk/client-kms';
 import { mockClient } from 'aws-sdk-client-mock';
-import mockFs from 'mock-fs';
+// import mockFs from 'mock-fs';
 import {
   CREATE_KEY_SPEC,
   WRAPPING_SPEC,
@@ -61,6 +61,9 @@ import {
   tagKeyAsFailedImpl,
 } from '../src/importPrivateKey';
 import * as importKey from '../src/importPrivateKey';
+// TODO(jsii): Use ES import once jsii compilation is fixed with mock-fs
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const mockFs = require('mock-fs');
 
 const mockKmsClient = mockClient(KMSClient);
 const mockDynamoDBClient = mockClient(DynamoDBClient);
