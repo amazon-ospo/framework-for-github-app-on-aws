@@ -205,7 +205,7 @@ const genetOpsTools = new typescript.TypeScriptProject({
     "@aws-sdk/client-kms",
     "@aws-sdk/client-dynamodb",
   ],
-  devDeps: ["aws-sdk-client-mock"],
+  devDeps: ["aws-sdk-client-mock", "mock-fs", "@types/mock-fs"],
 });
 genetScripts(genetOpsTools);
 addTestTargets(genetOpsTools);

@@ -10,28 +10,8 @@ import {
   constants,
   randomBytes,
 } from 'crypto';
-import * as fs from 'fs';
-import {
-  existsSync,
-  mkdtempSync,
-  rmdirSync,
-  rmSync,
-  unlinkSync,
-  writeFileSync,
-} from 'fs';
-import { tmpdir } from 'os';
-import { join, resolve } from 'path';
-import * as path from 'path';
-jest.mock('fs', () => ({
-  ...jest.requireActual('fs'),
-  existsSync: jest.fn(),
-  unlinkSync: jest.fn(),
-}));
-jest.mock('path', () => ({
-  ...jest.requireActual('path'),
-  resolve: jest.fn(),
-}));
-
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import {
   DynamoDBClient,
   PutItemCommand,
@@ -56,6 +36,7 @@ import {
   TagResourceCommandOutput,
 } from '@aws-sdk/client-kms';
 import { mockClient } from 'aws-sdk-client-mock';
+import mockFs from 'mock-fs';
 import {
   CREATE_KEY_SPEC,
   WRAPPING_SPEC,
@@ -88,27 +69,29 @@ afterEach(() => {
   mockDynamoDBClient.reset();
   jest.clearAllMocks();
 });
-
 describe('validateInputsImpl', () => {
   let mockValidateJWT = jest.fn();
   let mockListTables = jest.fn();
-  let tempDir: string;
-  let tempPemFile: string;
-  const mockExistsSync = fs.existsSync as jest.Mock;
   const mockPemFilePath = '/path/to/privatekey.pem';
-  const mockWrongPrivateKeyPath = 'path/to/wrongPrivateKey.pem';
+  const mockWrongPrivateKeyPath = '/path/to/wrongPrivateKey.pem';
   const mockAppId = '12345';
   const mockTableName = 'validTable';
+  const validPrivateKey =
+    '-----BEGIN PRIVATE KEY-----\nvalid-key-content\n-----END PRIVATE KEY-----';
+  const invalidPrivateKey = 'invalid-key-content';
   beforeEach(() => {
-    tempDir = mkdtempSync(join(tmpdir(), 'test-'));
-    tempPemFile = join(tempDir, 'github-private-key.pem');
     jest.resetAllMocks();
+    mockFs({
+      '/path/to': {
+        'privatekey.pem': validPrivateKey,
+        'wrongPrivateKey.pem': invalidPrivateKey,
+      },
+    });
   });
-  afterAll(() => {
-    rmdirSync(tempDir);
+  afterEach(() => {
+    mockFs.restore();
   });
   it('should validate inputs successfully when PEM file exists, GitHub authentication succeeds and valid table name is provided', async () => {
-    mockExistsSync.mockReturnValue(true);
     mockValidateJWT.mockResolvedValue(true);
     mockListTables.mockResolvedValue(['validTable', 'otherTable']);
 
@@ -119,7 +102,6 @@ describe('validateInputsImpl', () => {
       validateJWt: mockValidateJWT,
       listTables: mockListTables,
     });
-    expect(mockExistsSync).toHaveBeenCalledWith('/path/to/privatekey.pem');
     expect(mockValidateJWT).toHaveBeenCalledWith({
       appId: mockAppId,
       signFunction: expect.any(Function),
@@ -127,15 +109,16 @@ describe('validateInputsImpl', () => {
     expect(mockListTables).toHaveBeenCalled();
   });
   it('should throw error when PEM file does not exist', async () => {
-    mockExistsSync.mockReturnValue(false);
+    mockFs({
+      '/path/to': {}, // Empty directory
+    });
     await expect(
       validateInputsImpl({
-        pemFile: tempPemFile,
+        pemFile: mockPemFilePath,
         appId: mockAppId,
         tableName: mockTableName,
       }),
-    ).rejects.toThrow(`File not found at the path: ${tempPemFile}`);
-    expect(mockExistsSync).toHaveBeenCalledWith(tempPemFile);
+    ).rejects.toThrow(`File not found at the path: ${mockPemFilePath}`);
     expect(mockValidateJWT).not.toHaveBeenCalled();
     expect(mockListTables).not.toHaveBeenCalled();
   });
@@ -151,7 +134,6 @@ describe('validateInputsImpl', () => {
       'invalid-app-id',
     ],
   ])('%s', async (_: string, pemFile, appId) => {
-    mockExistsSync.mockReturnValue(true);
     mockValidateJWT.mockResolvedValue(false);
     await expect(
       validateInputsImpl({
@@ -164,7 +146,6 @@ describe('validateInputsImpl', () => {
     ).rejects.toThrow(
       'GitHub authentication failed - invalid private key or App ID mismatch',
     );
-    expect(mockExistsSync).toHaveBeenCalledWith(pemFile);
     expect(mockValidateJWT).toHaveBeenCalledWith({
       appId: appId,
       signFunction: expect.any(Function),
@@ -172,7 +153,6 @@ describe('validateInputsImpl', () => {
     expect(mockListTables).not.toHaveBeenCalled();
   });
   it('should throw error when provided table name is not in the list of tables', async () => {
-    mockExistsSync.mockReturnValue(true);
     mockValidateJWT.mockResolvedValue(true);
     mockListTables.mockResolvedValue(['validTable', 'otherTable']);
 
@@ -190,7 +170,6 @@ describe('validateInputsImpl', () => {
     expect(mockListTables).toHaveBeenCalled();
   });
   it('should throw error when listTable fails', async () => {
-    mockExistsSync.mockReturnValue(true);
     mockValidateJWT.mockResolvedValue(true);
     mockListTables.mockRejectedValue(new Error('Failed to list tables'));
 
@@ -205,12 +184,15 @@ describe('validateInputsImpl', () => {
     ).rejects.toThrow('Failed to list tables');
   });
   it('should throw error when GitHub authentication fails due to API error', async () => {
-    mockExistsSync.mockReturnValue(true);
     mockValidateJWT.mockRejectedValue(new Error('GitHub API Error'));
-
+    mockFs({
+      '/path/to': {
+        'privatekey.pem': validPrivateKey,
+      },
+    });
     await expect(
       validateInputsImpl({
-        pemFile: '/path/to/key.pem',
+        pemFile: '/path/to/privatekey.pem',
         appId: mockAppId,
         tableName: mockTableName,
         validateJWt: mockValidateJWT,
@@ -223,18 +205,12 @@ describe('validateInputsImpl', () => {
 describe('convertPemToDerImpl', () => {
   let originalPrivateKeyPem: string;
   let expectedDerBuffer: Buffer;
-  let tempDir: string;
-  let tempPemFile: string;
-  let invalidPemPath: string;
-  let emptyPemPath: string;
-  let nonexistentFile: string;
+  const pemFilePath = '/path/to/github-private-key.pem';
+  const invalidPemPath = '/path/to/invalidFile.pem';
+  const emptyPemPath = '/path/to/empty.pem';
+  const nonexistentFile = '/path/to/nonexistent.pem';
 
-  beforeAll(() => {
-    tempDir = mkdtempSync(tmpdir());
-    tempPemFile = join(tempDir, 'github-private-key.pem');
-    invalidPemPath = join(tempDir, 'invalidFile.pem');
-    emptyPemPath = join(tempDir, 'empty.pem');
-    nonexistentFile = join(tempDir, 'donotexist.pem');
+  beforeEach(() => {
     const { privateKey } = generateKeyPairSync('rsa', {
       modulusLength: 2048,
       publicKeyEncoding: {
@@ -246,20 +222,27 @@ describe('convertPemToDerImpl', () => {
         format: 'pem',
       },
     });
+
     originalPrivateKeyPem = privateKey;
-    writeFileSync(tempPemFile, privateKey);
     expectedDerBuffer = createPrivateKey(privateKey).export({
       type: 'pkcs8',
       format: 'der',
     });
+    mockFs({
+      '/path/to': {
+        'github-private-key.pem': originalPrivateKeyPem,
+        'invalidFile.pem': 'invalid content',
+        'empty.pem': '',
+      },
+    });
   });
-  afterAll(() => {
-    rmSync(tempDir, { recursive: true, force: true });
+  afterEach(() => {
+    mockFs.restore();
   });
 
   it('should successfully convert a valid PEM to DER format', () => {
     const derBuffer = convertPemToDerImpl({
-      pemFile: tempPemFile,
+      pemFile: pemFilePath,
     });
     expect(Buffer.isBuffer(derBuffer)).toBe(true);
     expect(derBuffer).toEqual(expectedDerBuffer);
@@ -276,26 +259,17 @@ describe('convertPemToDerImpl', () => {
       .toString();
     expect(reconstructedPem).toEqual(originalPrivateKeyPem);
   });
-  it('should throw an error when PEM file is not a valid PEM encoding', () => {
-    writeFileSync(invalidPemPath, 'invalid content');
+  it.each([
+    [
+      'should throw an error when PEM file is not a valid PEM encoding',
+      invalidPemPath,
+    ],
+    ['should throw an error when PEM file is empty', emptyPemPath],
+    ['should throw an error when PEM file does not exist', nonexistentFile],
+  ])('%s', (_: string, testPemFilePath) => {
     expect(() =>
       convertPemToDerImpl({
-        pemFile: invalidPemPath,
-      }),
-    ).toThrow();
-  });
-  it('should throw an error when PEM file is empty', () => {
-    writeFileSync(emptyPemPath, '');
-    expect(() =>
-      convertPemToDerImpl({
-        pemFile: emptyPemPath,
-      }),
-    ).toThrow();
-  });
-  it('should throw an error when PEM file does not exist', () => {
-    expect(() =>
-      convertPemToDerImpl({
-        pemFile: nonexistentFile,
+        pemFile: testPemFilePath,
       }),
     ).toThrow();
   });
@@ -1150,17 +1124,11 @@ describe('kmsSignImpl', () => {
 
 describe('pemSignImpl', () => {
   let publicKey: KeyObject;
-  let tempDir: string;
-  let tempPemFile: string;
-  let invalidPemPath: string;
-
-  tempDir = mkdtempSync(tmpdir());
-  tempPemFile = join(tempDir, 'github-private-key.pem');
-  beforeAll(() => {
-    invalidPemPath = join(
-      mkdtempSync(join(mkdtempSync(tmpdir()))),
-      'invalidFile.pem',
-    );
+  let privateKeyContent: string;
+  const pemFilePath = '/path/to/github-private-key.pem';
+  const invalidPemPath = '/path/to/invalidFile.pem';
+  const nonexistentPath = '/path/to/nonexistent.pem';
+  beforeEach(() => {
     const { privateKey, publicKey: pubKey } = generateKeyPairSync('rsa', {
       modulusLength: 2048,
       publicKeyEncoding: {
@@ -1172,17 +1140,25 @@ describe('pemSignImpl', () => {
         format: 'pem',
       },
     });
-    writeFileSync(tempPemFile, privateKey);
+
+    privateKeyContent = privateKey;
     publicKey = createPublicKey(pubKey);
-  });
-  afterAll(() => {
-    rmSync(tempDir, { recursive: true, force: true });
+
+    mockFs({
+      '/path/to': {
+        'github-private-key.pem': privateKeyContent,
+        'invalidFile.pem': 'invalid content',
+      },
+    });
   });
 
+  afterEach(() => {
+    mockFs.restore();
+  });
   it('should successfully sign a message using private key and verify with corresponding public key', async () => {
     const message = 'Hello, GitHub App';
     const signature = await pemSignImpl({
-      pemFile: tempPemFile,
+      pemFile: pemFilePath,
       message,
     });
     expect(Buffer.isBuffer(signature)).toBe(true);
@@ -1194,30 +1170,31 @@ describe('pemSignImpl', () => {
     );
     expect(isValid).toBe(true);
   });
+
   it('should generate different signatures for different messages', async () => {
     const message1 = 'Hello';
     const message2 = 'GitHub App';
     const signature1 = await pemSignImpl({
-      pemFile: tempPemFile,
+      pemFile: pemFilePath,
       message: message1,
     });
     const signature2 = await pemSignImpl({
-      pemFile: tempPemFile,
+      pemFile: pemFilePath,
       message: message2,
     });
     expect(signature1).not.toEqual(signature2);
   });
+
   it('should throw an error if the PEM file does not exist', async () => {
-    const message = 'Hello, GitHub App';
     await expect(
       pemSignImpl({
-        pemFile: 'nonexistent.pem',
-        message,
+        pemFile: nonexistentPath,
+        message: 'Hello, GitHub App',
       }),
     ).rejects.toThrow(/ENOENT/);
   });
+
   it('should throw an error if the PEM file contains invalid content', async () => {
-    writeFileSync(invalidPemPath, 'invalid content');
     await expect(
       pemSignImpl({
         pemFile: invalidPemPath,
@@ -1225,19 +1202,21 @@ describe('pemSignImpl', () => {
       }),
     ).rejects.toThrow();
   });
+
   it('should handle an empty message', async () => {
     const signature = await pemSignImpl({
-      pemFile: tempPemFile,
+      pemFile: pemFilePath,
       message: '',
     });
     expect(Buffer.isBuffer(signature)).toBe(true);
     const isValid = verify('sha256', Buffer.from(''), publicKey, signature);
     expect(isValid).toBe(true);
   });
+
   it('should handle long messages', async () => {
     const longMessage = 'a'.repeat(10000);
     const signature = await pemSignImpl({
-      pemFile: tempPemFile,
+      pemFile: pemFilePath,
       message: longMessage,
     });
     expect(Buffer.isBuffer(signature)).toBe(true);
@@ -1259,7 +1238,8 @@ describe('importPrivateKey', () => {
   const mockPublicKey = 'mock-public-key';
   const mockImportToken = 'mock-import-token';
   const mockEncryptedKey = 'encrypted-key-material';
-  const mockUnlinkFileSync = fs.unlinkSync as jest.Mock;
+  const pemFilePath = '/path/to/github-private-key.pem';
+  const resolvedPemFile = resolve(pemFilePath);
   let mockValidateInputs = jest.fn();
   let mockConvertPemToDer = jest.fn();
   let mockCreateKmsKey = jest.fn();
@@ -1268,18 +1248,14 @@ describe('importPrivateKey', () => {
   let mockImportKeyMaterialAndValidate = jest.fn();
   let mockUpdateAppsTable = jest.fn();
   let mockTagKeyAsFailed = jest.fn();
-  let tempDir: string;
-  let tempPemFile: string;
-  let resolvedPemFile: string;
-  beforeAll(() => {
-    tempDir = mkdtempSync(tmpdir());
-    tempPemFile = join(tempDir, 'github-private-key.pem');
-    resolvedPemFile = tempPemFile;
-  });
+
   beforeEach(() => {
-    writeFileSync(tempPemFile, 'private-key');
-    const mockPath = path.resolve as jest.Mock;
-    mockPath.mockReturnValue(resolvedPemFile);
+    jest.resetAllMocks();
+    mockFs({
+      '/path/to': {
+        'github-private-key.pem': 'private-key',
+      },
+    });
     mockValidateInputs.mockResolvedValue(true);
     mockConvertPemToDer.mockReturnValue(mockDerFormat);
     mockCreateKmsKey.mockResolvedValue(mockAppKeyArn);
@@ -1292,18 +1268,15 @@ describe('importPrivateKey', () => {
     mockUpdateAppsTable.mockResolvedValue(undefined);
     mockTagKeyAsFailed.mockResolvedValue(undefined);
   });
+
   afterEach(() => {
+    mockFs.restore();
     jest.clearAllMocks();
-    if (existsSync(tempPemFile)) {
-      unlinkSync(tempPemFile);
-    }
   });
-  afterAll(() => {
-    rmSync(tempDir, { recursive: true, force: true });
-  });
+
   it('should successfully import private key and delete PEM file after all steps process successfully', async () => {
     await importPrivateKey({
-      pemFilePath: tempPemFile,
+      pemFilePath,
       appId: mockAppId,
       tableName: mockTableName,
       validateInputs: mockValidateInputs,
@@ -1315,7 +1288,6 @@ describe('importPrivateKey', () => {
       updateAppsTable: mockUpdateAppsTable,
       tagKeyAsFailed: mockTagKeyAsFailed,
     });
-    expect(resolve).toHaveBeenCalledWith(tempPemFile);
     expect(mockValidateInputs).toHaveBeenCalledWith({
       pemFile: resolvedPemFile,
       appId: mockAppId,
@@ -1348,9 +1320,11 @@ describe('importPrivateKey', () => {
       appId: mockAppId,
       tableName: mockTableName,
     });
-    expect(mockUnlinkFileSync).toHaveBeenCalledWith(tempPemFile);
+    // File should be deleted after successful import
+    expect(() => readFileSync(pemFilePath)).toThrow();
     expect(mockTagKeyAsFailed).not.toHaveBeenCalled();
   });
+
   it.each([
     [
       'validateInputs',
@@ -1447,7 +1421,7 @@ describe('importPrivateKey', () => {
       const expectedError = setupFailureAndGetError();
       await expect(
         importPrivateKey({
-          pemFilePath: tempPemFile,
+          pemFilePath,
           appId: mockAppId,
           tableName: mockTableName,
           validateInputs: mockValidateInputs,
@@ -1460,6 +1434,7 @@ describe('importPrivateKey', () => {
           tagKeyAsFailed: mockTagKeyAsFailed,
         }),
       ).rejects.toThrow(expectedError);
+
       if (shouldTagAsFailed) {
         expect(mockTagKeyAsFailed).toHaveBeenCalledWith({
           appKeyArn: mockAppKeyArn,
@@ -1470,6 +1445,226 @@ describe('importPrivateKey', () => {
     },
   );
 });
+
+// describe('importPrivateKey', () => {
+//   const mockAppId = '12345';
+//   const mockTableName = 'validTable';
+//   const mockDerFormat = 'der-formatted-key';
+//   const mockAppKeyArn = 'arn:aws:kms:region:account:key/mock-key-id';
+//   const mockPublicKey = 'mock-public-key';
+//   const mockImportToken = 'mock-import-token';
+//   const mockEncryptedKey = 'encrypted-key-material';
+//   const mockUnlinkFileSync = fs.unlinkSync as jest.Mock;
+//   let mockValidateInputs = jest.fn();
+//   let mockConvertPemToDer = jest.fn();
+//   let mockCreateKmsKey = jest.fn();
+//   let mockGetKmsImportParameters = jest.fn();
+//   let mockEncryptKeyMaterial = jest.fn();
+//   let mockImportKeyMaterialAndValidate = jest.fn();
+//   let mockUpdateAppsTable = jest.fn();
+//   let mockTagKeyAsFailed = jest.fn();
+//   let tempDir: string;
+//   let tempPemFile: string;
+//   let resolvedPemFile: string;
+//   beforeAll(() => {
+//     tempDir = mkdtempSync(tmpdir());
+//     tempPemFile = join(tempDir, 'github-private-key.pem');
+//     resolvedPemFile = tempPemFile;
+//   });
+//   beforeEach(() => {
+//     writeFileSync(tempPemFile, 'private-key');
+//     const mockPath = path.resolve as jest.Mock;
+//     mockPath.mockReturnValue(resolvedPemFile);
+//     mockValidateInputs.mockResolvedValue(true);
+//     mockConvertPemToDer.mockReturnValue(mockDerFormat);
+//     mockCreateKmsKey.mockResolvedValue(mockAppKeyArn);
+//     mockGetKmsImportParameters.mockResolvedValue({
+//       publicKey: mockPublicKey,
+//       importToken: mockImportToken,
+//     });
+//     mockEncryptKeyMaterial.mockResolvedValue(mockEncryptedKey);
+//     mockImportKeyMaterialAndValidate.mockResolvedValue(undefined);
+//     mockUpdateAppsTable.mockResolvedValue(undefined);
+//     mockTagKeyAsFailed.mockResolvedValue(undefined);
+//   });
+//   afterEach(() => {
+//     jest.clearAllMocks();
+//     if (existsSync(tempPemFile)) {
+//       unlinkSync(tempPemFile);
+//     }
+//   });
+//   afterAll(() => {
+//     rmSync(tempDir, { recursive: true, force: true });
+//   });
+//   it('should successfully import private key and delete PEM file after all steps process successfully', async () => {
+//     await importPrivateKey({
+//       pemFilePath: tempPemFile,
+//       appId: mockAppId,
+//       tableName: mockTableName,
+//       validateInputs: mockValidateInputs,
+//       convertPemToDer: mockConvertPemToDer,
+//       createKmsKey: mockCreateKmsKey,
+//       getKmsImportParameters: mockGetKmsImportParameters,
+//       encryptKeyMaterial: mockEncryptKeyMaterial,
+//       importKeyMaterialAndValidate: mockImportKeyMaterialAndValidate,
+//       updateAppsTable: mockUpdateAppsTable,
+//       tagKeyAsFailed: mockTagKeyAsFailed,
+//     });
+//     expect(resolve).toHaveBeenCalledWith(tempPemFile);
+//     expect(mockValidateInputs).toHaveBeenCalledWith({
+//       pemFile: resolvedPemFile,
+//       appId: mockAppId,
+//       tableName: mockTableName,
+//     });
+//     expect(mockConvertPemToDer).toHaveBeenCalledWith({
+//       pemFile: resolvedPemFile,
+//     });
+//     expect(mockCreateKmsKey).toHaveBeenCalledWith({
+//       appId: mockAppId,
+//     });
+//     expect(mockGetKmsImportParameters).toHaveBeenCalledWith({
+//       appKeyArn: mockAppKeyArn,
+//     });
+//     expect(mockEncryptKeyMaterial).toHaveBeenCalledWith({
+//       privateKeyDer: mockDerFormat,
+//       importParams: {
+//         publicKey: mockPublicKey,
+//         importToken: mockImportToken,
+//       },
+//     });
+//     expect(mockImportKeyMaterialAndValidate).toHaveBeenCalledWith({
+//       appKeyArn: mockAppKeyArn,
+//       appId: mockAppId,
+//       wrappedMaterial: mockEncryptedKey,
+//       importToken: mockImportToken,
+//     });
+//     expect(mockUpdateAppsTable).toHaveBeenCalledWith({
+//       appKeyArn: mockAppKeyArn,
+//       appId: mockAppId,
+//       tableName: mockTableName,
+//     });
+//     expect(mockUnlinkFileSync).toHaveBeenCalledWith(tempPemFile);
+//     expect(mockTagKeyAsFailed).not.toHaveBeenCalled();
+//   });
+//   it.each([
+//     [
+//       'validateInputs',
+//       () => {
+//         mockValidateInputs.mockRejectedValue(
+//           new Error('Inputs validation failed'),
+//         );
+//         return 'Inputs validation failed';
+//       },
+//       false,
+//     ],
+//     [
+//       'convertPemToDer',
+//       () => {
+//         mockConvertPemToDer.mockImplementation(() => {
+//           throw new Error('PEM to DER conversion failed');
+//         });
+//         return 'PEM to DER conversion failed';
+//       },
+//       false,
+//     ],
+//     [
+//       'createKmsKey',
+//       () => {
+//         mockCreateKmsKey.mockRejectedValue(
+//           new Error('KMS key creation failed'),
+//         );
+//         return 'KMS key creation failed';
+//       },
+//       false,
+//     ],
+//     [
+//       'getKmsImportParameters',
+//       () => {
+//         mockCreateKmsKey.mockResolvedValue(mockAppKeyArn);
+//         mockGetKmsImportParameters.mockRejectedValue(
+//           new Error('Failed to get import parameters'),
+//         );
+//         return 'Failed to get import parameters';
+//       },
+//       true,
+//     ],
+//     [
+//       'encryptKeyMaterial',
+//       () => {
+//         mockCreateKmsKey.mockResolvedValue(mockAppKeyArn);
+//         mockGetKmsImportParameters.mockResolvedValue({
+//           publicKey: mockPublicKey,
+//           importToken: mockImportToken,
+//         });
+//         mockEncryptKeyMaterial.mockRejectedValue(
+//           new Error('Encryption failed'),
+//         );
+//         return 'Encryption failed';
+//       },
+//       true,
+//     ],
+//     [
+//       'importKeyMaterialAndValidate',
+//       () => {
+//         mockCreateKmsKey.mockResolvedValue(mockAppKeyArn);
+//         mockGetKmsImportParameters.mockResolvedValue({
+//           publicKey: mockPublicKey,
+//           importToken: mockImportToken,
+//         });
+//         mockEncryptKeyMaterial.mockResolvedValue(mockEncryptedKey);
+//         mockImportKeyMaterialAndValidate.mockRejectedValue(
+//           new Error('Import validation failed'),
+//         );
+//         return 'Import validation failed';
+//       },
+//       true,
+//     ],
+//     [
+//       'updateAppsTable',
+//       () => {
+//         mockCreateKmsKey.mockResolvedValue(mockAppKeyArn);
+//         mockGetKmsImportParameters.mockResolvedValue({
+//           publicKey: mockPublicKey,
+//           importToken: mockImportToken,
+//         });
+//         mockEncryptKeyMaterial.mockResolvedValue(mockEncryptedKey);
+//         mockImportKeyMaterialAndValidate.mockResolvedValue(undefined);
+//         mockUpdateAppsTable.mockRejectedValue(
+//           new Error('Failed to update apps table'),
+//         );
+//         return 'Failed to update apps table';
+//       },
+//       true,
+//     ],
+//   ])(
+//     'should throw error when %s fails',
+//     async (_: string, setupFailureAndGetError, shouldTagAsFailed: boolean) => {
+//       const expectedError = setupFailureAndGetError();
+//       await expect(
+//         importPrivateKey({
+//           pemFilePath: tempPemFile,
+//           appId: mockAppId,
+//           tableName: mockTableName,
+//           validateInputs: mockValidateInputs,
+//           convertPemToDer: mockConvertPemToDer,
+//           createKmsKey: mockCreateKmsKey,
+//           getKmsImportParameters: mockGetKmsImportParameters,
+//           encryptKeyMaterial: mockEncryptKeyMaterial,
+//           importKeyMaterialAndValidate: mockImportKeyMaterialAndValidate,
+//           updateAppsTable: mockUpdateAppsTable,
+//           tagKeyAsFailed: mockTagKeyAsFailed,
+//         }),
+//       ).rejects.toThrow(expectedError);
+//       if (shouldTagAsFailed) {
+//         expect(mockTagKeyAsFailed).toHaveBeenCalledWith({
+//           appKeyArn: mockAppKeyArn,
+//         });
+//       } else {
+//         expect(mockTagKeyAsFailed).not.toHaveBeenCalled();
+//       }
+//     },
+//   );
+// });
 
 describe('main', () => {
   const originalArgs = process.argv;
