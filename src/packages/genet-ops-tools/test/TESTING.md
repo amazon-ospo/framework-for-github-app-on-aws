@@ -17,7 +17,7 @@ and using it for JWT signing.
 - Each execution of tests creates 2 KMS keys
 
 - Each subsequent execution keeps on adding 2 more KMS keys while
-  keeping old ones in pending deletion state for a window of 30 days.
+  keeping old ones in status as Inactive.
 
 - Store data in DynamoDB table
 

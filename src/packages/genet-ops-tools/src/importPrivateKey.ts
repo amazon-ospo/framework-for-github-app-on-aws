@@ -516,7 +516,7 @@ type UpdateAppsTable = ({
  * @param appKeyArn ARN of the new KMS key
  * @param appId GitHub App ID
  * @param tableName Table to update the KMSKey ARN and App ID
- * @param tagOldKeyArn Function to tags the old key as Inactive if rotation
+ * @param tagOldKeyArn Function to tag the old key as Inactive if rotation
  */
 export const updateAppsTableImpl: UpdateAppsTable = async ({
   appKeyArn,

@@ -34,7 +34,7 @@ including validation, encryption, import, and rotation.
 
 This tool consists of two scripts that work together:
 
-1. **`getTable.ts`** - Lists available DynamoDB tables
+1. **`getTableName.ts`** - Lists available DynamoDB tables
 
 1. **`importPrivateKey.ts`** - Securely imports GitHub App private keys
    into AWS KMS
