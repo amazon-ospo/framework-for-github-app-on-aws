@@ -16,7 +16,7 @@ export class CredentialManager extends NestedStack {
     this.appTable = new Table(this, 'AppTable', {
       partitionKey: {
         name: 'AppId',
-        type: AttributeType.STRING,
+        type: AttributeType.NUMBER,
       },
       billingMode: BillingMode.PAY_PER_REQUEST,
       removalPolicy: RemovalPolicy.RETAIN,
@@ -29,7 +29,7 @@ export class CredentialManager extends NestedStack {
     this.installationTable = new Table(this, 'AppInstallationTable', {
       partitionKey: {
         name: 'AppId',
-        type: AttributeType.STRING,
+        type: AttributeType.NUMBER,
       },
       sortKey: {
         name: 'NodeId',
@@ -51,7 +51,7 @@ export class CredentialManager extends NestedStack {
       },
       sortKey: {
         name: 'AppId',
-        type: AttributeType.STRING,
+        type: AttributeType.NUMBER,
       },
     });
     // Global secondary index for looking up installations by installations ID.
@@ -59,11 +59,11 @@ export class CredentialManager extends NestedStack {
       indexName: 'InstallationID',
       partitionKey: {
         name: 'InstallationId',
-        type: AttributeType.STRING,
+        type: AttributeType.NUMBER,
       },
       sortKey: {
         name: 'AppId',
-        type: AttributeType.STRING,
+        type: AttributeType.NUMBER,
       },
     });
   }

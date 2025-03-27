@@ -14,7 +14,7 @@ export class InstallationManager extends NestedStack {
     this.targetTable = new Table(this, 'PreApprovalTargetTable', {
       partitionKey: {
         name: 'AppId',
-        type: AttributeType.STRING,
+        type: AttributeType.NUMBER,
       },
       sortKey: {
         name: 'NodeId',
@@ -33,7 +33,7 @@ export class InstallationManager extends NestedStack {
       },
       sortKey: {
         name: 'AppId',
-        type: AttributeType.STRING,
+        type: AttributeType.NUMBER,
       },
     });
   }
