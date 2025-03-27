@@ -238,6 +238,9 @@ while maintaining security and preventing disruption to your app's operations.
 into the credential manager to help users determine
 when all running logic has transitioned to using the new key -->
 
+**Important:** Ensure all your GitHub App processes are functioning correctly
+with the new key before removing the old keys.
+
 After confirming that all your processes are successfully using the new key:
 
 1. Remove the old private key:
@@ -252,9 +255,6 @@ After confirming that all your processes are successfully using the new key:
    - Go to AWS KMS console
    - Locate the tagged Inactive key
    - Schedule it for deletion with a waiting period between 7 and 30 days
-
-**Important:** Ensure all your GitHub App processes are functioning correctly
-with the new key before removing the old keys.
 
 ## FAQs
 
