@@ -5,6 +5,7 @@
     "url": "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git"
   },
   "scripts": {
+    "accept": "npx projen accept",
     "build": "npx projen build",
     "compat": "npx projen compat",
     "compile": "npx projen compile",
@@ -20,7 +21,9 @@
     "test:watch": "npx projen test:watch",
     "upgrade": "npx projen upgrade",
     "watch": "npx projen watch",
-    "projen": "npx projen"
+    "projen": "npx projen",
+    "import-private-key": "ts-node ../../../src/packages/genet-ops-tools/src/importPrivateKey.ts",
+    "get-table-name": "ts-node ../../../src/packages/genet-ops-tools/src/getTableName.ts"
   },
   "author": {
     "name": "Amazon OSPO",

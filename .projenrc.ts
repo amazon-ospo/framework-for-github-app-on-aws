@@ -1,4 +1,4 @@
-import { awscdk, JsonFile, Project } from "projen";
+import { awscdk, JsonFile, Project, typescript } from "projen";
 import { TypeScriptAppProject } from "projen/lib/typescript";
 
 const projectMetadata = {
@@ -46,6 +46,52 @@ export const configureMarkDownLinting = (tsProject: TypeScriptAppProject) => {
   });
 };
 
+export const addTestTargets = (subProject: Project) => {
+  const eslintTask = subProject.tasks.tryFind("eslint");
+  const testTask = subProject.tasks.tryFind("test");
+  if (testTask && eslintTask) {
+    testTask.reset();
+    testTask.exec(
+      "jest --passWithNoTests --updateSnapshot --testPathIgnorePatterns=.*\\.accept\\.test\\.ts$",
+      {
+        receiveArgs: true,
+      },
+    );
+    testTask.spawn(eslintTask);
+  }
+
+  const acceptTask = subProject.addTask("accept", {
+    description: "Run all acceptance tests",
+  });
+  const defaultTask = subProject.tasks.tryFind("default");
+  if (defaultTask) acceptTask.spawn(defaultTask);
+
+  const preCompileTask = subProject.tasks.tryFind("pre-compile");
+  if (preCompileTask) acceptTask.spawn(preCompileTask);
+
+  const compileTask = subProject.tasks.tryFind("compile");
+  if (compileTask) acceptTask.spawn(compileTask);
+
+  const postCompileTask = subProject.tasks.tryFind("post-compile");
+  if (postCompileTask) acceptTask.spawn(postCompileTask);
+
+  acceptTask.exec("jest --passWithNoTests --updateSnapshot --group=accept", {
+    receiveArgs: true,
+  });
+};
+
+// TODO: Publish these ops tools as a CLI
+const genetScripts = (
+  subProject: awscdk.AwsCdkConstructLibrary | typescript.TypeScriptProject,
+) => {
+  subProject.addScripts({
+    "import-private-key":
+      "ts-node ../../../src/packages/genet-ops-tools/src/importPrivateKey.ts",
+    "get-table-name":
+      "ts-node ../../../src/packages/genet-ops-tools/src/getTableName.ts",
+  });
+};
+
 // Main Project Configuration
 export const project = new awscdk.AwsCdkConstructLibrary({
   ...projectMetadata,
@@ -62,6 +108,7 @@ export const project = new awscdk.AwsCdkConstructLibrary({
   },
   jestOptions: {
     jestConfig: {
+      runner: "groups",
       verbose: true,
     },
   },
@@ -70,7 +117,7 @@ export const project = new awscdk.AwsCdkConstructLibrary({
   autoMerge: false,
   releaseToNpm: false,
   constructsVersion: "10.4.2",
-  devDeps: ["lerna"],
+  devDeps: ["lerna", "jest-runner-groups"],
 
   // deps: [],                /* Runtime dependencies of this module. /
   // description: undefined,  / The description is just a string that helps people understand the purpose of the package. /
@@ -102,6 +149,12 @@ project.package.file.addOverride("workspaces", ["src/packages/*"]);
 // Run Lerna build one package at a time and,
 // waits for each package to complete before showing its logs.
 project.preCompileTask.exec("npx lerna run build --concurrency=1 --no-stream");
+project.addScripts({
+  "import-private-key":
+    "ts-node src/packages/genet-ops-tools/src/importPrivateKey.ts",
+  "get-table-name": "ts-node src/packages/genet-ops-tools/src/getTableName.ts",
+});
+addTestTargets(project);
 configureMarkDownLinting(project);
 
 interface PackageConfig {
@@ -129,6 +182,8 @@ export const createPackage = (config: PackageConfig) => {
     devDeps: config.devDeps,
     docgen: false,
   });
+  genetScripts(tsProject);
+  addTestTargets(tsProject);
   addPrettierConfig(tsProject);
   configureMarkDownLinting(tsProject);
   return tsProject;
@@ -139,13 +194,21 @@ createPackage({
   outdir: "src/packages/genet-framework",
 });
 
-const genetOpsTools = new awscdk.AwsCdkTypeScriptApp({
+const genetOpsTools = new typescript.TypeScriptProject({
   ...projectMetadata,
   name: "genet-ops-tools",
   outdir: "src/packages/genet-ops-tools",
   parent: project,
   projenrcTs: false,
+  deps: [
+    "@aws-sdk/client-resource-groups-tagging-api",
+    "@aws-sdk/client-kms",
+    "@aws-sdk/client-dynamodb",
+  ],
+  devDeps: ["aws-sdk-client-mock", "mock-fs", "@types/mock-fs"],
 });
+genetScripts(genetOpsTools);
+addTestTargets(genetOpsTools);
 addPrettierConfig(genetOpsTools);
 configureMarkDownLinting(genetOpsTools);
 
@@ -157,6 +220,7 @@ const genetTestApp = new awscdk.AwsCdkTypeScriptApp({
   projenrcTs: false,
   cdkVersion: "2.184.1",
 });
+addTestTargets(genetTestApp);
 addPrettierConfig(genetTestApp);
 configureMarkDownLinting(genetTestApp);
 genetTestApp.addDeps("genet-framework");

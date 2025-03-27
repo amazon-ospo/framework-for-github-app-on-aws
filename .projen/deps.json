@@ -53,6 +53,10 @@
       "type": "build"
     },
     {
+      "name": "jest-runner-groups",
+      "type": "build"
+    },
+    {
       "name": "jsii-diff",
       "type": "build"
     },

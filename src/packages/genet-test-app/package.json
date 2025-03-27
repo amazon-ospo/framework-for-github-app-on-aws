@@ -1,6 +1,7 @@
 {
   "name": "genet-test-app",
   "scripts": {
+    "accept": "npx projen accept",
     "build": "npx projen build",
     "bundle": "npx projen bundle",
     "compile": "npx projen compile",
