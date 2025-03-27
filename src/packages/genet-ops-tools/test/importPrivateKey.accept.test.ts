@@ -2,7 +2,7 @@ import { generateKeyPairSync } from 'crypto';
 import { copyFileSync, existsSync, mkdtempSync } from 'fs';
 import { unlink, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
 import { KMSClient, ListResourceTagsCommand } from '@aws-sdk/client-kms';
 import { importPrivateKey } from '../src/importPrivateKey';
@@ -17,13 +17,14 @@ describe('importPrivateKey Acceptance Tests', () => {
   let tempPemFile: string;
   const invalidTableName = 'invalidTableName';
   const invalidPrivateKeyPath = './invalidPEMPath.pem';
-  const invalidAppId = 'invalidAppID';
+  const invalidAppId = -1;
   const pemFile = process.env.GITHUB_PEM_FILE_PATH!;
-  const appId = process.env.GITHUB_APPID ?? '';
+  const appIdAsString = process.env.GITHUB_APPID ?? '';
+  const appId = Number(appIdAsString);
   const tableName = process.env.DYNAMODB_TABLE_NAME ?? '';
 
   beforeEach(() => {
-    if (!pemFile || !appId || !tableName) {
+    if (!pemFile || !appIdAsString || !tableName) {
       throw new Error(`
             Missing required environment variables
 
@@ -36,7 +37,7 @@ describe('importPrivateKey Acceptance Tests', () => {
 
             Current values:
             PEM_FILE_PATH: ${pemFile ? pemFile : 'NOT_SET'}
-            APPID: ${appId ? appId : 'NOT_SET'}
+            APPID: ${appIdAsString ? appIdAsString : 'NOT_SET'}
             TABLE_NAME: ${tableName ? tableName : 'NOT_SET'}
 
             Then run the tests again with:
@@ -64,6 +65,11 @@ describe('importPrivateKey Acceptance Tests', () => {
     }
   });
   afterAll(async () => {
+    const absolutePemPath = resolve(pemFile);
+    if (existsSync(absolutePemPath)) {
+      await unlink(absolutePemPath);
+      console.log(`Deleted pem file found at ${absolutePemPath}`);
+    }
     if (createdKeyArn) {
       console.log(`
         Upon rotation, imported old keys are tagged as status "Inactive".
@@ -83,14 +89,14 @@ describe('importPrivateKey Acceptance Tests', () => {
       new GetItemCommand({
         TableName: tableName,
         Key: {
-          AppId: { S: appId },
+          AppId: { N: appId.toString() },
         },
       }),
     );
     createdKeyArn = getItemResponse.Item?.KmsKeyArn?.S || null;
     expect(getItemResponse.Item).toBeDefined();
     expect(createdKeyArn).toBeDefined();
-    expect(getItemResponse.Item?.AppId.S).toBe(appId);
+    expect(getItemResponse.Item?.AppId.N).toBe(appId.toString());
   });
 
   it('should handle key rotation and successfully import the updated private key into AWS KMS ', async () => {
@@ -99,7 +105,7 @@ describe('importPrivateKey Acceptance Tests', () => {
       new GetItemCommand({
         TableName: tableName,
         Key: {
-          AppId: { S: appId },
+          AppId: { N: appId.toString() },
         },
       }),
     );
@@ -114,7 +120,7 @@ describe('importPrivateKey Acceptance Tests', () => {
       new GetItemCommand({
         TableName: tableName,
         Key: {
-          AppId: { S: appId },
+          AppId: { N: appId.toString() },
         },
       }),
     );
@@ -131,7 +137,7 @@ describe('importPrivateKey Acceptance Tests', () => {
           { TagKey: 'Status', TagValue: 'Inactive' },
           { TagKey: 'ReplacedBy', TagValue: createdKeyArn },
           { TagKey: 'ReplacedOn', TagValue: expect.any(String) },
-          { TagKey: 'AppId', TagValue: appId },
+          { TagKey: 'AppId', TagValue: appId.toString() },
           { TagKey: 'Genet-Managed', TagValue: 'true' },
         ]),
       );
@@ -144,7 +150,7 @@ describe('importPrivateKey Acceptance Tests', () => {
     expect(newKeyTags.Tags).toEqual(
       expect.arrayContaining([
         { TagKey: 'Status', TagValue: 'Active' },
-        { TagKey: 'AppId', TagValue: appId },
+        { TagKey: 'AppId', TagValue: appId.toString() },
         { TagKey: 'Genet-Managed', TagValue: 'true' },
       ]),
     );

@@ -62,6 +62,10 @@
       "type": "build"
     },
     {
+      "name": "jest-runner-groups",
+      "type": "build"
+    },
+    {
       "name": "markdown-eslint-parser",
       "type": "build"
     },

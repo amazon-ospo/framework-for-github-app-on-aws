@@ -147,13 +147,13 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@types/jest,@types/mock-fs,@types/node,aws-sdk-client-mock,eslint-import-resolver-typescript,eslint-plugin-import,eslint-plugin-md,eslint-plugin-prettier,jest,markdown-eslint-parser,mock-fs,ts-jest,typescript,@aws-sdk/client-dynamodb,@aws-sdk/client-kms,@aws-sdk/client-resource-groups-tagging-api"
+          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@types/jest,@types/mock-fs,@types/node,aws-sdk-client-mock,eslint-import-resolver-typescript,eslint-plugin-import,eslint-plugin-md,eslint-plugin-prettier,jest,jest-runner-groups,markdown-eslint-parser,mock-fs,ts-jest,typescript,@aws-sdk/client-dynamodb,@aws-sdk/client-kms,@aws-sdk/client-resource-groups-tagging-api"
         },
         {
           "exec": "yarn install --check-files"
         },
         {
-          "exec": "yarn upgrade @stylistic/eslint-plugin @types/jest @types/mock-fs @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-sdk-client-mock eslint-import-resolver-typescript eslint-plugin-import eslint-plugin-md eslint-plugin-prettier eslint jest jest-junit markdown-eslint-parser mock-fs ts-jest typescript @aws-sdk/client-dynamodb @aws-sdk/client-kms @aws-sdk/client-resource-groups-tagging-api"
+          "exec": "yarn upgrade @stylistic/eslint-plugin @types/jest @types/mock-fs @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-sdk-client-mock eslint-import-resolver-typescript eslint-plugin-import eslint-plugin-md eslint-plugin-prettier eslint jest jest-junit jest-runner-groups markdown-eslint-parser mock-fs ts-jest typescript @aws-sdk/client-dynamodb @aws-sdk/client-kms @aws-sdk/client-resource-groups-tagging-api"
         },
         {
           "exec": "npx projen"

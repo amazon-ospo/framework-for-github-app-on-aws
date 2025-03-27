@@ -33,6 +33,7 @@
     "eslint-plugin-prettier": "^5.2.3",
     "jest": "^29.7.0",
     "jest-junit": "^16",
+    "jest-runner-groups": "^2.2.0",
     "markdown-eslint-parser": "^1.2.1",
     "mock-fs": "^5.5.0",
     "ts-jest": "^29.2.6",
@@ -51,6 +52,8 @@
   "version": "0.0.0",
   "jest": {
     "coverageProvider": "v8",
+    "runner": "groups",
+    "verbose": true,
     "testMatch": [
       "<rootDir>/@(src|test)/**/*(*.)@(spec|test).ts?(x)",
       "<rootDir>/@(src|test)/**/__tests__/**/*.ts?(x)"
