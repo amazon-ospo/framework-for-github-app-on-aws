@@ -232,12 +232,6 @@ Genet simplifies the key rotation process:
 This process ensures a smooth transition
 while maintaining security and preventing disruption to your app's operations.
 
-### AWS KMS Key Status Tags
-
-- **Active** - Key currently in use
-- **Inactive** - Replaced by a new key during rotation
-- **Failed** - Import process failed after key creation
-
 ### Post-Rotation Manual Clean-up Steps
 
 <!-- TODO: We should think about building monitoring capabilities
