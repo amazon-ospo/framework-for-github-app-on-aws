@@ -17,15 +17,10 @@ import {
   GetParametersForImportCommand,
   ImportKeyMaterialCommand,
   KMSClient,
-  ScheduleKeyDeletionCommand,
   SignCommand,
   TagResourceCommand,
 } from '@aws-sdk/client-kms';
-import {
-  WRAPPING_SPEC,
-  CREATE_KEY_SPEC,
-  SCHEDULE_OLD_KEY_DELETION_DAYS,
-} from './constants';
+import { WRAPPING_SPEC, CREATE_KEY_SPEC } from './constants';
 import { listTablesByTags } from './getTableName';
 
 export const kms = new KMSClient({});
@@ -68,7 +63,7 @@ export type ImportPrivateKey = ({
  * 5. Encrypts the key material
  * 6. Imports the encrypted key material into KMS and validates it
  * 7. Updates the DynamoDB table with the KMS key ARN
- * 8. Upon rotation, old key is tagged as inactive and scheduled for deletion.
+ * 8. Upon rotation, old key is tagged as inactive.
  * 9. PEM file is permanently deleted from the local path provided.
  * 10. Tags failed imports created KMS keys as status "Failed"
  *
@@ -259,52 +254,48 @@ type CreateKmsKey = ({ appId }: { appId: string }) => Promise<string>;
  * @returns The ARN of the created KMS key
  */
 export const createKmsKeyImpl: CreateKmsKey = async ({ appId }) => {
-  try {
-    const createKeyResponse = await kms.send(
-      new CreateKeyCommand({
-        KeySpec: CREATE_KEY_SPEC,
-        KeyUsage: 'SIGN_VERIFY',
-        Origin: 'EXTERNAL',
-        Description: `GitHub App Signing key for App ID ${appId}`,
-        Tags: [
-          {
-            TagKey: 'Status',
-            TagValue: 'Active',
-          },
-          {
-            TagKey: 'CreatedOn',
-            TagValue: new Date().toISOString(),
-          },
-          {
-            TagKey: 'AppId',
-            TagValue: appId,
-          },
-          {
-            TagKey: 'Genet-Managed',
-            TagValue: 'true',
-          },
-        ],
-      }),
-    );
-    if (!createKeyResponse.KeyMetadata?.KeyId) {
-      throw new Error('Failed to create KMS key');
-    }
-    const keyId = createKeyResponse.KeyMetadata.KeyId;
-    const describeKeyResponse = await kms.send(
-      new DescribeKeyCommand({ KeyId: keyId }),
-    );
-
-    const appKeyArn = describeKeyResponse.KeyMetadata?.Arn;
-    if (!appKeyArn) {
-      throw new Error('Failed to retrieve KMS Key Arn');
-    }
-    console.log(
-      `Created new KMS key with ARN ${appKeyArn} for GitHub AppId: ${appId}`,
-    );
-    return appKeyArn;
-  } catch (error) {
-    throw error;
+  const createKeyResponse = await kms.send(
+    new CreateKeyCommand({
+      KeySpec: CREATE_KEY_SPEC,
+      KeyUsage: 'SIGN_VERIFY',
+      Origin: 'EXTERNAL',
+      Description: `GitHub App Signing key for App ID ${appId}`,
+      Tags: [
+        {
+          TagKey: 'Status',
+          TagValue: 'Active',
+        },
+        {
+          TagKey: 'CreatedOn',
+          TagValue: new Date().toISOString(),
+        },
+        {
+          TagKey: 'AppId',
+          TagValue: appId,
+        },
+        {
+          TagKey: 'Genet-Managed',
+          TagValue: 'true',
+        },
+      ],
+    }),
+  );
+  if (!createKeyResponse.KeyMetadata?.KeyId) {
+    throw new Error('Failed to create KMS key');
   }
+  const keyId = createKeyResponse.KeyMetadata.KeyId;
+  const describeKeyResponse = await kms.send(
+    new DescribeKeyCommand({ KeyId: keyId }),
+  );
+
+  const appKeyArn = describeKeyResponse.KeyMetadata?.Arn;
+  if (!appKeyArn) {
+    throw new Error('Failed to retrieve KMS Key Arn');
+  }
+  console.log(
+    `Created new KMS key with ARN ${appKeyArn} for GitHub AppId: ${appId}`,
+  );
+  return appKeyArn;
 };
 
 type GetKmsImportParameters = ({
@@ -507,17 +498,17 @@ type UpdateAppsTable = ({
   appKeyArn,
   appId,
   tableName,
-  handleOldKey,
+  tagOldKeyArn,
 }: {
   appKeyArn: string;
   appId: string;
   tableName: string;
-  handleOldKey?: HandleOldKey;
+  tagOldKeyArn?: TagOldKeyArn;
 }) => Promise<void>;
 
 /**
  * Function that updates DynamoDB table with appId and AWS key ARN,
- * also includes handling of old key upon rotation.
+ * also includes tagging of old key as Inactive upon rotation.
  *
  * ---
  * dependency injection parameters:
@@ -525,13 +516,13 @@ type UpdateAppsTable = ({
  * @param appKeyArn ARN of the new KMS key
  * @param appId GitHub App ID
  * @param tableName Table to update the KMSKey ARN and App ID
- * @param handleOldKey Function to handle the old key if rotation
+ * @param tagOldKeyArn Function to tags the old key as Inactive if rotation
  */
 export const updateAppsTableImpl: UpdateAppsTable = async ({
   appKeyArn,
   appId,
   tableName,
-  handleOldKey = handleOldKeyImpl,
+  tagOldKeyArn = tagOldKeyArnImpl,
 }) => {
   try {
     const putResult = await dynamoDB.send(
@@ -547,7 +538,7 @@ export const updateAppsTableImpl: UpdateAppsTable = async ({
     if (!!putResult.Attributes && !!putResult.Attributes?.KmsKeyArn?.S) {
       const oldKeyArn = putResult.Attributes.KmsKeyArn.S;
       try {
-        await handleOldKey({ oldKeyArn, appKeyArn, appId });
+        await tagOldKeyArn({ oldKeyArn, appKeyArn, appId });
       } catch (error) {
         throw error;
       }
@@ -555,81 +546,6 @@ export const updateAppsTableImpl: UpdateAppsTable = async ({
   } catch (error) {
     throw error;
   }
-};
-
-export type HandleOldKey = ({
-  oldKeyArn,
-  appKeyArn,
-  appId,
-  tagOldKeyArn,
-  scheduleOldKeyDeletion,
-}: {
-  oldKeyArn: string;
-  appKeyArn: string;
-  appId: string;
-  tagOldKeyArn?: TagOldKeyArn;
-  scheduleOldKeyDeletion?: ScheduleOldKeyDeletion;
-}) => Promise<void>;
-
-/**
- * Function that tags old key as inactive and schedules it for deletion
- * for a window of 30 days.
- *
- * ---
- * dependency injection parameters:
- *
- * @param oldKeyArn ARN of the old key being replaced
- * @param appKeyArn ARN of the new key
- * @param appId GitHub App ID
- * @param tagOldKeyArn Function to tag the old key as inactive.
- * @param scheduleOldKeyDeletion Function to schedule old key for deletion.
- */
-export const handleOldKeyImpl: HandleOldKey = async ({
-  oldKeyArn,
-  appKeyArn,
-  appId,
-  tagOldKeyArn = tagOldKeyArnImpl,
-  scheduleOldKeyDeletion = scheduleOldKeyDeletionImpl,
-}) => {
-  try {
-    const oldKeyDeletionDate = new Date(
-      new Date().getTime() +
-        SCHEDULE_OLD_KEY_DELETION_DAYS * 24 * 60 * 60 * 1000,
-    );
-    await tagOldKeyArn({ oldKeyArn, appKeyArn, appId });
-    await scheduleOldKeyDeletion({ oldKeyArn });
-    console.log(
-      `Successfully tagged old key "${oldKeyArn}" as inactive and scheduled it for deletion on ${oldKeyDeletionDate.toISOString()}`,
-    );
-  } catch (error) {
-    console.error('Could not process old key:', error);
-    throw error;
-  }
-};
-
-export type ScheduleOldKeyDeletion = ({
-  oldKeyArn,
-}: {
-  oldKeyArn: string;
-}) => Promise<void>;
-
-/**
- * Functions that schedules KMS old key for automatic deletion after 30 days.
- *
- * @param oldKeyArn ARN of the old key to be scheduled for deletion.
- *
- *  Note: Once scheduled, the key deletion can still be cancelled within the pending window
- * if needed for recovery purposes.
- */
-export const scheduleOldKeyDeletionImpl: ScheduleOldKeyDeletion = async ({
-  oldKeyArn,
-}) => {
-  await kms.send(
-    new ScheduleKeyDeletionCommand({
-      KeyId: oldKeyArn,
-      PendingWindowInDays: SCHEDULE_OLD_KEY_DELETION_DAYS,
-    }),
-  );
 };
 
 export type TagOldKeyArn = ({
@@ -682,6 +598,7 @@ export const tagOldKeyArnImpl: TagOldKeyArn = async ({
       ],
     }),
   );
+  console.log(`Successfully tagged old key ${oldKeyArn} as Inactive`);
 };
 
 export type TagKeyAsFailed = ({
@@ -807,24 +724,20 @@ export type KmsSign = ({
  * @returns The signature as a Buffer
  */
 export const kmsSignImpl: KmsSign = async ({ appKeyArn, message }) => {
-  try {
-    const messageHash = createHash('sha256').update(message).digest();
-    const signResponse = await kms.send(
-      new SignCommand({
-        KeyId: appKeyArn,
-        Message: messageHash,
-        MessageType: 'DIGEST',
-        SigningAlgorithm: 'RSASSA_PKCS1_V1_5_SHA_256',
-      }),
-    );
+  const messageHash = createHash('sha256').update(message).digest();
+  const signResponse = await kms.send(
+    new SignCommand({
+      KeyId: appKeyArn,
+      Message: messageHash,
+      MessageType: 'DIGEST',
+      SigningAlgorithm: 'RSASSA_PKCS1_V1_5_SHA_256',
+    }),
+  );
 
-    if (!signResponse.Signature || signResponse.Signature.length === 0) {
-      throw new Error('KMS signing failed: Signature is missing or empty');
-    }
-    return Buffer.from(signResponse.Signature);
-  } catch (error) {
-    throw error;
+  if (!signResponse.Signature || signResponse.Signature.length === 0) {
+    throw new Error('KMS signing failed: Signature is missing or empty');
   }
+  return Buffer.from(signResponse.Signature);
 };
 
 export type PemSign = ({

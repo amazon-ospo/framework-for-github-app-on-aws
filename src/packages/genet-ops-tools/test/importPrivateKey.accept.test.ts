@@ -4,11 +4,7 @@ import { unlink, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
-import {
-  DescribeKeyCommand,
-  KMSClient,
-  ListResourceTagsCommand,
-} from '@aws-sdk/client-kms';
+import { KMSClient, ListResourceTagsCommand } from '@aws-sdk/client-kms';
 import { importPrivateKey } from '../src/importPrivateKey';
 
 /**
@@ -70,7 +66,7 @@ describe('importPrivateKey Acceptance Tests', () => {
   afterAll(async () => {
     if (createdKeyArn) {
       console.log(`
-        Upon rotation, imported old keys are automatically scheduled for deletion
+        Upon rotation, imported old keys are tagged as status "Inactive".
         The most recently created KMS key: ${createdKeyArn} remains active and will incur AWS charges. 
         You can manually delete it to avoid ongoing costs if you don't plan to use it further \n`);
     }
@@ -125,7 +121,7 @@ describe('importPrivateKey Acceptance Tests', () => {
 
     createdKeyArn = newKeyResponse.Item?.KmsKeyArn?.S || null;
     expect(createdKeyArn).toBeDefined();
-    // Handling old key - Tagging and scheduling for deletion
+    // Handling old key - Tagging as "Inactive"
     if (existingKeyArn) {
       const tagsResponse = await kmsClient.send(
         new ListResourceTagsCommand({ KeyId: existingKeyArn }),
@@ -139,11 +135,6 @@ describe('importPrivateKey Acceptance Tests', () => {
           { TagKey: 'Genet-Managed', TagValue: 'true' },
         ]),
       );
-      const describeResponse = await kmsClient.send(
-        new DescribeKeyCommand({ KeyId: existingKeyArn }),
-      );
-      expect(describeResponse.KeyMetadata?.KeyState).toBe('PendingDeletion');
-      expect(describeResponse.KeyMetadata?.DeletionDate).toBeDefined();
     }
     // Verify new key Tags
     const newKeyTags = await kmsClient.send(

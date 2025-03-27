@@ -28,8 +28,6 @@ import {
   ImportKeyMaterialCommandOutput,
   KeyMetadata,
   KMSClient,
-  ScheduleKeyDeletionCommand,
-  ScheduleKeyDeletionCommandOutput,
   SignCommand,
   SignCommandOutput,
   TagResourceCommand,
@@ -39,17 +37,11 @@ import { mockClient } from 'aws-sdk-client-mock';
 // TODO: REMOVE once jsii compilation is fixed with mock-fs
 // @ts-ignore
 import mockFs from 'mock-fs';
-import {
-  CREATE_KEY_SPEC,
-  WRAPPING_SPEC,
-  SCHEDULE_OLD_KEY_DELETION_DAYS,
-} from '../src/constants';
+import { CREATE_KEY_SPEC, WRAPPING_SPEC } from '../src/constants';
 import {
   createKmsKeyImpl,
   updateAppsTableImpl,
-  scheduleOldKeyDeletionImpl,
   tagOldKeyArnImpl,
-  handleOldKeyImpl,
   validateJWTImpl,
   kmsSignImpl,
   importKeyMaterialAndValidateImpl,
@@ -697,12 +689,12 @@ describe('updateAppsTableImpl', () => {
       $metadata: { requestId: 'mock-request-id' },
     };
     mockDynamoDBClient.on(PutItemCommand).resolves(mockResponse);
-    const mockHandleOldKey = jest.fn().mockReturnValue(undefined);
+    const mockTagOldKeyArn = jest.fn().mockReturnValue(undefined);
     await updateAppsTableImpl({
       appKeyArn: mockAppKeyArn,
       appId: mockAppId,
       tableName: mockTableName,
-      handleOldKey: mockHandleOldKey,
+      tagOldKeyArn: mockTagOldKeyArn,
     });
     expect(mockDynamoDBClient.calls()).toHaveLength(1);
     const [putItemCommand] = mockDynamoDBClient.calls();
@@ -714,7 +706,7 @@ describe('updateAppsTableImpl', () => {
       },
       ReturnValues: 'ALL_OLD',
     });
-    expect(mockHandleOldKey).not.toHaveBeenCalled();
+    expect(mockTagOldKeyArn).not.toHaveBeenCalled();
   });
   it('should update DynamoDB table with new key details and handle old key successfully', async () => {
     const mockResponse: PutItemCommandOutput = {
@@ -724,14 +716,14 @@ describe('updateAppsTableImpl', () => {
       },
     };
     mockDynamoDBClient.on(PutItemCommand).resolves(mockResponse);
-    const mockHandleOldKey = jest.fn().mockResolvedValue(undefined);
+    const mockTagOldKeyArn = jest.fn().mockResolvedValue(undefined);
     await updateAppsTableImpl({
       appKeyArn: mockAppKeyArn,
       appId: mockAppId,
       tableName: mockTableName,
-      handleOldKey: mockHandleOldKey,
+      tagOldKeyArn: mockTagOldKeyArn,
     });
-    expect(mockHandleOldKey).toHaveBeenCalledWith({
+    expect(mockTagOldKeyArn).toHaveBeenCalledWith({
       oldKeyArn: mockOldKeyArn,
       appKeyArn: mockAppKeyArn,
       appId: mockAppId,
@@ -740,18 +732,18 @@ describe('updateAppsTableImpl', () => {
   it('should throw error when DynamoDB PutItemCommand fails', async () => {
     const mockError = new Error('Failed to update DynamoDB table');
     mockDynamoDBClient.on(PutItemCommand).rejects(mockError);
-    const mockHandleOldKey = jest.fn();
+    const mockTagOldKeyArn = jest.fn();
     await expect(
       updateAppsTableImpl({
         appKeyArn: mockAppKeyArn,
         appId: mockAppId,
         tableName: mockTableName,
-        handleOldKey: mockHandleOldKey,
+        tagOldKeyArn: mockTagOldKeyArn,
       }),
     ).rejects.toThrow('Failed to update DynamoDB table');
-    expect(mockHandleOldKey).not.toHaveBeenCalled();
+    expect(mockTagOldKeyArn).not.toHaveBeenCalled();
   });
-  it('should throw an error when handling old Key fails', async () => {
+  it('should throw an error when tagging old Key fails', async () => {
     const mockResponse: PutItemCommandOutput = {
       $metadata: { requestId: 'mock-request-id' },
       Attributes: {
@@ -759,100 +751,17 @@ describe('updateAppsTableImpl', () => {
       },
     };
     mockDynamoDBClient.on(PutItemCommand).resolves(mockResponse);
-    const mockHandleOldKey = jest
+    const mockTagOldKeyArn = jest
       .fn()
-      .mockRejectedValue(new Error('Failed to handle old key'));
+      .mockRejectedValue(new Error('Failed to tag old key'));
     await expect(
       updateAppsTableImpl({
         appKeyArn: mockAppKeyArn,
         appId: mockAppId,
         tableName: mockTableName,
-        handleOldKey: mockHandleOldKey,
-      }),
-    ).rejects.toThrow('Failed to handle old key');
-  });
-});
-
-describe('handleOldKeyImpl', () => {
-  let mockTagOldKeyArn = jest.fn();
-  let mockScheduleOldKeyDeletion = jest.fn();
-  const mockAppKeyArn = 'arn:aws:kms:region:account:key/mock-key-id';
-  const mockOldKeyArn = 'arn:aws:kms:region:account:key/old-key-id';
-  const mockAppId = '12345';
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-  it('should successfully tag old key arn as inactive and schedule it for deletion', async () => {
-    mockTagOldKeyArn.mockResolvedValue(undefined);
-    mockScheduleOldKeyDeletion.mockResolvedValue(undefined);
-    await handleOldKeyImpl({
-      oldKeyArn: mockOldKeyArn,
-      appKeyArn: mockAppKeyArn,
-      appId: mockAppId,
-      tagOldKeyArn: mockTagOldKeyArn,
-      scheduleOldKeyDeletion: mockScheduleOldKeyDeletion,
-    });
-    expect(mockTagOldKeyArn).toHaveBeenCalled();
-    expect(mockScheduleOldKeyDeletion).toHaveBeenCalled();
-  });
-  it('should throw an error if tagging the old key arn fails', async () => {
-    mockTagOldKeyArn.mockRejectedValue(
-      new Error('Failed to tag the old key arn'),
-    );
-    await expect(
-      handleOldKeyImpl({
-        oldKeyArn: mockOldKeyArn,
-        appKeyArn: mockAppKeyArn,
-        appId: mockAppId,
         tagOldKeyArn: mockTagOldKeyArn,
       }),
-    ).rejects.toThrow('Failed to tag the old key arn');
-    expect(mockScheduleOldKeyDeletion).not.toHaveBeenCalled();
-  });
-  it('should throw an error if scheduling old key deletion fails', async () => {
-    mockTagOldKeyArn.mockResolvedValue(undefined);
-    mockScheduleOldKeyDeletion.mockRejectedValue(
-      new Error('Failed to schedule old key for deletion'),
-    );
-    await expect(
-      handleOldKeyImpl({
-        oldKeyArn: mockOldKeyArn,
-        appKeyArn: mockAppKeyArn,
-        appId: mockAppId,
-        tagOldKeyArn: mockTagOldKeyArn,
-        scheduleOldKeyDeletion: mockScheduleOldKeyDeletion,
-      }),
-    ).rejects.toThrow('Failed to schedule old key for deletion');
-  });
-});
-
-describe('scheduleOldKeyDeletionImpl', () => {
-  const oldKeyArn = 'arn:aws:kms:region:account:key/old-key-id';
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-  it('should successfully schedule oldkey for deletion', async () => {
-    const mockResponse: ScheduleKeyDeletionCommandOutput = {
-      $metadata: { requestId: 'mock-request-id' },
-    };
-    mockKmsClient.on(ScheduleKeyDeletionCommand).resolves(mockResponse);
-    await scheduleOldKeyDeletionImpl({ oldKeyArn });
-    const kmsClientCalls = mockKmsClient.commandCalls(
-      ScheduleKeyDeletionCommand,
-    );
-    expect(kmsClientCalls).toHaveLength(1);
-    expect(kmsClientCalls[0].args[0].input).toEqual({
-      KeyId: oldKeyArn,
-      PendingWindowInDays: SCHEDULE_OLD_KEY_DELETION_DAYS,
-    });
-  });
-  it('should throw an error if scheduling old key for deletion fails', async () => {
-    mockKmsClient
-      .on(ScheduleKeyDeletionCommand)
-      .rejects(new Error('Failed to schedule old key for deletion'));
-    await expect(scheduleOldKeyDeletionImpl({ oldKeyArn })).rejects.toThrow(
-      'Failed to schedule old key for deletion',
-    );
+    ).rejects.toThrow('Failed to tag old key');
   });
 });
 

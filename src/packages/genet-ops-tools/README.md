@@ -54,8 +54,7 @@ The tool performs these key actions:
 - Manages key rotation:
 
   - Supports importing new private keys
-  - Tags old keys as inactive
-  - Schedules old keys for deletion
+  - Tags old keys as Inactive
 
 - Deletes the PEM file after successful import
 
@@ -64,7 +63,7 @@ Key advantages of using this tool as part of Genet:
 1. Eliminates exposure of private keys after secure import
 1. Leverages AWS KMS HSMs for secure key storage
 1. Automates secure key material wrapping and import
-1. Enables systematic key rotation and lifecycle management
+1. Simplifies key rotation and lifecycle management
 
 ---
 
@@ -106,7 +105,7 @@ Configure your AWS credentials using your preferred method described in the
 
 ### Generate the Private Key (PEM File)
 
-A private key is required to authenticate your GitHub App.
+A private key is required to authenticate as your GitHub App.
 
 1. In the same GitHub App settings page:
 
@@ -119,7 +118,8 @@ A private key is required to authenticate your GitHub App.
    - If lost, you'll need to generate a new key
    - Keep track of the file location for the import process
 
-**NOTE:** GitHub Apps are subject to a limit of 25 private keys per application
+**NOTE:** GitHub Apps are subject to a limit of 25 active private keys
+per application
 
 For more details, see:
 [Managing private keys for GitHub Apps](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps)
@@ -139,7 +139,6 @@ Ensure AWS credentials have these required permissions:
 - `kms:GetParametersForImport` - Obtains key import parameters
 - `kms:ImportKeyMaterial` - Imports private key material
 - `kms:Sign` - Sign JWT tokens for GitHub App authentication
-- `kms:ScheduleKeyDeletion` - Schedule deletion of old keys during rotation
 - `kms:TagResource` - Tag keys with metadata and for tracking status
 
 ### DynamoDB Permissions
@@ -228,11 +227,40 @@ Genet simplifies the key rotation process:
    - Securely imports the private key
    - Updates the DynamoDB table with the new key's information
    - Tags the old key as inactive in AWS KMS
-   - Schedules the old key for deletion after a set period of 30 days
    - Permanently deletes the newly downloaded PEM file
 
 This process ensures a smooth transition
 while maintaining security and preventing disruption to your app's operations.
+
+### AWS KMS Key Status Tags
+
+- **Active** - Key currently in use
+- **Inactive** - Replaced by a new key during rotation
+- **Failed** - Import process failed after key creation
+
+### Post-Rotation Manual Clean-up Steps
+
+<!-- TODO: We should think about building monitoring capabilities
+into the credential manager to help users determine
+when all running logic has transitioned to using the new key -->
+
+After confirming that all your processes are successfully using the new key:
+
+1. Remove the old private key:
+
+   - Go to your GitHub App settings page
+   - Navigate to the "Private Keys" section
+   - Locate and delete the old private key
+
+   **NOTE:** Once deleted, these keys immediately become invalid
+
+1. Schedule the old KMS key for deletion:
+   - Go to AWS KMS console
+   - Locate the tagged Inactive key
+   - Schedule it for deletion with a waiting period between 7 and 30 days
+
+**Important:** Ensure all your GitHub App processes are functioning correctly
+with the new key before removing the old keys.
 
 ## FAQs
 
@@ -246,8 +274,8 @@ while maintaining security and preventing disruption to your app's operations.
    - If you lost the `.pem` file, you need to generate a
      new one in the GitHub App settings and perform the import process again.
 
-   - Generating a new key will invalidate any previously
-     generated keys.
+   - Each key remains valid until explicitly deleted from
+     GitHub App settings.
 
 1. Need more information?
 

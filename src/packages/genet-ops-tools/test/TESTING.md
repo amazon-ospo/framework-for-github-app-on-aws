@@ -48,7 +48,6 @@ Ensure AWS credentials have these required permissions:
 - `kms:GetParametersForImport` - Get import parameters for key material
 - `kms:ImportKeyMaterial` - Import external key material into KMS
 - `kms:ListResourceTags` - List tags associated with KMS keys
-- `kms:ScheduleKeyDeletion` - Schedule deletion of old keys
 - `kms:TagResource` - Tag keys for tracking status and metadata
 
 ### **DynamoDB Permissions (Required for Table Operations)**
@@ -87,10 +86,12 @@ recheck if the environment variables are set correctly.
 
 ## After Successful test completion
 
-- Old KMS keys are automatically scheduled for deletion
-
 - The PEM file will be automatically deleted from the downloaded location for
   security.
 
-- The most recently created KMS key remains active - you can manually delete
-  it if you want to avoid ongoing costs.
+- To clean up test resources and avoid ongoing costs:
+
+1. Go to your GitHub App settings and delete the generated private keys
+
+1. Go to AWS KMS console and schedule the KMS keys for deletion with
+   a waiting period between 7 and 30 days
