@@ -39,7 +39,7 @@ export type ImportPrivateKey = ({
   tagKeyAsFailed,
 }: {
   pemFilePath: string;
-  appId: string;
+  appId: number;
   tableName: string;
   validateInputs?: ValidateInputs;
   convertPemToDer?: ConvertPemToDer;
@@ -159,7 +159,7 @@ type ValidateInputs = ({
   pemSign,
 }: {
   pemFile: string;
-  appId: string;
+  appId: number;
   tableName: string;
   listTables?: () => Promise<string[]>;
   validateJWt?: ValidateJWT;
@@ -240,7 +240,7 @@ export const convertPemToDerImpl: ConvertPemToDer = ({ pemFile }) => {
   });
 };
 
-type CreateKmsKey = ({ appId }: { appId: string }) => Promise<string>;
+type CreateKmsKey = ({ appId }: { appId: number }) => Promise<string>;
 
 /**
  * Function that creates an external AWS KMS key configured for GitHub App signing.
@@ -271,7 +271,7 @@ export const createKmsKeyImpl: CreateKmsKey = async ({ appId }) => {
         },
         {
           TagKey: 'AppId',
-          TagValue: appId,
+          TagValue: appId.toString(),
         },
         {
           TagKey: 'Genet-Managed',
@@ -439,7 +439,7 @@ type ImportKeyMaterialAndValidate = ({
   validateJWT,
 }: {
   appKeyArn: string;
-  appId: string;
+  appId: number;
   wrappedMaterial: Buffer;
   importToken: Uint8Array;
   kmsSign?: KmsSign;
@@ -501,7 +501,7 @@ type UpdateAppsTable = ({
   tagOldKeyArn,
 }: {
   appKeyArn: string;
-  appId: string;
+  appId: number;
   tableName: string;
   tagOldKeyArn?: TagOldKeyArn;
 }) => Promise<void>;
@@ -529,7 +529,7 @@ export const updateAppsTableImpl: UpdateAppsTable = async ({
       new PutItemCommand({
         TableName: tableName,
         Item: {
-          AppId: { S: appId },
+          AppId: { N: appId.toString() },
           KmsKeyArn: { S: appKeyArn },
         },
         ReturnValues: 'ALL_OLD',
@@ -555,7 +555,7 @@ export type TagOldKeyArn = ({
 }: {
   oldKeyArn: string;
   appKeyArn: string;
-  appId: string;
+  appId: number;
 }) => Promise<void>;
 
 /**
@@ -589,7 +589,7 @@ export const tagOldKeyArnImpl: TagOldKeyArn = async ({
         },
         {
           TagKey: 'AppId',
-          TagValue: appId,
+          TagValue: appId.toString(),
         },
         {
           TagKey: 'Genet-Managed',
@@ -635,7 +635,7 @@ export type ValidateJWT = ({
   appId,
   signFunction,
 }: {
-  appId: string;
+  appId: number;
   signFunction: (message: string) => Promise<Buffer>;
 }) => Promise<boolean>;
 
@@ -694,7 +694,7 @@ export const validateJWTImpl: ValidateJWT = async ({ appId, signFunction }) => {
       return false;
     }
     const data = (await response.json()) as { id: number; name: string };
-    if (data.id.toString() !== appId) {
+    if (data.id !== appId) {
       console.error(`App ID mismatch: Expected ${appId}, got ${data.id}`);
       return false;
     }
@@ -767,8 +767,8 @@ export const pemSignImpl: PemSign = async ({ pemFile, message }) => {
 };
 
 export async function main(): Promise<void> {
-  const [, , pemFilePath, appId, tableName] = process.argv;
-  if (!pemFilePath || !appId || !tableName) {
+  const [, , pemFilePath, appIdAsString, tableName] = process.argv;
+  if (!pemFilePath || !appIdAsString || !tableName) {
     const errorMessage = [
       'Please provide GitHub App PEM file path, GitHub AppId and the table name to store the AppId and Key ARN',
       'Usage: npm run import-private-key <path-to-private-key.pem> <GitHubAppId> <TableName>',
@@ -777,6 +777,11 @@ export async function main(): Promise<void> {
     ].join('\n\n');
 
     console.error(errorMessage);
+    process.exit(1);
+  }
+  const appId = Number(appIdAsString);
+  if (isNaN(appId)) {
+    console.error('Error: GitHub AppId must be a valid number');
     process.exit(1);
   }
   try {

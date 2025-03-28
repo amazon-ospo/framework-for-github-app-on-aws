@@ -68,7 +68,7 @@ describe('validateInputsImpl', () => {
   let mockListTables = jest.fn();
   const mockPemFilePath = '/path/to/privatekey.pem';
   const mockWrongPrivateKeyPath = '/path/to/wrongPrivateKey.pem';
-  const mockAppId = '12345';
+  const mockAppId = 12345;
   const mockTableName = 'validTable';
   const validPrivateKey =
     '-----BEGIN PRIVATE KEY-----\nvalid-key-content\n-----END PRIVATE KEY-----';
@@ -125,7 +125,7 @@ describe('validateInputsImpl', () => {
     [
       'should throw error when GitHub authentication fails due to App ID mismatch',
       mockPemFilePath,
-      'invalid-app-id',
+      54321,
     ],
   ])('%s', async (_: string, pemFile, appId) => {
     mockValidateJWT.mockResolvedValue(false);
@@ -272,7 +272,7 @@ describe('convertPemToDerImpl', () => {
 describe('createKmsKeyImpl', () => {
   const mockKeyId = 'mock-key-id';
   const mockAppKeyArn = 'arn:aws:kms:region:account:key/mock-key-id';
-  const mockAppId = '12345';
+  const mockAppId = 12345;
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -312,7 +312,7 @@ describe('createKmsKeyImpl', () => {
         },
         {
           TagKey: 'AppId',
-          TagValue: mockAppId,
+          TagValue: mockAppId.toString(),
         },
         {
           TagKey: 'Genet-Managed',
@@ -619,7 +619,7 @@ describe('importKeyMaterialAndValidateImpl', () => {
   let mockConsoleLog = jest.spyOn(console, 'log');
   const mockParams = {
     appKeyArn: 'arn:aws:kms:region:account:key/mock-key-id',
-    appId: '12345',
+    appId: 12345,
     wrappedMaterial: Buffer.from('mock-wrapped-material'),
     importToken: new Uint8Array([1, 2, 3, 4]),
   };
@@ -679,7 +679,7 @@ describe('importKeyMaterialAndValidateImpl', () => {
 describe('updateAppsTableImpl', () => {
   const mockAppKeyArn = 'arn:aws:kms:region:account:key/mock-key-id';
   const mockOldKeyArn = 'arn:aws:kms:region:account:key/old-key-id';
-  const mockAppId = '12345';
+  const mockAppId = 12345;
   const mockTableName = 'validTable';
   beforeEach(() => {
     jest.resetAllMocks();
@@ -701,7 +701,7 @@ describe('updateAppsTableImpl', () => {
     expect(putItemCommand.args[0].input).toEqual({
       TableName: mockTableName,
       Item: {
-        AppId: { S: mockAppId },
+        AppId: { N: mockAppId.toString() },
         KmsKeyArn: { S: mockAppKeyArn },
       },
       ReturnValues: 'ALL_OLD',
@@ -768,7 +768,7 @@ describe('updateAppsTableImpl', () => {
 describe('tagOldKeyArnImpl', () => {
   const mockAppKeyArn = 'arn:aws:kms:region:account:key/mock-key-id';
   const oldKeyArn = 'arn:aws:kms:region:account:key/old-key-id';
-  const mockAppId = '12345';
+  const mockAppId = 12345;
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -805,7 +805,7 @@ describe('tagOldKeyArnImpl', () => {
         },
         {
           TagKey: 'AppId',
-          TagValue: mockAppId,
+          TagValue: mockAppId.toString(),
         },
         {
           TagKey: 'Genet-Managed',
@@ -906,7 +906,7 @@ describe('validateJWTImpl', () => {
     mockFetch.mockResolvedValue(mockSuccessResponse);
 
     const result = await validateJWTImpl({
-      appId: '12345',
+      appId: 12345,
       signFunction: jest.fn().mockResolvedValue(Buffer.from('test-signature')),
     });
 
@@ -936,7 +936,7 @@ describe('validateJWTImpl', () => {
     );
     mockFetch.mockResolvedValueOnce(mismatchResponse);
     const result = await validateJWTImpl({
-      appId: '12345',
+      appId: 12345,
       signFunction: jest.fn().mockResolvedValue(Buffer.from('test-signature')),
     });
 
@@ -945,7 +945,7 @@ describe('validateJWTImpl', () => {
   it('should return false if the GitHub API returns an error', async () => {
     mockFetch.mockResolvedValueOnce(mockErrorResponse as Response);
     const result = await validateJWTImpl({
-      appId: '12345',
+      appId: 12345,
       signFunction: jest.fn().mockResolvedValue(Buffer.from('test-signature')),
     });
     expect(result).toBe(false);
@@ -956,7 +956,7 @@ describe('validateJWTImpl', () => {
       .mockRejectedValue(new Error('Signing Failed'));
     mockFetch.mockResolvedValueOnce(mockErrorResponse as Response);
     const result = await validateJWTImpl({
-      appId: '12345',
+      appId: 12345,
       signFunction: failingSignFunction,
     });
     expect(result).toBe(false);
@@ -964,7 +964,7 @@ describe('validateJWTImpl', () => {
   it('should return false if the GitHub API call throws an error', async () => {
     mockFetch.mockRejectedValueOnce(new Error('GitHub Network error'));
     const result = await validateJWTImpl({
-      appId: '12345',
+      appId: 12345,
       signFunction: jest.fn().mockResolvedValue(Buffer.from('test-signature')),
     });
     expect(result).toBe(false);
@@ -1146,7 +1146,7 @@ describe('pemSignImpl', () => {
 });
 
 describe('importPrivateKey', () => {
-  const mockAppId = '12345';
+  const mockAppId = 12345;
   const mockTableName = 'validTable';
   const mockDerFormat = 'der-formatted-key';
   const mockAppKeyArn = 'arn:aws:kms:region:account:key/mock-key-id';
@@ -1366,7 +1366,7 @@ describe('main', () => {
     .mockImplementation((): never => undefined as never);
   const mockConsoleError = jest.spyOn(console, 'error');
   const pemFilePath = '/path/to/privatekey.pem';
-  const appId = '12345';
+  const appIdAsString = '12345';
   const tableName = 'validTable';
 
   afterAll(() => {
@@ -1383,10 +1383,14 @@ describe('main', () => {
     const fetchSpy = jest
       .spyOn(importKey, 'importPrivateKey')
       .mockImplementation(() => Promise.resolve());
-    process.argv = ['', '', pemFilePath, appId, tableName];
+    process.argv = ['', '', pemFilePath, appIdAsString, tableName];
     await expect(importKey.main()).resolves.toBeUndefined();
     expect(fetchSpy).toHaveBeenCalledTimes(1);
-    expect(fetchSpy).toHaveBeenCalledWith({ pemFilePath, appId, tableName });
+    expect(fetchSpy).toHaveBeenCalledWith({
+      pemFilePath,
+      appId: Number(appIdAsString),
+      tableName,
+    });
   });
 
   it.each([
@@ -1401,11 +1405,11 @@ describe('main', () => {
     ],
     [
       'should exit with error when pemFilePath and tableName are missing',
-      ['', appId, ''],
+      ['', appIdAsString, ''],
     ],
     [
       'should exit with error when pemFilePath is missing',
-      ['', appId, tableName],
+      ['', appIdAsString, tableName],
     ],
     [
       'should exit with error when appId is missing',
@@ -1413,7 +1417,7 @@ describe('main', () => {
     ],
     [
       'should exit with error when tableName is missing',
-      [pemFilePath, appId, ''],
+      [pemFilePath, appIdAsString, ''],
     ],
   ])('%s', async (_: string, args) => {
     process.argv = args;

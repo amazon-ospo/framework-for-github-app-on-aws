@@ -205,7 +205,18 @@ const genetOpsTools = new typescript.TypeScriptProject({
     "@aws-sdk/client-kms",
     "@aws-sdk/client-dynamodb",
   ],
-  devDeps: ["aws-sdk-client-mock", "mock-fs", "@types/mock-fs"],
+  devDeps: [
+    "aws-sdk-client-mock",
+    "mock-fs",
+    "@types/mock-fs",
+    "jest-runner-groups",
+  ],
+  jestOptions: {
+    jestConfig: {
+      runner: "groups",
+      verbose: true,
+    },
+  },
 });
 genetScripts(genetOpsTools);
 addTestTargets(genetOpsTools);
