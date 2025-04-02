@@ -4,11 +4,10 @@ namespace genet.api
 
 use aws.auth#sigv4
 use aws.protocols#restJson1
-use smithy.framework#ValidationException
 
 @title("Genet Service")
 @auth([sigv4])
-@sigv4(name: "Genet")
+@sigv4(name: "execute-api")
 @restJson1
 service GenetService {
     version: "2024-08-23"
@@ -16,7 +15,6 @@ service GenetService {
         CredentialManagementService
     ]
     errors: [
-        ValidationException,
         AccessDeniedError,
         GatewayTimeoutError,
         ServiceUnavailableError
