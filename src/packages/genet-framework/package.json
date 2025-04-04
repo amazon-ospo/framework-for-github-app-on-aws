@@ -37,6 +37,7 @@
     "@typescript-eslint/eslint-plugin": "^8",
     "@typescript-eslint/parser": "^8",
     "aws-cdk-lib": "2.184.0",
+    "aws-sdk-client-mock": "^4.1.0",
     "constructs": "10.4.2",
     "eslint": "^9",
     "eslint-import-resolver-typescript": "^3.8.3",
@@ -57,6 +58,18 @@
     "aws-cdk-lib": "^2.184.0",
     "constructs": "^10.4.2"
   },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.777.0",
+    "@aws-sdk/client-kms": "^3.777.0",
+    "@aws-sdk/util-dynamodb": "^3.777.0",
+    "aws-xray-sdk": "^3.10.3"
+  },
+  "bundledDependencies": [
+    "@aws-sdk/client-dynamodb",
+    "@aws-sdk/client-kms",
+    "@aws-sdk/util-dynamodb",
+    "aws-xray-sdk"
+  ],
   "keywords": [
     "cdk"
   ],

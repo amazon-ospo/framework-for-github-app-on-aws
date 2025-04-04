@@ -99,7 +99,7 @@ export const project = new awscdk.AwsCdkConstructLibrary({
   projenrcTs: true,
   docgen: true,
   github: true,
-  gitignore: [".idea"],
+  gitignore: [".idea", "cdk.out"],
   eslint: true,
   eslintOptions: {
     prettier: true,
@@ -154,6 +154,7 @@ project.addScripts({
     "ts-node src/packages/genet-ops-tools/src/importPrivateKey.ts",
   "get-table-name": "ts-node src/packages/genet-ops-tools/src/getTableName.ts",
 });
+
 addTestTargets(project);
 configureMarkDownLinting(project);
 
@@ -162,6 +163,7 @@ interface PackageConfig {
   outdir: string;
   deps?: string[];
   devDeps?: string[];
+  bundledDeps?: string[];
 }
 const addPrettierConfig = (projectType: Project) => {
   new JsonFile(projectType, ".prettierrc.json", {
@@ -180,6 +182,7 @@ export const createPackage = (config: PackageConfig) => {
     parent: project,
     deps: config.deps,
     devDeps: config.devDeps,
+    bundledDeps: config.bundledDeps,
     docgen: false,
   });
   genetScripts(tsProject);
@@ -192,6 +195,19 @@ export const createPackage = (config: PackageConfig) => {
 createPackage({
   name: "genet-framework",
   outdir: "src/packages/genet-framework",
+  deps: [
+    "@aws-sdk/client-dynamodb",
+    "@aws-sdk/client-kms",
+    "aws-xray-sdk",
+    "@aws-sdk/util-dynamodb",
+  ],
+  devDeps: ["aws-sdk-client-mock"],
+  bundledDeps: [
+    "@aws-sdk/client-dynamodb",
+    "@aws-sdk/client-kms",
+    "@aws-sdk/util-dynamodb",
+    "aws-xray-sdk",
+  ],
 });
 
 const genetOpsTools = new typescript.TypeScriptProject({
