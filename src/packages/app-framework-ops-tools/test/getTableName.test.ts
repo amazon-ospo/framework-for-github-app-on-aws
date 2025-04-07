@@ -92,7 +92,9 @@ describe('displayDynamoDBTables', () => {
       displayDynamoDBTables({
         listTables: mockListTables,
       }),
-    ).rejects.toThrow('No tables found with the GENET_COMPONENT-APP_TABLE tag');
+    ).rejects.toThrow(
+      'No tables found with the FRAMEWORK_FOR_GITHUB_APP_ON_AWS_MANAGED-APP_TABLE tag',
+    );
   });
   it('should throw an error when listTables  fails', async () => {
     mockListTables.mockRejectedValue(

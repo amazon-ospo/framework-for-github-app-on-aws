@@ -9,7 +9,10 @@ export class InstallationManager extends NestedStack {
   readonly targetTable: Table;
   constructor(scope: Construct, id: string, props: InstallationManagerProps) {
     super(scope, id, props);
-    Tags.of(this).add('GenetComponent', 'InstallationManager');
+    Tags.of(this).add(
+      'FrameworkForGitHubAppOnAwsManaged',
+      'InstallationManager',
+    );
     // Table for storing the pre-approval target list GitHub App installation.
     this.targetTable = new Table(this, 'PreApprovalTargetTable', {
       partitionKey: {

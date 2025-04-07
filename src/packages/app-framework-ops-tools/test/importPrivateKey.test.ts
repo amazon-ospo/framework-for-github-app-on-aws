@@ -315,7 +315,7 @@ describe('createKmsKeyImpl', () => {
           TagValue: mockAppId.toString(),
         },
         {
-          TagKey: 'Genet-Managed',
+          TagKey: 'FrameworkForGitHubAppOnAwsManaged',
           TagValue: 'true',
         },
       ],
@@ -808,7 +808,7 @@ describe('tagOldKeyArnImpl', () => {
           TagValue: mockAppId.toString(),
         },
         {
-          TagKey: 'Genet-Managed',
+          TagKey: 'FrameworkForGitHubAppOnAwsManaged',
           TagValue: 'true',
         },
       ],

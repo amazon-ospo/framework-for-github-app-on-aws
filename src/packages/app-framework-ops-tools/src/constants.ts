@@ -1,6 +1,6 @@
-// Genet Tags for DynamoDB App Table
+// Tags for DynamoDB App Table
 export enum TagName {
-  GENET_COMPONENT = 'GenetComponent',
+  FRAMEWORK_FOR_GITHUB_APP_ON_AWS_MANAGED = 'FrameworkForGitHubAppOnAwsManaged',
   CREDENTIAL_MANAGER = 'CredentialManager',
   APP_TABLE = 'AppTable',
 }

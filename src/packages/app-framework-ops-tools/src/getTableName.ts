@@ -7,7 +7,7 @@ import { TagName, RESOURCES_PER_PAGE } from './constants';
 const taggingClient = new ResourceGroupsTaggingAPIClient({});
 
 /**
- * Fetches DynamoDB tables tagged with GENET_COMPONENT and CREDENTIAL_MANAGER
+ * Fetches DynamoDB tables tagged with FRAMEWORK_FOR_GITHUB_APP_ON_AWS_MANAGED and CREDENTIAL_MANAGER
  * and APP_TABLE
  * @returns Array of table names that match the tag criteria
  */
@@ -18,7 +18,10 @@ export const listTablesByTags = async (): Promise<string[]> => {
     const command = new GetResourcesCommand({
       ResourceTypeFilters: ['dynamodb:table'],
       TagFilters: [
-        { Key: TagName.GENET_COMPONENT, Values: [TagName.CREDENTIAL_MANAGER] },
+        {
+          Key: TagName.FRAMEWORK_FOR_GITHUB_APP_ON_AWS_MANAGED,
+          Values: [TagName.CREDENTIAL_MANAGER],
+        },
         { Key: TagName.CREDENTIAL_MANAGER, Values: [TagName.APP_TABLE] },
       ],
       PaginationToken: paginationToken,
@@ -52,14 +55,14 @@ export type DisplayDynamoDBTables = ({
 
 /**
  * Displays a list of DynamoDB tables that match Tags
- * with GENET_COMPONENT, CREDENTIAL_MANAGER and APP_TABLE.
+ * with FrameworkForGitHubAppOnAwsManaged, CredentialManager and AppTable.
  * Lists tables in a numbered format and shows the total count.
  *
  * ---
  * dependency injection parameters:
  *
  * @param listTables Function that fetches the dynamoDB tables tagged with
- * GENET_COMPONENT, CREDENTIAL_MANAGER and APP_TABLE
+ * FrameworkForGitHubAppOnAwsManaged, CredentialManager and AppTable
  *
  * @example
  * // Output:
@@ -74,7 +77,9 @@ export const displayDynamoDBTables: DisplayDynamoDBTables = async ({
   try {
     const tables = await listTables();
     if (tables.length === 0) {
-      throw new Error('No tables found with the GENET_COMPONENT-APP_TABLE tag');
+      throw new Error(
+        'No tables found with the FRAMEWORK_FOR_GITHUB_APP_ON_AWS_MANAGED-APP_TABLE tag',
+      );
     }
     console.log('\nAvailable tables:');
     tables.forEach((name, index) => {

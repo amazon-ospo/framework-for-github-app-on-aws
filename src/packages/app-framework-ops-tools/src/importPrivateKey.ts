@@ -248,7 +248,7 @@ type CreateKmsKey = ({ appId }: { appId: number }) => Promise<string>;
  * - KeySpec: Specified by CREATE_KEY_SPEC constant
  * - KeyUsage: SIGN_VERIFY
  * - Origin: EXTERNAL
- * - Tags: Status, CreatedOn, AppId, and Genet-Managed
+ * - Tags: Status, CreatedOn, AppId, and FrameworkForGitHubAppOnAwsManaged
  *
  * @param appId GitHub App ID to associate with the KMS key
  * @returns The ARN of the created KMS key
@@ -274,7 +274,7 @@ export const createKmsKeyImpl: CreateKmsKey = async ({ appId }) => {
           TagValue: appId.toString(),
         },
         {
-          TagKey: 'Genet-Managed',
+          TagKey: 'FrameworkForGitHubAppOnAwsManaged',
           TagValue: 'true',
         },
       ],
@@ -592,7 +592,7 @@ export const tagOldKeyArnImpl: TagOldKeyArn = async ({
           TagValue: appId.toString(),
         },
         {
-          TagKey: 'Genet-Managed',
+          TagKey: 'FrameworkForGitHubAppOnAwsManaged',
           TagValue: 'true',
         },
       ],

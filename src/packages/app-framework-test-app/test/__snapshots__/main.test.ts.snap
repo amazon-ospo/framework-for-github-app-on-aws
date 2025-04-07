@@ -15,7 +15,7 @@ exports[`Snapshot 1`] = `
       "Properties": {
         "Tags": [
           {
-            "Key": "GenetComponent",
+            "Key": "FrameworkForGitHubAppOnAwsManaged",
             "Value": "CredentialManager",
           },
         ],
@@ -35,7 +35,7 @@ exports[`Snapshot 1`] = `
               {
                 "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
               },
-              "/a5e44f738b3b4af89f75fb709893966a0c13ac39f60cf6d065274e98fa5d21d7.json",
+              "/f76558d545cf5f780053409bc7249279e104d163128fa1a9335a06ac34446a7d.json",
             ],
           ],
         },
@@ -48,7 +48,7 @@ exports[`Snapshot 1`] = `
       "Properties": {
         "Tags": [
           {
-            "Key": "GenetComponent",
+            "Key": "FrameworkForGitHubAppOnAwsManaged",
             "Value": "InstallationManager",
           },
         ],
@@ -68,7 +68,7 @@ exports[`Snapshot 1`] = `
               {
                 "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
               },
-              "/0efc7cb4376ec681e5ef9ca835bb46eb0364075d915e073395458e52bd0001fb.json",
+              "/0b8158db38e0c2c0e9b1cb8ca488578d7c325147348cb06a667000fb1b8f7d42.json",
             ],
           ],
         },

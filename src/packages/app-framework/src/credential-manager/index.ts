@@ -11,7 +11,7 @@ export class CredentialManager extends NestedStack {
   readonly installationTable: Table;
   constructor(scope: Construct, id: string, props?: CredentialManagerProps) {
     super(scope, id, props);
-    Tags.of(this).add('GenetComponent', 'CredentialManager');
+    Tags.of(this).add('FrameworkForGitHubAppOnAwsManaged', 'CredentialManager');
     // Table for storing GitHub App IDs and their corresponding private key ARNs that stored in AWS KMS.
     this.appTable = new Table(this, 'AppTable', {
       partitionKey: {

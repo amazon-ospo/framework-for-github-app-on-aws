@@ -25,8 +25,8 @@
     "upgrade": "npx projen upgrade",
     "watch": "npx projen watch",
     "projen": "npx projen",
-    "import-private-key": "ts-node src/packages/genet-ops-tools/src/importPrivateKey.ts",
-    "get-table-name": "ts-node src/packages/genet-ops-tools/src/getTableName.ts"
+    "import-private-key": "ts-node src/packages/app-framework-ops-tools/src/importPrivateKey.ts",
+    "get-table-name": "ts-node src/packages/app-framework-ops-tools/src/getTableName.ts"
   },
   "author": {
     "name": "Amazon OSPO",

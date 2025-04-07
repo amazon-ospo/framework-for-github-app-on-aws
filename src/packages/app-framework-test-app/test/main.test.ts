@@ -1,12 +1,12 @@
 import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
-import { GenetFrameworkTestStack } from '../src/main';
+import { TheAppFrameworkTestStack } from '../src/main';
 
 test('Snapshot', () => {
   const app = new App();
-  const stack = new GenetFrameworkTestStack(
+  const stack = new TheAppFrameworkTestStack(
     app,
-    'genet-framework-test-stack',
+    'app-framework-test-stack',
     {},
   );
 

@@ -81,14 +81,14 @@ export const addTestTargets = (subProject: Project) => {
 };
 
 // TODO: Publish these ops tools as a CLI
-const genetScripts = (
+const theAppFrameworkScripts = (
   subProject: awscdk.AwsCdkConstructLibrary | typescript.TypeScriptProject,
 ) => {
   subProject.addScripts({
     "import-private-key":
-      "ts-node ../../../src/packages/genet-ops-tools/src/importPrivateKey.ts",
+      "ts-node ../../../src/packages/app-framework-ops-tools/src/importPrivateKey.ts",
     "get-table-name":
-      "ts-node ../../../src/packages/genet-ops-tools/src/getTableName.ts",
+      "ts-node ../../../src/packages/app-framework-ops-tools/src/getTableName.ts",
   });
 };
 
@@ -151,8 +151,9 @@ project.package.file.addOverride("workspaces", ["src/packages/*"]);
 project.preCompileTask.exec("npx lerna run build --concurrency=1 --no-stream");
 project.addScripts({
   "import-private-key":
-    "ts-node src/packages/genet-ops-tools/src/importPrivateKey.ts",
-  "get-table-name": "ts-node src/packages/genet-ops-tools/src/getTableName.ts",
+    "ts-node src/packages/app-framework-ops-tools/src/importPrivateKey.ts",
+  "get-table-name":
+    "ts-node src/packages/app-framework-ops-tools/src/getTableName.ts",
 });
 
 addTestTargets(project);
@@ -185,7 +186,7 @@ export const createPackage = (config: PackageConfig) => {
     bundledDeps: config.bundledDeps,
     docgen: false,
   });
-  genetScripts(tsProject);
+  theAppFrameworkScripts(tsProject);
   addTestTargets(tsProject);
   addPrettierConfig(tsProject);
   configureMarkDownLinting(tsProject);
@@ -193,8 +194,8 @@ export const createPackage = (config: PackageConfig) => {
 };
 
 createPackage({
-  name: "genet-framework",
-  outdir: "src/packages/genet-framework",
+  name: "@aws/framework-for-github-app-on-aws",
+  outdir: "src/packages/app-framework",
   deps: [
     "@aws-sdk/client-dynamodb",
     "@aws-sdk/client-kms",
@@ -210,10 +211,10 @@ createPackage({
   ],
 });
 
-const genetOpsTools = new typescript.TypeScriptProject({
+const theAppFrameworkOpsTools = new typescript.TypeScriptProject({
   ...projectMetadata,
-  name: "genet-ops-tools",
-  outdir: "src/packages/genet-ops-tools",
+  name: "app-framework-ops-tools",
+  outdir: "src/packages/app-framework-ops-tools",
   parent: project,
   projenrcTs: false,
   deps: [
@@ -234,21 +235,21 @@ const genetOpsTools = new typescript.TypeScriptProject({
     },
   },
 });
-genetScripts(genetOpsTools);
-addTestTargets(genetOpsTools);
-addPrettierConfig(genetOpsTools);
-configureMarkDownLinting(genetOpsTools);
+theAppFrameworkScripts(theAppFrameworkOpsTools);
+addTestTargets(theAppFrameworkOpsTools);
+addPrettierConfig(theAppFrameworkOpsTools);
+configureMarkDownLinting(theAppFrameworkOpsTools);
 
-const genetTestApp = new awscdk.AwsCdkTypeScriptApp({
+const theAppFrameworkTestApp = new awscdk.AwsCdkTypeScriptApp({
   ...projectMetadata,
-  name: "genet-test-app",
-  outdir: "src/packages/genet-test-app",
+  name: "app-framework-test-app",
+  outdir: "src/packages/app-framework-test-app",
   parent: project,
   projenrcTs: false,
   cdkVersion: "2.184.1",
 });
-addTestTargets(genetTestApp);
-addPrettierConfig(genetTestApp);
-configureMarkDownLinting(genetTestApp);
-genetTestApp.addDeps("genet-framework");
+addTestTargets(theAppFrameworkTestApp);
+addPrettierConfig(theAppFrameworkTestApp);
+configureMarkDownLinting(theAppFrameworkTestApp);
+theAppFrameworkTestApp.addDeps("@aws/framework-for-github-app-on-aws");
 project.synth();
