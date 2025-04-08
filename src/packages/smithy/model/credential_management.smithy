@@ -30,17 +30,14 @@ operation GetAppToken {
 
 structure GetInstallationTokenInput {
     @required
-    @httpQuery("appId")
     appId: String
 
     @required
-    @httpQuery("nodeId")
     nodeId: String
 }
 
 structure GetAppTokenInput {
     @required
-    @httpQuery("appId")
     appId: String
 }
 
