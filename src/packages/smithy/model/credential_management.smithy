@@ -1,11 +1,12 @@
-namespace genet.api
+namespace framework.api
 
 resource CredentialManagementService{
     operations: [GetInstallationToken, GetAppToken]
 }
 
 @readonly
-@http(method: "GET", uri: "/tokens/installation")
+// Placeholder API endpoints
+@http(method: "GET", uri: "/example.com")
 operation GetInstallationToken {
     input: GetInstallationTokenInput,
     output: GetInstallationTokenOutput
@@ -19,7 +20,8 @@ structure GetInstallationTokenOutput {
 }
 
 @readonly
-@http(method: "GET", uri: "/tokens/app")
+// Placeholder API endpoints
+@http(method: "GET", uri: "/example.net")
 operation GetAppToken {
     input: GetAppTokenInput,
     output: GetAppTokenOutput
@@ -28,17 +30,14 @@ operation GetAppToken {
 
 structure GetInstallationTokenInput {
     @required
-    @httpQuery("appId")
     appId: String
 
     @required
-    @httpQuery("nodeId")
     nodeId: String
 }
 
 structure GetAppTokenInput {
     @required
-    @httpQuery("appId")
     appId: String
 }
 
