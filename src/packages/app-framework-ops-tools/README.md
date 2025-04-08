@@ -2,8 +2,8 @@
 
 ## Introduction
 
-This tool is part of Genet,
-a framework developed by Amazon's Open Source Program Office (OSPO)
+This tool is part of framework-for-github-app-on-aws (the app framework),
+a solution developed by Amazon's Open Source Program Office (OSPO)
 that simplifies and secures GitHub App management.
 While GitHub Apps offer significant advantages
 over Personal Access Tokens (PATs) and OAuth Apps,
@@ -27,7 +27,7 @@ For more information about GitHub Apps, see:
 
 ## Overview
 
-This tool implements Genet's Credential Management component
+This tool implements the app framework's Credential Management component
 for secure import of GitHub App private keys into AWS KMS.
 It handles the complete lifecycle of key management
 including validation, encryption, import, and rotation.
@@ -58,7 +58,7 @@ The tool performs these key actions:
 
 - Deletes the PEM file after successful import
 
-Key advantages of using this tool as part of Genet:
+Key advantages of using this tool as part of the app framework:
 
 1. Eliminates exposure of private keys after secure import
 1. Leverages AWS KMS HSMs for secure key storage
@@ -216,7 +216,7 @@ As a best practice, you can rotate your GitHub App's private key:
 
 ### Rotation Process
 
-Genet simplifies the key rotation process:
+The app framework simplifies the key rotation process:
 
 1. Generate a new private key in your GitHub App settings
 

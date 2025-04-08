@@ -138,7 +138,7 @@ describe('importPrivateKey Acceptance Tests', () => {
           { TagKey: 'ReplacedBy', TagValue: createdKeyArn },
           { TagKey: 'ReplacedOn', TagValue: expect.any(String) },
           { TagKey: 'AppId', TagValue: appId.toString() },
-          { TagKey: 'Genet-Managed', TagValue: 'true' },
+          { TagKey: 'FrameworkForGitHubAppOnAwsManaged', TagValue: 'true' },
         ]),
       );
     }
@@ -151,7 +151,7 @@ describe('importPrivateKey Acceptance Tests', () => {
       expect.arrayContaining([
         { TagKey: 'Status', TagValue: 'Active' },
         { TagKey: 'AppId', TagValue: appId.toString() },
-        { TagKey: 'Genet-Managed', TagValue: 'true' },
+        { TagKey: 'FrameworkForGitHubAppOnAwsManaged', TagValue: 'true' },
       ]),
     );
   });
