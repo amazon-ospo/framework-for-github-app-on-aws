@@ -32,6 +32,7 @@ jspm_packages/
 .cache
 .idea
 cdk.out
+__snapshots__
 /test-reports/
 junit.xml
 /coverage/

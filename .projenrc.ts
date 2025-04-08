@@ -99,7 +99,7 @@ export const project = new awscdk.AwsCdkConstructLibrary({
   projenrcTs: true,
   docgen: true,
   github: true,
-  gitignore: [".idea", "cdk.out"],
+  gitignore: [".idea", "cdk.out", "__snapshots__"],
   eslint: true,
   eslintOptions: {
     prettier: true,
