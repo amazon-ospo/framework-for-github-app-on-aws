@@ -5,7 +5,7 @@ resource CredentialManagementService{
 }
 
 // Placeholder API endpoints
-@http(method: "POST", uri: "/example.com")
+@http(method: "POST", uri: "/tokens/installation")
 operation GetInstallationToken {
     input: GetInstallationTokenInput,
     output: GetInstallationTokenOutput
@@ -13,7 +13,7 @@ operation GetInstallationToken {
 }
 
 // Placeholder API endpoints
-@http(method: "POST", uri: "/example.net")
+@http(method: "POST", uri: "/tokens/app")
 operation GetAppToken {
     input: GetAppTokenInput,
     output: GetAppTokenOutput
