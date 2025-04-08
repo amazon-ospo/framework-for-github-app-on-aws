@@ -4,24 +4,16 @@ resource CredentialManagementService{
     operations: [GetInstallationToken, GetAppToken]
 }
 
-@readonly
 // Placeholder API endpoints
-@http(method: "GET", uri: "/example.com")
+@http(method: "POST", uri: "/example.com")
 operation GetInstallationToken {
     input: GetInstallationTokenInput,
     output: GetInstallationTokenOutput
     errors:[ServerSideError, ClientSideError, AccessDeniedError, RateLimitError, GatewayTimeoutError, ServiceUnavailableError]
 }
 
-structure GetInstallationTokenOutput {
-    installationToken: String
-    nodeId: String
-    appId: String
-}
-
-@readonly
 // Placeholder API endpoints
-@http(method: "GET", uri: "/example.net")
+@http(method: "POST", uri: "/example.net")
 operation GetAppToken {
     input: GetAppTokenInput,
     output: GetAppTokenOutput
@@ -30,20 +22,26 @@ operation GetAppToken {
 
 structure GetInstallationTokenInput {
     @required
-    appId: String
+    appId: Integer
 
     @required
     nodeId: String
 }
 
+structure GetInstallationTokenOutput {
+    installationToken: String
+    nodeId: String
+    appId: Integer
+}
+
 structure GetAppTokenInput {
     @required
-    appId: String
+    appId: Integer
 }
 
 structure GetAppTokenOutput {
     appToken: String
-    appId: String
+    appId: Integer
 }
 
 @httpError(500)
