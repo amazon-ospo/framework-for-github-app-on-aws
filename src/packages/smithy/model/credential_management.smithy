@@ -1,4 +1,4 @@
-namespace genet.api
+namespace framework.api
 
 resource CredentialManagementService{
     operations: [GetInstallationToken, GetAppToken]

@@ -1,15 +1,15 @@
 $version: "2.0"
 
-namespace genet.api
+namespace framework.api
 
 use aws.auth#sigv4
 use aws.protocols#restJson1
 
-@title("Genet Service")
+@title("Framework for GitHub Apps on AWS")
 @auth([sigv4])
 @sigv4(name: "execute-api")
 @restJson1
-service GenetService {
+service AppFramework {
     version: "2024-08-23"
     resources: [
         CredentialManagementService
