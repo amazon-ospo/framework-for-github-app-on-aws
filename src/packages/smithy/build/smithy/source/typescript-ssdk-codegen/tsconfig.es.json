@@ -2,7 +2,7 @@
   "extends": "./tsconfig",
   "compilerOptions": {
     "lib": ["dom"],
-    "module": "esnext",
+    "module": "Node16",
     "outDir": "dist-es"
   }
 }

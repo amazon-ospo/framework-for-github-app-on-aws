@@ -62,12 +62,18 @@
     "@aws-sdk/client-dynamodb": "^3.777.0",
     "@aws-sdk/client-kms": "^3.777.0",
     "@aws-sdk/util-dynamodb": "^3.777.0",
+    "@aws-smithy/server-apigateway": "^1.0.0-alpha.10",
+    "@aws-smithy/server-common": "^1.0.0-alpha.10",
+    "aws-lambda": "^1.0.7",
     "aws-xray-sdk": "^3.10.3"
   },
   "bundledDependencies": [
     "@aws-sdk/client-dynamodb",
     "@aws-sdk/client-kms",
     "@aws-sdk/util-dynamodb",
+    "@aws-smithy/server-apigateway",
+    "@aws-smithy/server-common",
+    "aws-lambda",
     "aws-xray-sdk"
   ],
   "keywords": [

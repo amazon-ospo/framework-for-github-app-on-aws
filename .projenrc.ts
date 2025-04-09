@@ -105,6 +105,7 @@ export const project = new awscdk.AwsCdkConstructLibrary({
     prettier: true,
     fileExtensions: [".ts", ".md"],
     dirs: ["src", "test", "docs"],
+    ignorePatterns: ["src/packages/smithy/build/**/*"],
   },
   jestOptions: {
     jestConfig: {
@@ -139,13 +140,16 @@ if (project.github) {
 // Add Lerna configuration file (lerna.json)
 new JsonFile(project, "lerna.json", {
   obj: {
-    packages: ["src/packages/*"],
+    packages: ["src/packages/*", "src/packages/smithy/build/smithy/source/*"],
     version: "0.0.0",
     npmClient: "yarn",
   },
 });
 project.package.file.addOverride("private", true);
-project.package.file.addOverride("workspaces", ["src/packages/*"]);
+project.package.file.addOverride("workspaces", [
+  "src/packages/*",
+  "src/packages/smithy/build/smithy/source/*",
+]);
 // Run Lerna build one package at a time and,
 // waits for each package to complete before showing its logs.
 project.preCompileTask.exec("npx lerna run build --concurrency=1 --no-stream");
@@ -199,15 +203,21 @@ createPackage({
   deps: [
     "@aws-sdk/client-dynamodb",
     "@aws-sdk/client-kms",
+    "@aws-smithy/server-common",
+    "aws-lambda",
     "aws-xray-sdk",
     "@aws-sdk/util-dynamodb",
+    "@aws-smithy/server-apigateway",
   ],
   devDeps: ["aws-sdk-client-mock"],
   bundledDeps: [
     "@aws-sdk/client-dynamodb",
     "@aws-sdk/client-kms",
-    "@aws-sdk/util-dynamodb",
     "aws-xray-sdk",
+    "@aws-sdk/util-dynamodb",
+    "@aws-smithy/server-common",
+    "@aws-smithy/server-apigateway",
+    "aws-lambda",
   ],
 });
 

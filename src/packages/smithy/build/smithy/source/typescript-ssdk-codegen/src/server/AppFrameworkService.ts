@@ -1,4 +1,4 @@
-//@ts-nocheck
+// @ts-nocheck
 // smithy-typescript generated code
 import { serializeFrameworkException } from "../protocols/Aws_restJson1";
 import {
