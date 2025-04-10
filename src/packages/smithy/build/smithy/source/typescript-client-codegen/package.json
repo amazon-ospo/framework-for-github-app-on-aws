@@ -1,6 +1,6 @@
 {
-    "name": "@genet.example/coffee-shop-client",
-    "description": "@genet.example/coffee-shop-client client",
+    "name": "@aws/app-framework-client",
+    "description": "@aws/app-framework-client client",
     "version": "0.0.1",
     "scripts": {
         "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
