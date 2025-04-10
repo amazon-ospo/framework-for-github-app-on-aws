@@ -4,6 +4,7 @@ namespace framework.api
 
 use aws.auth#sigv4
 use aws.protocols#restJson1
+use smithy.framework#ValidationException
 
 @title("Framework for GitHub Apps on AWS")
 @auth([sigv4])
@@ -15,6 +16,7 @@ service AppFramework {
         CredentialManagementService
     ]
     errors: [
+        ValidationException
         AccessDeniedError,
         GatewayTimeoutError,
         ServiceUnavailableError
