@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "lib": ["dom"],
+    "module": "Node16",
+    "outDir": "dist-es"
+  }
+}

@@ -100,6 +100,18 @@
       "type": "bundled"
     },
     {
+      "name": "@aws-smithy/server-apigateway",
+      "type": "bundled"
+    },
+    {
+      "name": "@aws-smithy/server-common",
+      "type": "bundled"
+    },
+    {
+      "name": "aws-lambda",
+      "type": "bundled"
+    },
+    {
       "name": "aws-xray-sdk",
       "type": "bundled"
     },
@@ -123,6 +135,18 @@
     },
     {
       "name": "@aws-sdk/util-dynamodb",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-smithy/server-apigateway",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-smithy/server-common",
+      "type": "runtime"
+    },
+    {
+      "name": "aws-lambda",
       "type": "runtime"
     },
     {

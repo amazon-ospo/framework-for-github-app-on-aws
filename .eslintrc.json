@@ -36,11 +36,7 @@
     }
   },
   "ignorePatterns": [
-    "*.js",
-    "*.d.ts",
-    "node_modules/",
-    "*.generated.ts",
-    "coverage",
+    "src/packages/smithy/build/**/*",
     "!.projenrc.ts",
     "!projenrc/**/*.ts"
   ],
