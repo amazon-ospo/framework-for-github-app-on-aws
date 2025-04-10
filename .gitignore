@@ -33,6 +33,7 @@ jspm_packages/
 .idea
 cdk.out
 __snapshots__
+classpath.json
 /test-reports/
 junit.xml
 /coverage/

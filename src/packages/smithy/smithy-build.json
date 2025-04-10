@@ -12,6 +12,10 @@
         "typescript-ssdk-codegen": {
             "package": "@framework.api/app-framework-ssdk",
             "packageVersion": "0.0.1"
+        },
+        "typescript-client-codegen": {
+            "package": "@genet.example/coffee-shop-client",
+            "packageVersion": "0.0.1"
         }
     }
 }
