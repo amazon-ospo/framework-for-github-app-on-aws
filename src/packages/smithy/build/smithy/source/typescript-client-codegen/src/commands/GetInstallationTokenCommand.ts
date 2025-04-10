@@ -41,8 +41,8 @@ export interface GetInstallationTokenCommandOutput extends GetInstallationTokenO
  * @example
  * Use a bare-bones client and the command you need to make an API call.
  * ```javascript
- * import { AppFrameworkClient, GetInstallationTokenCommand } from "@genet.example/coffee-shop-client"; // ES Modules import
- * // const { AppFrameworkClient, GetInstallationTokenCommand } = require("@genet.example/coffee-shop-client"); // CommonJS import
+ * import { AppFrameworkClient, GetInstallationTokenCommand } from "@aws/app-framework-client"; // ES Modules import
+ * // const { AppFrameworkClient, GetInstallationTokenCommand } = require("@aws/app-framework-client"); // CommonJS import
  * const client = new AppFrameworkClient(config);
  * const input = { // GetInstallationTokenInput
  *   appId: Number("int"), // required

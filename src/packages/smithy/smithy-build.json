@@ -14,7 +14,7 @@
             "packageVersion": "0.0.1"
         },
         "typescript-client-codegen": {
-            "package": "@genet.example/coffee-shop-client",
+            "package": "@aws/app-framework-client",
             "packageVersion": "0.0.1"
         }
     }
