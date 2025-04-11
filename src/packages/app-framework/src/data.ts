@@ -1,19 +1,12 @@
-import {
-  DynamoDBClient,
-  GetItemCommand,
-  GetItemCommandOutput,
-} from '@aws-sdk/client-dynamodb';
-import { unmarshall } from '@aws-sdk/util-dynamodb';
-import { dynamodbClient } from './credential-manager/get-app-token/client';
-import { DataError, NotFound } from './error';
+import { DataError } from './error';
+import { TableOperations } from './tableOperations';
+
 export type GetAppKeyArnById = ({
   appId,
   tableName,
-  clientBuilder,
 }: {
   appId: number;
   tableName: string;
-  clientBuilder?: () => DynamoDBClient;
 }) => Promise<string>;
 /**
  * Retrieves the AWS KMS Key ARN associated with a given GitHub App ID from DynamoDB.
@@ -21,7 +14,6 @@ export type GetAppKeyArnById = ({
 ---
  @param appId ID of the GitHub App whose KMS Key ARN is being retrieved.
  @param tableName Name of the App table containing app-to-key mappings.
- @param clientBuilder Function to provide DynamoDB client.
  @returns The KMS Key ARN as a string.
  @throws NotFound if the app ID does not exist in the table.
  @throws DataError if the record is missing the KmsKeyArn field.
@@ -29,29 +21,63 @@ export type GetAppKeyArnById = ({
 export const getAppKeyArnByIdImpl: GetAppKeyArnById = async ({
   appId,
   tableName,
-  clientBuilder = dynamodbClient,
 }) => {
-  const client = clientBuilder();
   try {
-    const command = new GetItemCommand({
-      TableName: tableName,
-      Key: {
-        AppId: { N: appId.toString() },
-      },
+    const getItem = new TableOperations({ TableName: tableName });
+    const result = await getItem.getItem({
+      AppId: { N: appId.toString() },
     });
-    const result: GetItemCommandOutput = await client.send(command);
-    if (!result.Item) {
-      throw new NotFound(`KMS ARN not found for the given appId: ${appId}`);
-    }
-    const record = unmarshall(result.Item);
-    if (!record.KmsKeyArn) {
+    if (!result.KmsKeyArn) {
       throw new DataError(
         `Invalid data: Missing KmsKeyArn for appId: ${appId}`,
       );
     }
-    return record.KmsKeyArn;
+    return result.KmsKeyArn;
   } catch (error) {
     console.error('Error fetching KMS ARN:', error);
     throw error;
   }
 };
+
+/**
+ * Retrieves the Installation ID associated with a given GitHub App ID and Node ID from DynamoDB.
+ *
+ ---
+ @param appId ID of the GitHub App whose Installation ID is being retrieved.
+ @param nodeId ID of the GitHub App whose Installation ID is being retrieved.
+ @param tableName Name of the Installations table containing App and Node ID to Installation ID mapping.
+ @param clientBuilder Function to provide DynamoDB client.
+ @returns The Installation ID as a number.
+ @throws NotFound if the app ID or node ID does not exist in the table.
+ @throws DataError if the record is missing the Installation ID field.
+ */
+
+export type GetInstallationIdFromTable = ({
+  appId,
+  nodeId,
+  tableName,
+}: {
+  appId: number;
+  nodeId: string;
+  tableName: string;
+}) => Promise<number>;
+
+export const getInstallationIdFromTableImpl: GetInstallationIdFromTable =
+  async ({ appId, nodeId, tableName }) => {
+    try {
+      const getItem = new TableOperations({ TableName: tableName });
+      const result = await getItem.getItem({
+        AppId: { N: appId.toString() },
+        NodeId: { S: nodeId as string },
+      });
+      if (!result.InstallationID) {
+        throw new DataError(
+          `Invalid data: Missing Installation ID for appId: ${appId} and nodeID: ${nodeId}`,
+        );
+      }
+      return result.InstallationID;
+    } catch (error) {
+      console.error('Error fetching Installation ID:', error);
+      throw error;
+    }
+  };

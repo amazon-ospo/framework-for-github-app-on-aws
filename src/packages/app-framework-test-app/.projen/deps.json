@@ -79,6 +79,10 @@
       "type": "build"
     },
     {
+      "name": "@aws-sdk/hash-node",
+      "type": "runtime"
+    },
+    {
       "name": "@aws/framework-for-github-app-on-aws",
       "type": "runtime"
     },

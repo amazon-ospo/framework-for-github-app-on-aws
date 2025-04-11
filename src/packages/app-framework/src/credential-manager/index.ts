@@ -1,6 +1,8 @@
 import { RemovalPolicy, NestedStack, Tags } from 'aws-cdk-lib';
 import { AttributeType, Table, BillingMode } from 'aws-cdk-lib/aws-dynamodb';
+import { Effect, IGrantable, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
+import { InstallationAcessTokenGenerator } from './get-installation-access-token';
 export interface CredentialManagerProps {}
 
 /**
@@ -8,6 +10,8 @@ export interface CredentialManagerProps {}
  */
 export class CredentialManager extends NestedStack {
   readonly appTable: Table;
+  readonly installationAccessTokenEndpoint: string;
+  readonly installationAccessLambdaArn: string;
   readonly installationTable: Table;
   constructor(scope: Construct, id: string, props?: CredentialManagerProps) {
     super(scope, id, props);
@@ -66,5 +70,34 @@ export class CredentialManager extends NestedStack {
         type: AttributeType.NUMBER,
       },
     });
+
+    const getInstallationAccessTokenEndpoint =
+      new InstallationAcessTokenGenerator(
+        this,
+        'InstallationAccessTokenGenerator',
+        {
+          AppTable: this.appTable,
+          InstallationTable: this.installationTable,
+        },
+      );
+    this.installationAccessLambdaArn =
+      getInstallationAccessTokenEndpoint.lambdaHandler.functionArn;
+    this.installationAccessTokenEndpoint =
+      getInstallationAccessTokenEndpoint.functionUrl.url;
+  }
+
+  grantGetInstallationAccessToken(grantee: IGrantable) {
+    grantee.grantPrincipal.addToPrincipalPolicy(
+      new PolicyStatement({
+        actions: ['lambda:InvokeFunctionUrl'],
+        effect: Effect.ALLOW,
+        resources: [this.installationAccessLambdaArn],
+        conditions: {
+          StringEquals: {
+            'lambda:FunctionUrlAuthType': 'AWS_IAM',
+          },
+        },
+      }),
+    );
   }
 }
