@@ -1,6 +1,7 @@
 import { createHash } from 'crypto';
 import { KMSClient, SignCommand } from '@aws-sdk/client-kms';
 import { getAppKeyArnByIdImpl, GetAppKeyArnById } from '../../data';
+import { GitHubError, ServerError } from '../../error';
 
 export const kms = new KMSClient({});
 
@@ -13,9 +14,9 @@ export type GetAppToken = ({
 }: {
   appId: number;
   tableName: string;
-  getAppKeyArnbyId: GetAppKeyArnById;
-  kmsSign: KmsSign;
-  validateAppToken: ValidateAppToken;
+  getAppKeyArnbyId?: GetAppKeyArnById;
+  kmsSign?: KmsSign;
+  validateAppToken?: ValidateAppToken;
 }) => Promise<string>;
 /**
  * Generates a signed App Token using AWS KMS and validates it against the GitHub App API.
@@ -65,7 +66,7 @@ export const getAppTokenImpl: GetAppToken = async ({
     return appToken;
   } catch (error) {
     console.error('App Token Authentication Failed:', error);
-    throw new Error('Failed to generate App token');
+    throw new ServerError('Failed to generate App token');
   }
 };
 
@@ -101,16 +102,18 @@ export const validateAppTokenImpl: ValidateAppToken = async ({
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(
+      throw new GitHubError(
         `GitHub API Error: status: ${response.status}, statusText: ${response.statusText}, error: ${errorText}`,
       );
     }
     const data = (await response.json()) as { id: number; name: string };
     if (data.id !== appId) {
-      throw new Error(`App ID mismatch: Expected ${appId}, got ${data.id}`);
+      throw new GitHubError(
+        `App ID mismatch: Expected ${appId}, got ${data.id}`,
+      );
     }
   } catch (error) {
-    throw new Error(`App token Authentication Failed: ${error}`);
+    throw new GitHubError(`App token Authentication Failed: ${error}`);
   }
 };
 
@@ -143,7 +146,7 @@ export const kmsSignImpl: KmsSign = async ({ appKeyArn, message }) => {
   );
 
   if (!signResponse.Signature || signResponse.Signature.length === 0) {
-    throw new Error('KMS signing failed: Signature is missing or empty');
+    throw new ServerError('KMS signing failed: Signature is missing or empty');
   }
   return Buffer.from(signResponse.Signature);
 };

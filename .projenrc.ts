@@ -208,6 +208,7 @@ createPackage({
     "@aws-smithy/server-common",
     "aws-lambda",
     "@aws-smithy/server-apigateway",
+    "@framework.api/app-framework-ssdk",
   ],
   devDeps: ["aws-sdk-client-mock"],
   bundledDeps: [
@@ -217,7 +218,9 @@ createPackage({
     "@aws-sdk/util-dynamodb",
     "aws-xray-sdk",
     "aws-lambda",
+    "re2-wasm",
     "@aws-smithy/server-apigateway",
+    "@framework.api/app-framework-ssdk",
   ],
 });
 

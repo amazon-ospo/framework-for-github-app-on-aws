@@ -1,6 +1,8 @@
 import { RemovalPolicy, NestedStack, Tags } from 'aws-cdk-lib';
 import { AttributeType, Table, BillingMode } from 'aws-cdk-lib/aws-dynamodb';
+import { Effect, IGrantable, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
+import { GitHubAppToken } from './get-app-token/appToken';
 export interface CredentialManagerProps {}
 
 /**
@@ -9,6 +11,8 @@ export interface CredentialManagerProps {}
 export class CredentialManager extends NestedStack {
   readonly appTable: Table;
   readonly installationTable: Table;
+  readonly appTokenEndpoint: string;
+  readonly appTokenLambdaArn: string;
   constructor(scope: Construct, id: string, props?: CredentialManagerProps) {
     super(scope, id, props);
     Tags.of(this).add('FrameworkForGitHubAppOnAwsManaged', 'CredentialManager');
@@ -66,5 +70,37 @@ export class CredentialManager extends NestedStack {
         type: AttributeType.NUMBER,
       },
     });
+    // GitHubAppToken construct, which creates a lambda function with a Function URL.
+    const getAppTokenEndpoint = new GitHubAppToken(this, 'AppToken', {
+      appTableName: this.appTable.tableName,
+      installationTableName: this.installationTable.tableName,
+    });
+    // Grant lambda function read access to the App table.
+    this.appTable.grantReadData(getAppTokenEndpoint.lambdaHandler);
+    this.appTokenEndpoint = getAppTokenEndpoint.functionUrl.url;
+    this.appTokenLambdaArn = getAppTokenEndpoint.lambdaHandler.functionArn;
+    // Grant lambda function Sign permission.
+    getAppTokenEndpoint.lambdaHandler.addToRolePolicy(
+      new PolicyStatement({
+        actions: ['kms:Sign'],
+        resources: ['*'],
+      }),
+    );
+  }
+
+  // Grants a caller permission to invoke the app token lambda Function URL.
+  grantGetAppToken(grantee: IGrantable) {
+    grantee.grantPrincipal.addToPrincipalPolicy(
+      new PolicyStatement({
+        actions: ['lambda:InvokeFunctionUrl'],
+        effect: Effect.ALLOW,
+        resources: [this.appTokenLambdaArn],
+        conditions: {
+          StringEquals: {
+            'lambda:FunctionUrlAuthType': 'AWS_IAM',
+          },
+        },
+      }),
+    );
   }
 }

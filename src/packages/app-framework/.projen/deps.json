@@ -108,11 +108,19 @@
       "type": "bundled"
     },
     {
+      "name": "@framework.api/app-framework-ssdk",
+      "type": "bundled"
+    },
+    {
       "name": "aws-lambda",
       "type": "bundled"
     },
     {
       "name": "aws-xray-sdk",
+      "type": "bundled"
+    },
+    {
+      "name": "re2-wasm",
       "type": "bundled"
     },
     {
@@ -143,6 +151,10 @@
     },
     {
       "name": "@aws-smithy/server-common",
+      "type": "runtime"
+    },
+    {
+      "name": "@framework.api/app-framework-ssdk",
       "type": "runtime"
     },
     {
