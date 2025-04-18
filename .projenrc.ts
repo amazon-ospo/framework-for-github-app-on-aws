@@ -201,23 +201,30 @@ createPackage({
   name: "@aws/framework-for-github-app-on-aws",
   outdir: "src/packages/app-framework",
   deps: [
+    "@framework.api/app-framework-ssdk",
     "@aws-sdk/client-dynamodb",
     "@aws-sdk/client-kms",
+    "@aws-smithy/server-common",
+    "aws-lambda",
     "aws-xray-sdk",
     "@aws-sdk/util-dynamodb",
     "@aws-smithy/server-common",
-    "aws-lambda",
     "@aws-smithy/server-apigateway",
+    "re2-wasm",
   ],
   devDeps: ["aws-sdk-client-mock"],
   bundledDeps: [
+    "@framework.api/app-framework-ssdk",
+    "re2-wasm",
     "@aws-sdk/client-dynamodb",
     "@aws-smithy/server-common",
     "@aws-sdk/client-kms",
-    "@aws-sdk/util-dynamodb",
     "aws-xray-sdk",
-    "aws-lambda",
+    "@aws-sdk/util-dynamodb",
+    "@aws-smithy/server-common",
     "@aws-smithy/server-apigateway",
+    "aws-lambda",
+    "re2-wasm",
   ],
 });
 
@@ -262,4 +269,5 @@ addTestTargets(theAppFrameworkTestApp);
 addPrettierConfig(theAppFrameworkTestApp);
 configureMarkDownLinting(theAppFrameworkTestApp);
 theAppFrameworkTestApp.addDeps("@aws/framework-for-github-app-on-aws");
+theAppFrameworkTestApp.addDeps("@aws-sdk/hash-node");
 project.synth();
