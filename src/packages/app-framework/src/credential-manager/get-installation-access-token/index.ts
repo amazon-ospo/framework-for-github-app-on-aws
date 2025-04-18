@@ -45,7 +45,7 @@ export class InstallationAcessTokenGenerator extends Construct {
       authType: FunctionUrlAuthType.AWS_IAM,
       cors: {
         allowedOrigins: ['*'],
-        allowedMethods: [HttpMethod.ALL],
+        allowedMethods: [HttpMethod.POST],
         allowedHeaders: ['*'],
       },
     });

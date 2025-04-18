@@ -7,6 +7,7 @@ export class NotFound extends Error {
 
 // Error is thrown when the data is not present in the right format for GitHub API output or DynamoDB calls
 export class DataError extends Error {}
+export class ServerError extends Error {}
 
 // Error is thrown when GitHub is running into errors processing requests
 export class GitHubError extends Error {}
