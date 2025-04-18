@@ -110,9 +110,7 @@ describe('getInstallationIdImpl', () => {
         installationTable,
         appToken,
       }),
-    ).rejects.toThrow(
-      'GitHub API Error: Installation ID not found in response',
-    );
+    ).rejects.toThrow('Installation ID not found in response');
   });
   it('should thow error if GitHub API has an error', async () => {
     mockGitHubService.prototype.getInstallations.mockRejectedValue(() => {

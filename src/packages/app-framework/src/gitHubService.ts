@@ -1,4 +1,4 @@
-import { GitHubError, ServerError } from './error';
+import { DataError, GitHubError } from './error';
 import { AppInstallationType, InstallationAccessTokenResponse } from './types';
 
 export interface GitHubAPIServiceInput {
@@ -49,7 +49,7 @@ export class GitHubAPIService {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new ServerError(
+      throw new GitHubError(
         `GitHub API Error: status: ${response.status}, statusText: ${response.statusText}, error: ${errorText}`,
       );
     }
@@ -61,7 +61,7 @@ export class GitHubAPIService {
       return result.token;
     }
     console.error('GitHub Output:', JSON.stringify(result));
-    throw new ServerError(
+    throw new DataError(
       'GitHub API Error: No installation access token returned',
     );
   }

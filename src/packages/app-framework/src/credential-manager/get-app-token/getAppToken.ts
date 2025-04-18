@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 import { KMSClient, SignCommand } from '@aws-sdk/client-kms';
 import { getAppKeyArnByIdImpl, GetAppKeyArnById } from '../../data';
-import { GitHubError, ServerError } from '../../error';
+import { GitHubError } from '../../error';
 
 export const kms = new KMSClient({});
 
@@ -66,7 +66,7 @@ export const getAppTokenImpl: GetAppToken = async ({
     return appToken;
   } catch (error) {
     console.error('App Token Authentication Failed:', error);
-    throw new ServerError('Failed to generate App token');
+    throw new Error('Failed to generate App token');
   }
 };
 
@@ -146,7 +146,7 @@ export const kmsSignImpl: KmsSign = async ({ appKeyArn, message }) => {
   );
 
   if (!signResponse.Signature || signResponse.Signature.length === 0) {
-    throw new ServerError('KMS signing failed: Signature is missing or empty');
+    throw new Error('KMS signing failed: Signature is missing or empty');
   }
   return Buffer.from(signResponse.Signature);
 };

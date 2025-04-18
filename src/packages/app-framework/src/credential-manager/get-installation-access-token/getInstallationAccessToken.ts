@@ -3,6 +3,7 @@ import {
   GetInstallationIdFromTable,
   getInstallationIdFromTableImpl,
 } from '../../data';
+import { NotFound } from '../../error';
 import { GitHubAPIService } from '../../gitHubService';
 import { AppInstallationType } from '../../types';
 import { GetAppToken, getAppTokenImpl } from '../get-app-token/getAppToken';
@@ -101,7 +102,7 @@ export interface GetInstallationId {
  @param getInstallationIdFromTable Function that retrieves Installation from Installations DynamoDB Table
  @param appToken Token necessary for calling GitHub API to retrieve Installation ID
  @returns An Installation ID
- @throws Error Incase GitHub API response does not have installation ID
+ @throws DataError Incase GitHub API response does not have installation ID
  */
 
 export const getInstallationIdImpl: GetInstallationId = async ({
@@ -140,9 +141,7 @@ export const getInstallationIdImpl: GetInstallationId = async ({
 
     if (installationID === -1) {
       console.log('Response from GitHub:', JSON.stringify(result));
-      throw new Error(
-        'GitHub API Error: Installation ID not found in response',
-      );
+      throw new NotFound('Installation ID not found in response');
     }
 
     return installationID;
