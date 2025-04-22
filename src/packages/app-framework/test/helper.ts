@@ -2,16 +2,18 @@ import { APIGatewayProxyEventV2 } from 'aws-lambda';
 
 // Helper method used to generate default APIGatewayProxyEventV2 to use as input for handlerImpl testing
 export const apiGatewayEventHelper = ({
+  path,
   nodeId,
   version = 2.0,
 }: {
+  path: string;
   nodeId?: string;
   version?: number;
 }): APIGatewayProxyEventV2 => {
   return {
     version: `${version.toFixed(1)}`,
     routeKey: '$default',
-    rawPath: '/tokens/installation',
+    rawPath: path,
     rawQueryString: '',
     headers: {},
     requestContext: {
@@ -21,7 +23,7 @@ export const apiGatewayEventHelper = ({
       domainPrefix: 'something',
       http: {
         method: 'POST',
-        path: '/tokens/installation',
+        path: path,
         protocol: 'HTTP/1.1',
         sourceIp: 'some-ip',
         userAgent: 'some-agent',

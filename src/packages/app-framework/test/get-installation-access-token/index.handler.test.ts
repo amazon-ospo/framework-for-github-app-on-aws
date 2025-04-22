@@ -1,11 +1,11 @@
 import { APIGatewayProxyResult } from 'aws-lambda';
-import { apiGatewayEventHelper } from './helper';
 import { InstallationAccessTokenEnvironmentVariables } from '../../src/credential-manager/get-installation-access-token/constants';
 import {
   checkEnvironmentImpl,
   handlerImpl,
 } from '../../src/credential-manager/get-installation-access-token/index.handler';
 import { EnvironmentError } from '../../src/error';
+import { apiGatewayEventHelper } from '../helper';
 
 const installationTable = 'baz';
 const appTable = 'foo';
@@ -20,6 +20,7 @@ beforeEach(() => {
 });
 
 describe('handlerImpl', () => {
+  const path = '/tokens/installation';
   const nodeId = 'foo';
   const mockCheckEnvironment = jest.fn().mockResolvedValue({
     appTable: 'appTable',
@@ -32,7 +33,7 @@ describe('handlerImpl', () => {
   });
   it('should return installation access token with app id and node id', async () => {
     const response: APIGatewayProxyResult = await handlerImpl({
-      event: apiGatewayEventHelper({ nodeId }),
+      event: apiGatewayEventHelper({ path, nodeId }),
       getInstallationAccessTokenOperation:
         mockGetInstallationAccessTokenOperation,
       checkEnvironment: mockCheckEnvironment,
@@ -47,14 +48,14 @@ describe('handlerImpl', () => {
   });
   it('should return empty json for any error occuring inside of operation', async () => {
     const response: APIGatewayProxyResult = await handlerImpl({
-      event: apiGatewayEventHelper({ nodeId }),
+      event: apiGatewayEventHelper({ path, nodeId }),
       checkEnvironment: mockCheckEnvironment,
     });
     expect(response.body).toEqual(JSON.stringify({}));
   });
   it('should return message for request error', async () => {
     const response: APIGatewayProxyResult = await handlerImpl({
-      event: apiGatewayEventHelper({ nodeId: '' }),
+      event: apiGatewayEventHelper({ path, nodeId: '' }),
       checkEnvironment: mockCheckEnvironment,
     });
     expect(response.body).toEqual(
@@ -66,7 +67,7 @@ describe('handlerImpl', () => {
   it('should return empty json for any error occuring inside of operation', async () => {
     await expect(
       handlerImpl({
-        event: apiGatewayEventHelper({ version: -1 }),
+        event: apiGatewayEventHelper({ path, version: -1 }),
         checkEnvironment: mockCheckEnvironment,
       }),
     ).rejects.toThrow(TypeError);
