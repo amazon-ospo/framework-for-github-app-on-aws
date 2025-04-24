@@ -1,19 +1,26 @@
-// Error is thrown when necessary data is not present for GitHub API output or DynamoDB calls
-export class NotFound extends Error {
-  constructor(message: string) {
-    super(message);
-  }
-}
+// Base class for errors that can be shown to end users
+export class VisibleError extends Error {}
+// Error thrown when a requested resource cannot be found
+export class NotFound extends VisibleError {}
 
-// Error is thrown when the data is not present in the right format for GitHub API output or DynamoDB calls
-export class DataError extends Error {}
+/**
+ * Base class for server-side errors.
+ * Thrown when the server encounters an unexpected internal error that cannot be attributed to client input.
+ */
 export class ServerError extends Error {}
+// Error thrown when server fails to process or validate data.
+// Extends ServerError as these are internal processing failures rather than client-side issues
+export class DataError extends ServerError {}
 
 // Error is thrown when GitHub is running into errors processing requests
-export class GitHubError extends Error {}
+export class GitHubError extends ServerError {}
 
 // Error is thrown when environment for lambda functions are not configured properly
-export class EnvironmentError extends Error {}
+export class EnvironmentError extends ServerError {}
+
+/**
+ * TODO: After we change the smithy model to perform empty string validation, delete these.
+ */
 export class ClientError extends Error {}
 
 // Error is thrown when request parameters provided to APIs are of incorrect format

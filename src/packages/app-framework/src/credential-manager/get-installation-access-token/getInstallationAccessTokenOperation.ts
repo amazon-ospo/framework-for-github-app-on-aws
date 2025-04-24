@@ -21,6 +21,9 @@ export const getInstallationAccessTokenOperationImpl: Operation<
   { appTable: string; installationTable: string }
 > = async (input, _context) => {
   try {
+    /**
+     * TODO: After we change the smithy model to perform empty string validation, delete these.
+     */
     // Smithy default validation does not catch errors such as empty strings hence adding in
     // a second layer of error handling.
     if (!input.appId || !input.nodeId) {
@@ -41,6 +44,7 @@ export const getInstallationAccessTokenOperationImpl: Operation<
         message: error.message,
       });
     }
+    console.error(error);
     throw error;
   }
 };

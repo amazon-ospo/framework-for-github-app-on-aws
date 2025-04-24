@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 import { KMSClient, SignCommand } from '@aws-sdk/client-kms';
 import { getAppKeyArnByIdImpl, GetAppKeyArnById } from '../../data';
-import { GitHubError, ServerError } from '../../error';
+import { GitHubError, ServerError, VisibleError } from '../../error';
 
 export const kms = new KMSClient({});
 
@@ -65,6 +65,9 @@ export const getAppTokenImpl: GetAppToken = async ({
     await validateAppToken({ appId, appToken });
     return appToken;
   } catch (error) {
+    if (error instanceof VisibleError) {
+      throw error;
+    }
     console.error('App Token Authentication Failed:', error);
     throw new ServerError('Failed to generate App token');
   }

@@ -55,23 +55,18 @@ export const handlerImpl: Handler = async ({
   checkEnvironment = checkEnvironmentImpl,
   getInstallationAccessTokenOperation = getInstallationAccessTokenOperationImpl,
 }) => {
-  try {
-    console.log('Event received', event);
-    const context = checkEnvironment();
-    const httpRequest = convertEvent(event);
-    console.log('Smithy event:', httpRequest);
-    const installationAccessTokenhandler = getGetInstallationTokenHandler(
-      getInstallationAccessTokenOperation,
-    );
-    const result = await installationAccessTokenhandler.handle(
-      httpRequest,
-      context,
-    );
-    return convertVersion1Response(result);
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+  console.log('Event received', event);
+  const context = checkEnvironment();
+  const httpRequest = convertEvent(event);
+  console.log('Smithy event:', httpRequest);
+  const installationAccessTokenhandler = getGetInstallationTokenHandler(
+    getInstallationAccessTokenOperation,
+  );
+  const result = await installationAccessTokenhandler.handle(
+    httpRequest,
+    context,
+  );
+  return convertVersion1Response(result);
 };
 
 export type CheckEnvironment = () => {
