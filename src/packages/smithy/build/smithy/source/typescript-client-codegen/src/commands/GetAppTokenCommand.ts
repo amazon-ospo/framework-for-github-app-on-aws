@@ -66,12 +66,6 @@ export interface GetAppTokenCommandOutput extends GetAppTokenOutput, __MetadataB
  *
  * @throws {@link ClientSideError} (client fault)
  *
- * @throws {@link AccessDeniedError} (client fault)
- *
- * @throws {@link GatewayTimeoutError} (server fault)
- *
- * @throws {@link ServiceUnavailableError} (server fault)
- *
  * @throws {@link ValidationException} (client fault)
  *  A standard error for input validation failures.
  * This should be thrown by services when a member of the input structure
@@ -79,6 +73,7 @@ export interface GetAppTokenCommandOutput extends GetAppTokenOutput, __MetadataB
  *
  * @throws {@link AppFrameworkServiceException}
  * <p>Base exception class for all service exceptions from AppFramework service.</p>
+ *
  *
  */
 export class GetAppTokenCommand extends $Command.classBuilder<GetAppTokenCommandInput, GetAppTokenCommandOutput, AppFrameworkClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
@@ -96,4 +91,15 @@ export class GetAppTokenCommand extends $Command.classBuilder<GetAppTokenCommand
   .ser(se_GetAppTokenCommand)
   .de(de_GetAppTokenCommand)
 .build() {
+/** @internal type navigation helper, not in runtime. */
+declare protected static __types: {
+  api: {
+      input: GetAppTokenInput;
+      output: GetAppTokenOutput;
+  };
+  sdk: {
+      input: GetAppTokenCommandInput;
+      output: GetAppTokenCommandOutput;
+  };
+};
 }

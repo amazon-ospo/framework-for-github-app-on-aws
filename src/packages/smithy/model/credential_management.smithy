@@ -1,3 +1,4 @@
+$version: "2.0"
 namespace framework.api
 
 resource CredentialManagementService{
@@ -9,7 +10,7 @@ resource CredentialManagementService{
 operation GetInstallationToken {
     input: GetInstallationTokenInput,
     output: GetInstallationTokenOutput
-    errors:[ServerSideError, ClientSideError, AccessDeniedError, RateLimitError, GatewayTimeoutError, ServiceUnavailableError]
+    errors:[ServerSideError, ClientSideError]
 }
 
 // Placeholder API endpoints
@@ -17,13 +18,15 @@ operation GetInstallationToken {
 operation GetAppToken {
     input: GetAppTokenInput,
     output: GetAppTokenOutput
-    errors:[ServerSideError, ClientSideError, AccessDeniedError, GatewayTimeoutError, ServiceUnavailableError]
+    errors:[ServerSideError, ClientSideError]
 }
 
 structure GetInstallationTokenInput {
+    @range(min: 1)
     @required
     appId: Integer
 
+    @length(min: 1, max:256)
     @required
     nodeId: String
 }
@@ -35,6 +38,7 @@ structure GetInstallationTokenOutput {
 }
 
 structure GetAppTokenInput {
+    @range(min: 1)
     @required
     appId: Integer
 }
@@ -47,45 +51,12 @@ structure GetAppTokenOutput {
 @httpError(500)
 @error("server")
 structure ServerSideError {
+    @default("Internal Server Error")
     message: String,
 }
 
 @httpError(400)
 @error("client")
 structure ClientSideError {
-    message: String,
-}
-
-// Error that can occur when unable to access AWS resources
-@httpError(403)
-@error("client")
-structure AccessDeniedError {
-    message: String,
-}
-
-// Error that can occur when not authorized to access AWS resources
-@httpError(401)
-@error("client")
-structure NotAuthorizedError {
-    message: String,
-}
-
-@httpError(429)
-@error("client")
-structure RateLimitError {
-    message: String,
-}
-
-// Error that can occur when unable to access AWS resources
-@httpError(504)
-@error("server")
-structure GatewayTimeoutError {
-    message: String,
-}
-
-// Error that can occur when AWS service is unavailable
-@httpError(503)
-@error("server")
-structure ServiceUnavailableError {
     message: String,
 }

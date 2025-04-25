@@ -3,7 +3,11 @@
 // @ts-ignore: package.json will be imported from dist folders
 import packageInfo from "../package.json"; // eslint-disable-line
 
-import { defaultUserAgent } from "@aws-sdk/util-user-agent-node";
+import { defaultProvider as credentialDefaultProvider } from "@aws-sdk/credential-provider-node";
+import {
+  NODE_APP_ID_CONFIG_OPTIONS,
+  createDefaultUserAgentProvider,
+} from "@aws-sdk/util-user-agent-node";
 import {
   NODE_REGION_CONFIG_FILE_OPTIONS,
   NODE_REGION_CONFIG_OPTIONS,
@@ -34,18 +38,24 @@ export const getRuntimeConfig = (config: AppFrameworkClientConfig) => {
   const defaultsMode = resolveDefaultsModeConfig(config);
   const defaultConfigProvider = () => defaultsMode().then(loadConfigsForDefaultMode);
   const clientSharedValues = getSharedRuntimeConfig(config);
-  return {
+  const profileConfig = { profile: config?.profile };return {
     ...clientSharedValues,
     ...config,
     runtime: "node",
     defaultsMode,
     bodyLengthChecker: config?.bodyLengthChecker ?? calculateBodyLength,
-    defaultUserAgentProvider: config?.defaultUserAgentProvider ?? defaultUserAgent({clientVersion: packageInfo.version}),
-    maxAttempts: config?.maxAttempts ?? loadNodeConfig(NODE_MAX_ATTEMPT_CONFIG_OPTIONS),
-    region: config?.region ?? loadNodeConfig(NODE_REGION_CONFIG_OPTIONS, NODE_REGION_CONFIG_FILE_OPTIONS),
+    credentials: config?.credentials ?? credentialDefaultProvider(),
+    defaultUserAgentProvider: config?.defaultUserAgentProvider ?? createDefaultUserAgentProvider({clientVersion: packageInfo.version}),
+    maxAttempts: config?.maxAttempts ?? loadNodeConfig(NODE_MAX_ATTEMPT_CONFIG_OPTIONS, config),
+    region: config?.region ?? loadNodeConfig(
+          NODE_REGION_CONFIG_OPTIONS,
+          {...NODE_REGION_CONFIG_FILE_OPTIONS, ...profileConfig}
+      )
+    ,
     requestHandler: RequestHandler.create(config?.requestHandler ?? defaultConfigProvider),
-    retryMode: config?.retryMode ?? loadNodeConfig({...NODE_RETRY_MODE_CONFIG_OPTIONS,default: async () => (await defaultConfigProvider()).retryMode || DEFAULT_RETRY_MODE,}),
+    retryMode: config?.retryMode ?? loadNodeConfig({...NODE_RETRY_MODE_CONFIG_OPTIONS,default: async () => (await defaultConfigProvider()).retryMode || DEFAULT_RETRY_MODE,}, config),
     sha256: config?.sha256 ?? Hash.bind(null, "sha256"),
     streamCollector: config?.streamCollector ?? streamCollector,
+    userAgentAppId: config?.userAgentAppId ?? loadNodeConfig(NODE_APP_ID_CONFIG_OPTIONS, profileConfig),
   };
 };

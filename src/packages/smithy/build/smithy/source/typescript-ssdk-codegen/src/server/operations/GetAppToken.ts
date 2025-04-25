@@ -1,24 +1,18 @@
 // @ts-nocheck
 // smithy-typescript generated code
 import {
-  AccessDeniedError,
   ClientSideError,
-  GatewayTimeoutError,
   GetAppTokenInput,
   GetAppTokenOutput,
   ServerSideError,
-  ServiceUnavailableError,
   ValidationException,
 } from "../../models/models_0";
 import {
   deserializeGetAppTokenRequest,
-  serializeAccessDeniedErrorError,
   serializeClientSideErrorError,
   serializeFrameworkException,
-  serializeGatewayTimeoutErrorError,
   serializeGetAppTokenResponse,
   serializeServerSideErrorError,
-  serializeServiceUnavailableErrorError,
   serializeValidationExceptionError,
 } from "../../protocols/Aws_restJson1";
 import { AppFrameworkService } from "../AppFrameworkService";
@@ -71,14 +65,14 @@ export namespace GetAppTokenServerInput {
 }
 export interface GetAppTokenServerOutput extends GetAppTokenOutput {}
 
-export type GetAppTokenErrors = ServerSideError | ClientSideError | AccessDeniedError | GatewayTimeoutError | ServiceUnavailableError | ValidationException
+export type GetAppTokenErrors = ServerSideError | ClientSideError | ValidationException
 
 export class GetAppTokenSerializer implements __OperationSerializer<AppFrameworkService<any>, "GetAppToken", GetAppTokenErrors> {
   serialize = serializeGetAppTokenResponse;
   deserialize = deserializeGetAppTokenRequest;
 
   isOperationError(error: any): error is GetAppTokenErrors {
-    const names: GetAppTokenErrors['name'][] = ["ServerSideError", "ClientSideError", "AccessDeniedError", "GatewayTimeoutError", "ServiceUnavailableError", "ValidationException"];
+    const names: GetAppTokenErrors['name'][] = ["ServerSideError", "ClientSideError", "ValidationException"];
     return names.includes(error.name);
   };
 
@@ -89,15 +83,6 @@ export class GetAppTokenSerializer implements __OperationSerializer<AppFramework
       }
       case "ClientSideError": {
         return serializeClientSideErrorError(error, ctx);
-      }
-      case "AccessDeniedError": {
-        return serializeAccessDeniedErrorError(error, ctx);
-      }
-      case "GatewayTimeoutError": {
-        return serializeGatewayTimeoutErrorError(error, ctx);
-      }
-      case "ServiceUnavailableError": {
-        return serializeServiceUnavailableErrorError(error, ctx);
       }
       case "ValidationException": {
         return serializeValidationExceptionError(error, ctx);

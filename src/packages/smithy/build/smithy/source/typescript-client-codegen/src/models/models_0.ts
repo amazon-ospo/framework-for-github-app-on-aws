@@ -6,25 +6,6 @@ import { ExceptionOptionType as __ExceptionOptionType } from "@smithy/smithy-cli
 /**
  * @public
  */
-export class AccessDeniedError extends __BaseException {
-  readonly name: "AccessDeniedError" = "AccessDeniedError";
-  readonly $fault: "client" = "client";
-  /**
-   * @internal
-   */
-  constructor(opts: __ExceptionOptionType<AccessDeniedError, __BaseException>) {
-    super({
-      name: "AccessDeniedError",
-      $fault: "client",
-      ...opts
-    });
-    Object.setPrototypeOf(this, AccessDeniedError.prototype);
-  }
-}
-
-/**
- * @public
- */
 export class ClientSideError extends __BaseException {
   readonly name: "ClientSideError" = "ClientSideError";
   readonly $fault: "client" = "client";
@@ -44,25 +25,6 @@ export class ClientSideError extends __BaseException {
 /**
  * @public
  */
-export class GatewayTimeoutError extends __BaseException {
-  readonly name: "GatewayTimeoutError" = "GatewayTimeoutError";
-  readonly $fault: "server" = "server";
-  /**
-   * @internal
-   */
-  constructor(opts: __ExceptionOptionType<GatewayTimeoutError, __BaseException>) {
-    super({
-      name: "GatewayTimeoutError",
-      $fault: "server",
-      ...opts
-    });
-    Object.setPrototypeOf(this, GatewayTimeoutError.prototype);
-  }
-}
-
-/**
- * @public
- */
 export interface GetAppTokenInput {
   appId: number | undefined;
 }
@@ -71,8 +33,8 @@ export interface GetAppTokenInput {
  * @public
  */
 export interface GetAppTokenOutput {
-  appToken?: string;
-  appId?: number;
+  appToken?: string | undefined;
+  appId?: number | undefined;
 }
 
 /**
@@ -91,25 +53,6 @@ export class ServerSideError extends __BaseException {
       ...opts
     });
     Object.setPrototypeOf(this, ServerSideError.prototype);
-  }
-}
-
-/**
- * @public
- */
-export class ServiceUnavailableError extends __BaseException {
-  readonly name: "ServiceUnavailableError" = "ServiceUnavailableError";
-  readonly $fault: "server" = "server";
-  /**
-   * @internal
-   */
-  constructor(opts: __ExceptionOptionType<ServiceUnavailableError, __BaseException>) {
-    super({
-      name: "ServiceUnavailableError",
-      $fault: "server",
-      ...opts
-    });
-    Object.setPrototypeOf(this, ServiceUnavailableError.prototype);
   }
 }
 
@@ -145,7 +88,7 @@ export class ValidationException extends __BaseException {
    * A member can appear in this list more than once if it failed to satisfy multiple constraints.
    * @public
    */
-  fieldList?: (ValidationExceptionField)[];
+  fieldList?: (ValidationExceptionField)[] | undefined;
 
   /**
    * @internal
@@ -173,26 +116,7 @@ export interface GetInstallationTokenInput {
  * @public
  */
 export interface GetInstallationTokenOutput {
-  installationToken?: string;
-  nodeId?: string;
-  appId?: number;
-}
-
-/**
- * @public
- */
-export class RateLimitError extends __BaseException {
-  readonly name: "RateLimitError" = "RateLimitError";
-  readonly $fault: "client" = "client";
-  /**
-   * @internal
-   */
-  constructor(opts: __ExceptionOptionType<RateLimitError, __BaseException>) {
-    super({
-      name: "RateLimitError",
-      $fault: "client",
-      ...opts
-    });
-    Object.setPrototypeOf(this, RateLimitError.prototype);
-  }
+  installationToken?: string | undefined;
+  nodeId?: string | undefined;
+  appId?: number | undefined;
 }

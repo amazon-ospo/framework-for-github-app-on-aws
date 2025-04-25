@@ -17,36 +17,5 @@ service AppFramework {
     ]
     errors: [
         ValidationException
-        AccessDeniedError,
-        GatewayTimeoutError,
-        ServiceUnavailableError
     ]
-}
-
-// Error that can occur when unable to access AWS resources
-@error("client")
-@httpError(403)
-structure AccessDeniedError {
-    message: String,
-}
-
-// Error that can occur when unable to access AWS resources
-@httpError(504)
-@error("server")
-structure GatewayTimeoutError {
-    message: String,
-}
-
-// Error that can occur when AWS service is unavailable
-@httpError(503)
-@error("server")
-structure ServiceUnavailableError {
-    message: String,
-}
-
-// Error that can occur when not authorized to access AWS resources
-@httpError(401)
-@error("client")
-structure NotAuthorizedError {
-    message: String,
 }

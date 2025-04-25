@@ -17,6 +17,29 @@
                 "smithy.api#private": {}
             }
         },
+        "aws.api#ResourceDelimiter": {
+            "type": "enum",
+            "members": {
+                "FORWARD_SLASH": {
+                    "target": "smithy.api#Unit",
+                    "traits": {
+                        "smithy.api#documentation": "The `/` character.",
+                        "smithy.api#enumValue": "/"
+                    }
+                },
+                "COLON": {
+                    "target": "smithy.api#Unit",
+                    "traits": {
+                        "smithy.api#documentation": "The `:` character.",
+                        "smithy.api#enumValue": ":"
+                    }
+                }
+            },
+            "traits": {
+                "smithy.api#documentation": "The possible delimiters for an ARN resource segment.",
+                "smithy.api#private": {}
+            }
+        },
         "aws.api#TagOperationReference": {
             "type": "string",
             "traits": {
@@ -82,6 +105,18 @@
                     "target": "smithy.api#Boolean",
                     "traits": {
                         "smithy.api#documentation": "Set to true to specify that the ARN does not contain an account ID. If\nnot set, or if set to false, the resolved ARN will contain a placeholder\nfor the customer account ID. This can only be set to true if absolute\nis not set or is false."
+                    }
+                },
+                "resourceDelimiter": {
+                    "target": "aws.api#ResourceDelimiter",
+                    "traits": {
+                        "smithy.api#documentation": "Defines which character is used to delimit sections of the resource\nsegment of an ARN. This can only be set if absolute is set to true."
+                    }
+                },
+                "reusable": {
+                    "target": "smithy.api#Boolean",
+                    "traits": {
+                        "smithy.api#documentation": "Set to true to indicate that an ARN may be reused for different\ninstances of a resource."
                     }
                 }
             },
@@ -413,7 +448,13 @@
                     "Reference": "https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html"
                 },
                 "smithy.api#trait": {
-                    "selector": "service"
+                    "selector": "service",
+                    "breakingChanges": [
+                        {
+                            "change": "remove",
+                            "message": "Removing the existing authentication scheme is not backward compatible and can break existing clients' authentication."
+                        }
+                    ]
                 }
             }
         },
@@ -446,7 +487,13 @@
                     "Examples": "https://github.com/aws-samples/sigv4a-signing-examples"
                 },
                 "smithy.api#trait": {
-                    "selector": "service[trait|aws.auth#sigv4]"
+                    "selector": "service[trait|aws.auth#sigv4]",
+                    "breakingChanges": [
+                        {
+                            "change": "remove",
+                            "message": "Removing the existing authentication scheme is not backward compatible and can break existing clients' authentication."
+                        }
+                    ]
                 }
             }
         },
@@ -608,6 +655,15 @@
                     "traits": {
                         "smithy.api#documentation": "A list of additional shape IDs of structures that will have their\nproperties added to the CloudFormation resource."
                     }
+                },
+                "primaryIdentifier": {
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#deprecated": {
+                            "message": "Prefer the resource's identifiers when generating resource schemas."
+                        },
+                        "smithy.api#documentation": "An alternative resource property to use as the primary identifier\nfor the CloudFormation resource. The value MUST be the name of a\nproperty on the resource shape that targets a string shape."
+                    }
                 }
             },
             "traits": {
@@ -657,19 +713,32 @@
             "type": "structure",
             "members": {
                 "endpoint": {
-                    "target": "smithy.api#String"
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#documentation": "The special-cased endpoint pattern."
+                    }
                 },
                 "region": {
-                    "target": "smithy.api#String"
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#documentation": "The region to override the defaultGlobalRegion used in this partition."
+                    }
                 },
                 "dualStack": {
-                    "target": "smithy.api#Boolean"
+                    "target": "smithy.api#Boolean",
+                    "traits": {
+                        "smithy.api#documentation": "When true, the special case will apply to dualstack endpoint variants."
+                    }
                 },
                 "fips": {
-                    "target": "smithy.api#Boolean"
+                    "target": "smithy.api#Boolean",
+                    "traits": {
+                        "smithy.api#documentation": "When true, the special case will apply to fips endpoint variants."
+                    }
                 }
             },
             "traits": {
+                "smithy.api#documentation": "Defines the endpoint pattern to apply for a partitional endpoint.",
                 "smithy.api#private": {}
             }
         },
@@ -700,17 +769,25 @@
                 "endpoint": {
                     "target": "smithy.api#String",
                     "traits": {
+                        "smithy.api#documentation": "The special-cased endpoint pattern.",
                         "smithy.api#required": {}
                     }
                 },
                 "dualStack": {
-                    "target": "smithy.api#Boolean"
+                    "target": "smithy.api#Boolean",
+                    "traits": {
+                        "smithy.api#documentation": "When true, the special case will apply to dualstack endpoint variants."
+                    }
                 },
                 "fips": {
-                    "target": "smithy.api#Boolean"
+                    "target": "smithy.api#Boolean",
+                    "traits": {
+                        "smithy.api#documentation": "When true, the special case will apply to fips endpoint variants."
+                    }
                 }
             },
             "traits": {
+                "smithy.api#documentation": "Defines the endpoint pattern to apply for all regional endpoints in the given partition.",
                 "smithy.api#private": {}
             }
         },
@@ -741,20 +818,31 @@
                 "endpoint": {
                     "target": "smithy.api#String",
                     "traits": {
+                        "smithy.api#documentation": "The special-cased endpoint pattern.",
                         "smithy.api#required": {}
                     }
                 },
                 "dualStack": {
-                    "target": "smithy.api#Boolean"
+                    "target": "smithy.api#Boolean",
+                    "traits": {
+                        "smithy.api#documentation": "When true, the special case will apply to dualstack endpoint variants."
+                    }
                 },
                 "fips": {
-                    "target": "smithy.api#Boolean"
+                    "target": "smithy.api#Boolean",
+                    "traits": {
+                        "smithy.api#documentation": "When true, the special case will apply to fips endpoint variants."
+                    }
                 },
                 "signingRegion": {
-                    "target": "smithy.api#String"
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#documentation": "Overrides the signingRegion used for this region."
+                    }
                 }
             },
             "traits": {
+                "smithy.api#documentation": "Defines the endpoint pattern to apply for a region.",
                 "smithy.api#private": {}
             }
         },
@@ -841,7 +929,7 @@
                 "partitionEndpointSpecialCases": {
                     "target": "aws.endpoints#PartitionEndpointSpecialCaseMap",
                     "traits": {
-                        "smithy.api#documentation": "A list of partition endpoint special cases - partitions that do not follow the services standard patterns\nor are located in a region other than the partition's defaultGlobalRegion."
+                        "smithy.api#documentation": "A map of partition to a list of partition endpoint special cases -\npartitions that do not follow the services standard patterns or are\nlocated in a region other than the partition's defaultGlobalRegion."
                     }
                 }
             },
@@ -868,13 +956,13 @@
                 "partitionSpecialCases": {
                     "target": "aws.endpoints#PartitionSpecialCaseMap",
                     "traits": {
-                        "smithy.api#documentation": "A list of partition special cases - endpoints for a partition that do not follow the standard patterns."
+                        "smithy.api#documentation": "A map of partition to partition special cases -\nendpoints for a partition that do not follow the standard patterns."
                     }
                 },
                 "regionSpecialCases": {
                     "target": "aws.endpoints#RegionSpecialCaseMap",
                     "traits": {
-                        "smithy.api#documentation": "A list of regional special cases - endpoints for a region that do not follow the standard patterns."
+                        "smithy.api#documentation": "A map of region to regional special cases -\nendpoints for a region that do not follow the standard patterns."
                     }
                 }
             },
@@ -979,6 +1067,13 @@
             },
             "traits": {
                 "smithy.api#documentation": "A defined condition key to appear within a service in addition to inferred and global condition keys.",
+                "smithy.api#private": {}
+            }
+        },
+        "aws.iam#ConditionKeyName": {
+            "type": "string",
+            "traits": {
+                "smithy.api#pattern": "^(([A-Za-z0-9][A-Za-z0-9-\\.]{0,62}:)?[^:\\s]+)$",
                 "smithy.api#private": {}
             }
         },
@@ -1219,7 +1314,7 @@
         "aws.iam#defineConditionKeys": {
             "type": "map",
             "key": {
-                "target": "aws.iam#IamIdentifier"
+                "target": "aws.iam#ConditionKeyName"
             },
             "value": {
                 "target": "aws.iam#ConditionKeyDefinition"
@@ -1360,6 +1455,13 @@
         "aws.protocols#ChecksumAlgorithm": {
             "type": "enum",
             "members": {
+                "CRC64NVME": {
+                    "target": "smithy.api#Unit",
+                    "traits": {
+                        "smithy.api#documentation": "CRC64NVME",
+                        "smithy.api#enumValue": "CRC64NVME"
+                    }
+                },
                 "CRC32C": {
                     "target": "smithy.api#Unit",
                     "traits": {
@@ -1521,9 +1623,9 @@
             "type": "structure",
             "members": {},
             "traits": {
-                "smithy.api#documentation": "Enable backward compatibility when migrating from awsQuery to awsJson protocol",
+                "smithy.api#documentation": "Enable backward compatibility when migrating from awsQuery to the awsJson\nprotocol or Smithy RPC v2 CBOR.",
                 "smithy.api#trait": {
-                    "selector": "service [trait|aws.protocols#awsJson1_0]"
+                    "selector": "service :test([trait|aws.protocols#awsJson1_0], [trait|smithy.protocols#rpcv2Cbor])"
                 }
             }
         },
@@ -1628,7 +1730,32 @@
             "traits": {
                 "smithy.api#documentation": "Indicates that an operation supports checksum validation.",
                 "smithy.api#trait": {
-                    "selector": "operation"
+                    "selector": "operation",
+                    "breakingChanges": [
+                        {
+                            "change": "remove",
+                            "severity": "DANGER",
+                            "message": "Removing the trait removes the ability for clients to do request or response checksums. The service MUST continue to support old clients by supporting the `httpChecksum` trait."
+                        },
+                        {
+                            "change": "remove",
+                            "path": "/requestAlgorithmMember",
+                            "severity": "DANGER",
+                            "message": "`requestAlgorithmMember` was removed, so newly generated clients will no longer be able to pick the request checksum algorithms The service MUST continue to support old clients by supporting `requestAlgorithmMember`."
+                        },
+                        {
+                            "change": "remove",
+                            "path": "/requestValidationModeMember",
+                            "severity": "DANGER",
+                            "message": "`requestValidationModeMember` was removed, so newly generated clients will no longer validate response checksums. The service MUST continue to support old clients by supporting `requestValidationModeMember`."
+                        },
+                        {
+                            "change": "remove",
+                            "path": "/responseAlgorithms/member",
+                            "severity": "DANGER",
+                            "message": "Members of `responseAlgorithms` were removed, so newly generated clients will no longer validate response checksums for the removed algorithms. The service MUST continue to support old clients by supporting removed compression algorithms."
+                        }
+                    ]
                 },
                 "smithy.api#unstable": {}
             }
@@ -1719,18 +1846,6 @@
                 }
             }
         },
-        "framework.api#AccessDeniedError": {
-            "type": "structure",
-            "members": {
-                "message": {
-                    "target": "smithy.api#String"
-                }
-            },
-            "traits": {
-                "smithy.api#error": "client",
-                "smithy.api#httpError": 403
-            }
-        },
         "framework.api#AppFramework": {
             "type": "service",
             "version": "2024-08-23",
@@ -1740,15 +1855,6 @@
                 }
             ],
             "errors": [
-                {
-                    "target": "framework.api#AccessDeniedError"
-                },
-                {
-                    "target": "framework.api#GatewayTimeoutError"
-                },
-                {
-                    "target": "framework.api#ServiceUnavailableError"
-                },
                 {
                     "target": "smithy.framework#ValidationException"
                 }
@@ -1787,18 +1893,6 @@
                 }
             ]
         },
-        "framework.api#GatewayTimeoutError": {
-            "type": "structure",
-            "members": {
-                "message": {
-                    "target": "smithy.api#String"
-                }
-            },
-            "traits": {
-                "smithy.api#error": "server",
-                "smithy.api#httpError": 504
-            }
-        },
         "framework.api#GetAppToken": {
             "type": "operation",
             "input": {
@@ -1809,19 +1903,10 @@
             },
             "errors": [
                 {
-                    "target": "framework.api#AccessDeniedError"
-                },
-                {
                     "target": "framework.api#ClientSideError"
                 },
                 {
-                    "target": "framework.api#GatewayTimeoutError"
-                },
-                {
                     "target": "framework.api#ServerSideError"
-                },
-                {
-                    "target": "framework.api#ServiceUnavailableError"
                 }
             ],
             "traits": {
@@ -1837,6 +1922,9 @@
                 "appId": {
                     "target": "smithy.api#Integer",
                     "traits": {
+                        "smithy.api#range": {
+                            "min": 1
+                        },
                         "smithy.api#required": {}
                     }
                 }
@@ -1863,22 +1951,10 @@
             },
             "errors": [
                 {
-                    "target": "framework.api#AccessDeniedError"
-                },
-                {
                     "target": "framework.api#ClientSideError"
                 },
                 {
-                    "target": "framework.api#GatewayTimeoutError"
-                },
-                {
-                    "target": "framework.api#RateLimitError"
-                },
-                {
                     "target": "framework.api#ServerSideError"
-                },
-                {
-                    "target": "framework.api#ServiceUnavailableError"
                 }
             ],
             "traits": {
@@ -1894,12 +1970,19 @@
                 "appId": {
                     "target": "smithy.api#Integer",
                     "traits": {
+                        "smithy.api#range": {
+                            "min": 1
+                        },
                         "smithy.api#required": {}
                     }
                 },
                 "nodeId": {
                     "target": "smithy.api#String",
                     "traits": {
+                        "smithy.api#length": {
+                            "min": 1,
+                            "max": 256
+                        },
                         "smithy.api#required": {}
                     }
                 }
@@ -1919,52 +2002,19 @@
                 }
             }
         },
-        "framework.api#NotAuthorizedError": {
-            "type": "structure",
-            "members": {
-                "message": {
-                    "target": "smithy.api#String"
-                }
-            },
-            "traits": {
-                "smithy.api#error": "client",
-                "smithy.api#httpError": 401
-            }
-        },
-        "framework.api#RateLimitError": {
-            "type": "structure",
-            "members": {
-                "message": {
-                    "target": "smithy.api#String"
-                }
-            },
-            "traits": {
-                "smithy.api#error": "client",
-                "smithy.api#httpError": 429
-            }
-        },
         "framework.api#ServerSideError": {
             "type": "structure",
             "members": {
                 "message": {
-                    "target": "smithy.api#String"
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#default": "Internal Server Error"
+                    }
                 }
             },
             "traits": {
                 "smithy.api#error": "server",
                 "smithy.api#httpError": 500
-            }
-        },
-        "framework.api#ServiceUnavailableError": {
-            "type": "structure",
-            "members": {
-                "message": {
-                    "target": "smithy.api#String"
-                }
-            },
-            "traits": {
-                "smithy.api#error": "server",
-                "smithy.api#httpError": 503
             }
         },
         "smithy.framework#ValidationException": {
@@ -2015,6 +2065,54 @@
             "type": "list",
             "member": {
                 "target": "smithy.framework#ValidationExceptionField"
+            }
+        },
+        "smithy.protocols#StringList": {
+            "type": "list",
+            "member": {
+                "target": "smithy.api#String"
+            },
+            "traits": {
+                "smithy.api#documentation": "A list of String shapes.",
+                "smithy.api#private": {}
+            }
+        },
+        "smithy.protocols#rpcv2Cbor": {
+            "type": "structure",
+            "members": {
+                "http": {
+                    "target": "smithy.protocols#StringList",
+                    "traits": {
+                        "smithy.api#documentation": "Priority ordered list of supported HTTP protocol versions."
+                    }
+                },
+                "eventStreamHttp": {
+                    "target": "smithy.protocols#StringList",
+                    "traits": {
+                        "smithy.api#documentation": "Priority ordered list of supported HTTP protocol versions\nthat are required when using event streams."
+                    }
+                }
+            },
+            "traits": {
+                "smithy.api#documentation": "An RPC-based protocol that serializes CBOR payloads.",
+                "smithy.api#protocolDefinition": {
+                    "traits": [
+                        "smithy.api#cors",
+                        "smithy.api#endpoint",
+                        "smithy.api#hostLabel",
+                        "smithy.api#httpError"
+                    ]
+                },
+                "smithy.api#trait": {
+                    "selector": "service"
+                },
+                "smithy.api#traitValidators": {
+                    "rpcv2Cbor.NoDocuments": {
+                        "selector": "service ~> member :test(> document)",
+                        "message": "This protocol does not support document types in most possible scenarios.",
+                        "severity": "DANGER"
+                    }
+                }
             }
         },
         "smithy.rules#ClientContextParamDefinition": {

@@ -1,12 +1,8 @@
 // @ts-nocheck
 // smithy-typescript generated code
 import {
-  AccessDeniedError,
   ClientSideError,
-  GatewayTimeoutError,
-  RateLimitError,
   ServerSideError,
-  ServiceUnavailableError,
   ValidationException,
   ValidationExceptionField,
 } from "../models/models_0";
@@ -42,6 +38,7 @@ import {
   expectString as __expectString,
   _json,
   collectBody,
+  isSerializableHeaderValue,
   map,
   take,
 } from "@smithy/smithy-client";
@@ -264,34 +261,6 @@ export const serializeFrameworkException = async(
   }
 }
 
-export const serializeAccessDeniedErrorError = async(
-  input: AccessDeniedError,
-  ctx: ServerSerdeContext
-): Promise<__HttpResponse> => {
-  const context: __SerdeContext = {
-    ...ctx,
-    endpoint: () => Promise.resolve({
-      protocol: '',
-      hostname: '',
-      path: '',
-    }),
-  }
-  const statusCode: number = 403
-  let headers: any = map({}, isSerializableHeaderValue, {
-    'x-amzn-errortype': "AccessDeniedError",
-    'content-type': 'application/json',
-  });
-  let body: any;
-  body = JSON.stringify(take(input, {
-    'message': [],
-  }));
-  return new __HttpResponse({
-    headers,
-    body,
-    statusCode,
-  });
-}
-
 export const serializeClientSideErrorError = async(
   input: ClientSideError,
   ctx: ServerSerdeContext
@@ -320,62 +289,6 @@ export const serializeClientSideErrorError = async(
   });
 }
 
-export const serializeGatewayTimeoutErrorError = async(
-  input: GatewayTimeoutError,
-  ctx: ServerSerdeContext
-): Promise<__HttpResponse> => {
-  const context: __SerdeContext = {
-    ...ctx,
-    endpoint: () => Promise.resolve({
-      protocol: '',
-      hostname: '',
-      path: '',
-    }),
-  }
-  const statusCode: number = 504
-  let headers: any = map({}, isSerializableHeaderValue, {
-    'x-amzn-errortype': "GatewayTimeoutError",
-    'content-type': 'application/json',
-  });
-  let body: any;
-  body = JSON.stringify(take(input, {
-    'message': [],
-  }));
-  return new __HttpResponse({
-    headers,
-    body,
-    statusCode,
-  });
-}
-
-export const serializeRateLimitErrorError = async(
-  input: RateLimitError,
-  ctx: ServerSerdeContext
-): Promise<__HttpResponse> => {
-  const context: __SerdeContext = {
-    ...ctx,
-    endpoint: () => Promise.resolve({
-      protocol: '',
-      hostname: '',
-      path: '',
-    }),
-  }
-  const statusCode: number = 429
-  let headers: any = map({}, isSerializableHeaderValue, {
-    'x-amzn-errortype': "RateLimitError",
-    'content-type': 'application/json',
-  });
-  let body: any;
-  body = JSON.stringify(take(input, {
-    'message': [],
-  }));
-  return new __HttpResponse({
-    headers,
-    body,
-    statusCode,
-  });
-}
-
 export const serializeServerSideErrorError = async(
   input: ServerSideError,
   ctx: ServerSerdeContext
@@ -391,34 +304,6 @@ export const serializeServerSideErrorError = async(
   const statusCode: number = 500
   let headers: any = map({}, isSerializableHeaderValue, {
     'x-amzn-errortype': "ServerSideError",
-    'content-type': 'application/json',
-  });
-  let body: any;
-  body = JSON.stringify(take(input, {
-    'message': [],
-  }));
-  return new __HttpResponse({
-    headers,
-    body,
-    statusCode,
-  });
-}
-
-export const serializeServiceUnavailableErrorError = async(
-  input: ServiceUnavailableError,
-  ctx: ServerSerdeContext
-): Promise<__HttpResponse> => {
-  const context: __SerdeContext = {
-    ...ctx,
-    endpoint: () => Promise.resolve({
-      protocol: '',
-      hostname: '',
-      path: '',
-    }),
-  }
-  const statusCode: number = 503
-  let headers: any = map({}, isSerializableHeaderValue, {
-    'x-amzn-errortype': "ServiceUnavailableError",
     'content-type': 'application/json',
   });
   let body: any;
@@ -495,11 +380,3 @@ const deserializeMetadata = (output: __HttpResponse): __ResponseMetadata => ({
 
 // Encode Uint8Array data into string with utf-8.
 const collectBodyString = (streamBody: any, context: __SerdeContext): Promise<string> => collectBody(streamBody, context).then(body => context.utf8Encoder(body))
-
-const isSerializableHeaderValue = (value: any): boolean =>
-  value !== undefined &&
-  value !== null &&
-  value !== "" &&
-  (!Object.getOwnPropertyNames(value).includes("length") ||
-    value.length != 0) &&
-  (!Object.getOwnPropertyNames(value).includes("size") || value.size != 0);

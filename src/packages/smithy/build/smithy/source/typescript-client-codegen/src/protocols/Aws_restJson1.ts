@@ -10,12 +10,8 @@ import {
 } from "../commands/GetInstallationTokenCommand";
 import { AppFrameworkServiceException as __BaseException } from "../models/AppFrameworkServiceException";
 import {
-  AccessDeniedError,
   ClientSideError,
-  GatewayTimeoutError,
-  RateLimitError,
   ServerSideError,
-  ServiceUnavailableError,
   ValidationException,
 } from "../models/models_0";
 import {
@@ -149,27 +145,15 @@ const de_CommandError = async(
   };
   const errorCode = loadRestJsonErrorCode(output, parsedOutput.body);
   switch (errorCode) {
-    case "AccessDeniedError":
-    case "framework.api#AccessDeniedError":
-      throw await de_AccessDeniedErrorRes(parsedOutput, context);
     case "ClientSideError":
     case "framework.api#ClientSideError":
       throw await de_ClientSideErrorRes(parsedOutput, context);
-    case "GatewayTimeoutError":
-    case "framework.api#GatewayTimeoutError":
-      throw await de_GatewayTimeoutErrorRes(parsedOutput, context);
     case "ServerSideError":
     case "framework.api#ServerSideError":
       throw await de_ServerSideErrorRes(parsedOutput, context);
-    case "ServiceUnavailableError":
-    case "framework.api#ServiceUnavailableError":
-      throw await de_ServiceUnavailableErrorRes(parsedOutput, context);
     case "ValidationException":
     case "smithy.framework#ValidationException":
       throw await de_ValidationExceptionRes(parsedOutput, context);
-    case "RateLimitError":
-    case "framework.api#RateLimitError":
-      throw await de_RateLimitErrorRes(parsedOutput, context);
     default:
       const parsedBody = parsedOutput.body;
       return throwDefaultError({
@@ -181,27 +165,6 @@ const de_CommandError = async(
   }
 
   const throwDefaultError = withBaseException(__BaseException);
-  /**
-   * deserializeAws_restJson1AccessDeniedErrorRes
-   */
-  const de_AccessDeniedErrorRes = async (
-    parsedOutput: any,
-    context: __SerdeContext
-  ): Promise<AccessDeniedError> => {
-    const contents: any = map({
-    });
-    const data: any = parsedOutput.body;
-    const doc = take(data, {
-      'message': __expectString,
-    });
-    Object.assign(contents, doc);
-    const exception = new AccessDeniedError({
-      $metadata: deserializeMetadata(parsedOutput),
-      ...contents
-    });
-    return __decorateServiceException(exception, parsedOutput.body);
-  };
-
   /**
    * deserializeAws_restJson1ClientSideErrorRes
    */
@@ -224,48 +187,6 @@ const de_CommandError = async(
   };
 
   /**
-   * deserializeAws_restJson1GatewayTimeoutErrorRes
-   */
-  const de_GatewayTimeoutErrorRes = async (
-    parsedOutput: any,
-    context: __SerdeContext
-  ): Promise<GatewayTimeoutError> => {
-    const contents: any = map({
-    });
-    const data: any = parsedOutput.body;
-    const doc = take(data, {
-      'message': __expectString,
-    });
-    Object.assign(contents, doc);
-    const exception = new GatewayTimeoutError({
-      $metadata: deserializeMetadata(parsedOutput),
-      ...contents
-    });
-    return __decorateServiceException(exception, parsedOutput.body);
-  };
-
-  /**
-   * deserializeAws_restJson1RateLimitErrorRes
-   */
-  const de_RateLimitErrorRes = async (
-    parsedOutput: any,
-    context: __SerdeContext
-  ): Promise<RateLimitError> => {
-    const contents: any = map({
-    });
-    const data: any = parsedOutput.body;
-    const doc = take(data, {
-      'message': __expectString,
-    });
-    Object.assign(contents, doc);
-    const exception = new RateLimitError({
-      $metadata: deserializeMetadata(parsedOutput),
-      ...contents
-    });
-    return __decorateServiceException(exception, parsedOutput.body);
-  };
-
-  /**
    * deserializeAws_restJson1ServerSideErrorRes
    */
   const de_ServerSideErrorRes = async (
@@ -280,27 +201,6 @@ const de_CommandError = async(
     });
     Object.assign(contents, doc);
     const exception = new ServerSideError({
-      $metadata: deserializeMetadata(parsedOutput),
-      ...contents
-    });
-    return __decorateServiceException(exception, parsedOutput.body);
-  };
-
-  /**
-   * deserializeAws_restJson1ServiceUnavailableErrorRes
-   */
-  const de_ServiceUnavailableErrorRes = async (
-    parsedOutput: any,
-    context: __SerdeContext
-  ): Promise<ServiceUnavailableError> => {
-    const contents: any = map({
-    });
-    const data: any = parsedOutput.body;
-    const doc = take(data, {
-      'message': __expectString,
-    });
-    Object.assign(contents, doc);
-    const exception = new ServiceUnavailableError({
       $metadata: deserializeMetadata(parsedOutput),
       ...contents
     });
@@ -342,11 +242,3 @@ const de_CommandError = async(
 
   // Encode Uint8Array data into string with utf-8.
   const collectBodyString = (streamBody: any, context: __SerdeContext): Promise<string> => collectBody(streamBody, context).then(body => context.utf8Encoder(body))
-
-  const isSerializableHeaderValue = (value: any): boolean =>
-    value !== undefined &&
-    value !== null &&
-    value !== "" &&
-    (!Object.getOwnPropertyNames(value).includes("length") ||
-      value.length != 0) &&
-    (!Object.getOwnPropertyNames(value).includes("size") || value.size != 0);

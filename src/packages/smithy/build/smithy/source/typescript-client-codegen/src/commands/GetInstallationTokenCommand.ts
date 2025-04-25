@@ -68,14 +68,6 @@ export interface GetInstallationTokenCommandOutput extends GetInstallationTokenO
  *
  * @throws {@link ClientSideError} (client fault)
  *
- * @throws {@link AccessDeniedError} (client fault)
- *
- * @throws {@link RateLimitError} (client fault)
- *
- * @throws {@link GatewayTimeoutError} (server fault)
- *
- * @throws {@link ServiceUnavailableError} (server fault)
- *
  * @throws {@link ValidationException} (client fault)
  *  A standard error for input validation failures.
  * This should be thrown by services when a member of the input structure
@@ -83,6 +75,7 @@ export interface GetInstallationTokenCommandOutput extends GetInstallationTokenO
  *
  * @throws {@link AppFrameworkServiceException}
  * <p>Base exception class for all service exceptions from AppFramework service.</p>
+ *
  *
  */
 export class GetInstallationTokenCommand extends $Command.classBuilder<GetInstallationTokenCommandInput, GetInstallationTokenCommandOutput, AppFrameworkClientResolvedConfig, ServiceInputTypes, ServiceOutputTypes>()
@@ -100,4 +93,15 @@ export class GetInstallationTokenCommand extends $Command.classBuilder<GetInstal
   .ser(se_GetInstallationTokenCommand)
   .de(de_GetInstallationTokenCommand)
 .build() {
+/** @internal type navigation helper, not in runtime. */
+declare protected static __types: {
+  api: {
+      input: GetInstallationTokenInput;
+      output: GetInstallationTokenOutput;
+  };
+  sdk: {
+      input: GetInstallationTokenCommandInput;
+      output: GetInstallationTokenCommandOutput;
+  };
+};
 }

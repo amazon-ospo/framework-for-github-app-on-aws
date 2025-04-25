@@ -60,7 +60,15 @@ describe('handlerImpl', () => {
     });
     expect(response.body).toEqual(
       JSON.stringify({
-        message: 'Request Error: { appId: 1234, nodeId: }',
+        fieldList: [
+          {
+            message:
+              "Value with length 0 at '/nodeId' failed to satisfy constraint: Member must have length between 1 and 256, inclusive",
+            path: '/nodeId',
+          },
+        ],
+        message:
+          "1 validation error detected. Value with length 0 at '/nodeId' failed to satisfy constraint: Member must have length between 1 and 256, inclusive",
       }),
     );
   });
