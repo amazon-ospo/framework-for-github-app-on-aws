@@ -143,6 +143,7 @@
         "smithy.api#xmlFlattened",
         "smithy.api#xmlName",
         "smithy.api#xmlNamespace",
+        "smithy.protocols#rpcv2Cbor",
         "smithy.rules#clientContextParams",
         "smithy.rules#contextParam",
         "smithy.rules#endpointRuleSet",

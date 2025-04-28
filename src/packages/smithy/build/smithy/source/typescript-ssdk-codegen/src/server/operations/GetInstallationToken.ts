@@ -1,26 +1,18 @@
 // @ts-nocheck
 // smithy-typescript generated code
 import {
-  AccessDeniedError,
   ClientSideError,
-  GatewayTimeoutError,
   GetInstallationTokenInput,
   GetInstallationTokenOutput,
-  RateLimitError,
   ServerSideError,
-  ServiceUnavailableError,
   ValidationException,
 } from "../../models/models_0";
 import {
   deserializeGetInstallationTokenRequest,
-  serializeAccessDeniedErrorError,
   serializeClientSideErrorError,
   serializeFrameworkException,
-  serializeGatewayTimeoutErrorError,
   serializeGetInstallationTokenResponse,
-  serializeRateLimitErrorError,
   serializeServerSideErrorError,
-  serializeServiceUnavailableErrorError,
   serializeValidationExceptionError,
 } from "../../protocols/Aws_restJson1";
 import { AppFrameworkService } from "../AppFrameworkService";
@@ -73,14 +65,14 @@ export namespace GetInstallationTokenServerInput {
 }
 export interface GetInstallationTokenServerOutput extends GetInstallationTokenOutput {}
 
-export type GetInstallationTokenErrors = ServerSideError | ClientSideError | AccessDeniedError | RateLimitError | GatewayTimeoutError | ServiceUnavailableError | ValidationException
+export type GetInstallationTokenErrors = ServerSideError | ClientSideError | ValidationException
 
 export class GetInstallationTokenSerializer implements __OperationSerializer<AppFrameworkService<any>, "GetInstallationToken", GetInstallationTokenErrors> {
   serialize = serializeGetInstallationTokenResponse;
   deserialize = deserializeGetInstallationTokenRequest;
 
   isOperationError(error: any): error is GetInstallationTokenErrors {
-    const names: GetInstallationTokenErrors['name'][] = ["ServerSideError", "ClientSideError", "AccessDeniedError", "RateLimitError", "GatewayTimeoutError", "ServiceUnavailableError", "ValidationException"];
+    const names: GetInstallationTokenErrors['name'][] = ["ServerSideError", "ClientSideError", "ValidationException"];
     return names.includes(error.name);
   };
 
@@ -91,18 +83,6 @@ export class GetInstallationTokenSerializer implements __OperationSerializer<App
       }
       case "ClientSideError": {
         return serializeClientSideErrorError(error, ctx);
-      }
-      case "AccessDeniedError": {
-        return serializeAccessDeniedErrorError(error, ctx);
-      }
-      case "RateLimitError": {
-        return serializeRateLimitErrorError(error, ctx);
-      }
-      case "GatewayTimeoutError": {
-        return serializeGatewayTimeoutErrorError(error, ctx);
-      }
-      case "ServiceUnavailableError": {
-        return serializeServiceUnavailableErrorError(error, ctx);
       }
       case "ValidationException": {
         return serializeValidationExceptionError(error, ctx);

@@ -60,6 +60,7 @@ function createAwsAuthSigv4HttpAuthOption(authParameters: AppFrameworkHttpAuthSc
          */
         signingProperties: {
           context,
+          sha256: (config as any).sha256,
         },
       };
     },
@@ -142,9 +143,9 @@ export interface HttpAuthSchemeResolvedConfig {
 export const resolveHttpAuthSchemeConfig = <T>(config: T & HttpAuthSchemeInputConfig): T & HttpAuthSchemeResolvedConfig => {
   const credentials = memoizeIdentityProvider(config.credentials, isIdentityExpired, doesIdentityRequireRefresh);
   const region = config.region ? normalizeProvider(config.region) : undefined;
-  return {
-    ...config,
+  return Object.assign(
+    config, {
     credentials,
     region,
-  } as T & HttpAuthSchemeResolvedConfig;
+  }) as T & HttpAuthSchemeResolvedConfig;
 };

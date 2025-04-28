@@ -2,7 +2,8 @@
   "extends": "./tsconfig",
   "compilerOptions": {
     "lib": ["dom"],
-    "module": "Node16",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "outDir": "dist-es"
   }
 }
