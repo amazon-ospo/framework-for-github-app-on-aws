@@ -5,7 +5,7 @@ import {
   GetInstallationTokenOutput,
 } from '@framework.api/app-framework-ssdk';
 import { getInstallationAccessTokenImpl } from './getInstallationAccessToken';
-import { ClientError, RequestError } from '../../error';
+import { ClientError } from '../../error';
 
 /**
  *  Smithy operation that retrieves Installation Access token from GitHub APIs.
@@ -26,14 +26,11 @@ export const getInstallationAccessTokenOperationImpl: Operation<
      */
     // Smithy default validation does not catch errors such as empty strings hence adding in
     // a second layer of error handling.
-    if (!input.appId || !input.nodeId) {
-      throw new RequestError(
-        `Request Error: { appId: ${input.appId}, nodeId: ${input.nodeId}}`,
-      );
-    }
+
+    const { appId, nodeId } = input as { appId: number; nodeId: string };
     const result = await getInstallationAccessTokenImpl({
-      appId: input.appId,
-      nodeId: input.nodeId,
+      appId,
+      nodeId,
       appTable: _context.appTable,
       installationTable: _context.installationTable,
     });
