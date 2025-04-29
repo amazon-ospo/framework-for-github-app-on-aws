@@ -3,11 +3,11 @@ import { APIGatewayProxyEventV2 } from 'aws-lambda';
 // Helper method used to generate default APIGatewayProxyEventV2 to use as input for handlerImpl testing
 export const apiGatewayEventHelper = ({
   path,
-  nodeId,
+  body,
   version = 2.0,
 }: {
   path: string;
-  nodeId?: string;
+  body?: string;
   version?: number;
 }): APIGatewayProxyEventV2 => {
   return {
@@ -34,7 +34,7 @@ export const apiGatewayEventHelper = ({
       time: 'some-time',
       timeEpoch: 1234567,
     },
-    body: `{"appId": 1234, "nodeId": "${nodeId}"}`,
+    body: body,
     isBase64Encoded: false,
   };
 };

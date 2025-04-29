@@ -1,4 +1,4 @@
-import { Stack } from 'aws-cdk-lib';
+import { Stack, Tags } from 'aws-cdk-lib';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import {
@@ -10,6 +10,7 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import { InstallationAccessTokenEnvironmentVariables } from './constants';
 import { LAMBDA_DEFAULTS } from '../../lambdaDefaults';
+import { TAG_KEYS, TAG_VALUES } from '../constants';
 
 export interface InstallationAcessTokenProps {
   readonly AppTable: ITable;
@@ -48,6 +49,10 @@ export class InstallationAcessTokenGenerator extends Construct {
         allowedHeaders: ['*'],
       },
     });
+    Tags.of(this.functionUrl).add(
+      TAG_KEYS.CREDENTIAL_MANAGER,
+      TAG_VALUES.INSTALLATION_ACCESS_TOKEN_ENDPOINT,
+    );
 
     // Add KMS Sign permission
     this.lambdaHandler.addToRolePolicy(
@@ -59,8 +64,9 @@ export class InstallationAcessTokenGenerator extends Construct {
         ],
         conditions: {
           StringEquals: {
-            'aws:ResourceTag/FrameworkForGitHubAppOnAwsManaged': 'true',
-            'aws:ResourceTag/Status': 'Active',
+            [`aws:ResourceTag/${TAG_KEYS.FRAMEWORK_FOR_GITHUB_APP_ON_AWS_MANAGED}`]:
+              TAG_VALUES.TRUE,
+            [`aws:ResourceTag/${TAG_KEYS.STATUS}`]: TAG_VALUES.ACTIVE,
           },
         },
       }),
