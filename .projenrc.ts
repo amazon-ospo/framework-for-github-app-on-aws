@@ -209,6 +209,9 @@ createPackage({
     "aws-lambda",
     "@aws-smithy/server-apigateway",
     "@framework.api/app-framework-ssdk",
+    "re2-wasm",
+    "@octokit/rest",
+    "@octokit/types",
   ],
   devDeps: ["aws-sdk-client-mock"],
   bundledDeps: [
@@ -221,6 +224,8 @@ createPackage({
     "re2-wasm",
     "@aws-smithy/server-apigateway",
     "@framework.api/app-framework-ssdk",
+    "@octokit/rest",
+    "@octokit/types",
   ],
 });
 

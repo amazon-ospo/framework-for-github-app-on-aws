@@ -10,6 +10,20 @@ import { apiGatewayEventHelper } from '../helper';
 const installationTable = 'baz';
 const appTable = 'foo';
 let environment: { [key: string]: string | undefined };
+
+//TODO: Remove mock after Jest is able to build properly with Octokit
+
+const mockGetInstallations = jest.fn();
+const mockGetInstallationToken = jest.fn();
+
+jest.mock('../../src/gitHubService', () => {
+  return {
+    GitHubAPIService: jest.fn().mockImplementation(() => ({
+      getInstallations: mockGetInstallations,
+      getInstallationToken: mockGetInstallationToken,
+    })),
+  };
+});
 beforeEach(() => {
   environment = { ...process.env };
   process.env[
