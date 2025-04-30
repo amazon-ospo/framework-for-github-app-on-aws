@@ -1,6 +1,10 @@
 import { Octokit } from '@octokit/rest';
 import { DataError, GitHubError } from './error';
-import { AppInstallationType } from './types';
+import {
+  AppAuthenticationResponseType,
+  AppInstallationsResponseType,
+  GetInstallationAccessTokenResponseType,
+} from './types';
 
 export interface GitHubAPIServiceInput {
   readonly appToken?: string;
@@ -25,7 +29,7 @@ export class GitHubAPIService {
     ocktokitClient = this.getOctokitClient.bind(this),
   }: {
     ocktokitClient?: () => Octokit;
-  }): Promise<AppInstallationType[]> {
+  }): Promise<AppInstallationsResponseType> {
     const octokit = ocktokitClient();
     const response = await octokit.rest.apps.listInstallations();
 
@@ -35,7 +39,7 @@ export class GitHubAPIService {
       );
     }
 
-    return response.data as AppInstallationType[];
+    return response.data;
   }
 
   async getInstallationToken({
@@ -44,7 +48,7 @@ export class GitHubAPIService {
   }: {
     installationId: number;
     ocktokitClient?: () => Octokit;
-  }): Promise<string> {
+  }): Promise<GetInstallationAccessTokenResponseType> {
     const octokit = ocktokitClient();
     const response = await octokit.rest.apps.createInstallationAccessToken({
       installation_id: installationId,
@@ -57,7 +61,7 @@ export class GitHubAPIService {
     }
 
     if (!!response.data.token) {
-      return response.data.token;
+      return response.data;
     }
     console.error('GitHub Output:', JSON.stringify(response.data));
     throw new DataError(
@@ -69,7 +73,7 @@ export class GitHubAPIService {
     ocktokitClient = this.getOctokitClient.bind(this),
   }: {
     ocktokitClient?: () => Octokit;
-  }): Promise<{ id: number; name: string }> {
+  }): Promise<AppAuthenticationResponseType> {
     const octokit = ocktokitClient();
     const response = await octokit.rest.apps.getAuthenticated();
     if (response.status >= 400) {
@@ -77,8 +81,8 @@ export class GitHubAPIService {
         `GitHub API Error: status: ${response.status}, statusText: ${response.headers}, error: ${response.data}`,
       );
     }
-    if (!!response.data && response.data.id && !!response.data.name) {
-      return { id: response.data.id, name: response.data.name };
+    if (!!response.data && !!response.data.id && !!response.data.name) {
+      return response.data;
     }
     console.error('GitHub Output:', JSON.stringify(response.data));
     throw new DataError(

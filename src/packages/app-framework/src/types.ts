@@ -1,16 +1,22 @@
+import { Octokit } from '@octokit/rest';
+import { GetResponseDataTypeFromEndpointMethod } from '@octokit/types';
+
+const octokit = new Octokit();
+
 // Output response type from app/installations/${installationId}/access_tokens GitHub API
-export type InstallationAccessTokenResponse = {
-  token: string;
-  expires_at: string;
-  permissions: JSON;
-  repository_selection: string;
-};
+export type GetInstallationAccessTokenResponseType =
+  GetResponseDataTypeFromEndpointMethod<
+    typeof octokit.rest.apps.createInstallationAccessToken
+  >;
 
 // Output response of each installation in /app/installations GitHub API
-export type AppInstallationType = {
-  id: number;
-  account: {
-    node_id: string;
-  };
-  app_id: number;
-};
+export type AppInstallationsResponseType =
+  GetResponseDataTypeFromEndpointMethod<
+    typeof octokit.rest.apps.listInstallations
+  >;
+
+// Output response of each installation in /app GitHub API
+export type AppAuthenticationResponseType =
+  GetResponseDataTypeFromEndpointMethod<
+    typeof octokit.rest.apps.getAuthenticated
+  >;

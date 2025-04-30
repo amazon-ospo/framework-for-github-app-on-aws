@@ -5,7 +5,6 @@ import {
 } from '../../data';
 import { NotFound } from '../../error';
 import { GitHubAPIService } from '../../gitHubService';
-import { AppInstallationType } from '../../types';
 import { GetAppToken, getAppTokenImpl } from '../get-app-token/getAppToken';
 
 export type GetInstallationAccessToken = ({
@@ -62,13 +61,14 @@ export const getInstallationAccessTokenImpl: GetInstallationAccessToken =
         appToken,
       });
       const githubService = new GitHubAPIService({ appToken });
-      const installationAcessToken = await githubService.getInstallationToken({
-        installationId: installationID,
-      });
+      const getInstallationAcessToken =
+        await githubService.getInstallationToken({
+          installationId: installationID,
+        });
       return {
         appId: appId,
         nodeId: nodeId,
-        installationToken: installationAcessToken,
+        installationToken: getInstallationAcessToken.token,
       };
     } catch (error) {
       console.error(error);
@@ -130,10 +130,10 @@ export const getInstallationIdImpl: GetInstallationId = async ({
     let installationID = -1;
 
     if (!!result) {
-      result.map((appInstallation: AppInstallationType) => {
+      result.map((appInstallation) => {
         if (
           appInstallation.app_id === appId &&
-          appInstallation.account.node_id === nodeId
+          appInstallation.account?.node_id === nodeId
         ) {
           installationID = appInstallation.id;
         }

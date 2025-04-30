@@ -3,7 +3,6 @@ import {
   getInstallationAccessTokenImpl,
 } from '../../src/credential-manager/get-installation-access-token/getInstallationAccessToken';
 import { GitHubError, NotFound } from '../../src/error';
-import { AppInstallationType } from '../../src/types';
 
 const mockGetInstallations = jest.fn();
 const mockGetInstallationToken = jest.fn();
@@ -24,7 +23,12 @@ beforeEach(() => {
 
 describe('getInstallationAccessTokenImpl', () => {
   it('should return installation access token with app id and node id', async () => {
-    mockGetInstallationToken.mockResolvedValue('installation-access-token');
+    mockGetInstallationToken.mockResolvedValue({
+      token: 'installation-access-token',
+      expires_at: '2017-07-08T16:18:44-04:00',
+      permissions: {},
+      repository_selection: 'selected',
+    });
 
     const result = await getInstallationAccessTokenImpl({
       appId: 1234,
@@ -83,7 +87,7 @@ describe('getInstallationIdImpl', () => {
   });
 
   it('should return Installation ID if able to find in GitHub output', async () => {
-    const mockSuccessResponse: AppInstallationType[] = [
+    const mockSuccessResponse = [
       {
         id: installationId,
         account: {

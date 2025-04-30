@@ -100,14 +100,15 @@ describe('GitHubAPIService', () => {
     const token = 'foo';
 
     it('should return Installation ID if able to find in GitHub output', async () => {
+      const data = {
+        token,
+        expires_at: '2017-07-08T16:18:44-04:00',
+        permissions: {},
+        repository_selection: 'selected',
+      };
       mockOctokitRest.apps.createInstallationAccessToken.mockResolvedValue({
         status: 201,
-        data: {
-          token,
-          expires_at: '2017-07-08T16:18:44-04:00',
-          permissions: {},
-          repository_selection: 'selected',
-        },
+        data,
         headers: {},
         url: '',
       });
@@ -116,7 +117,7 @@ describe('GitHubAPIService', () => {
         installationId,
         ocktokitClient: () => new Octokit() as any,
       });
-      expect(result).toEqual(token);
+      expect(result).toEqual(data);
     });
 
     it('should throw error if unable to find Installation ID in GitHub output', async () => {

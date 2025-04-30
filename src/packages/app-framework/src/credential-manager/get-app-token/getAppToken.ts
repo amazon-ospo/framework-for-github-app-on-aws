@@ -99,7 +99,7 @@ export const validateAppTokenImpl: ValidateAppToken = async ({
       userAgent: 'KMS-Key-Importer/1.0',
     });
     const data = await githubService.getAuthenticatedApp({});
-    if (data.id !== appId) {
+    if (!!data && data.id !== appId) {
       throw new GitHubError(
         `App ID mismatch: Expected ${appId}, got ${data.id}`,
       );
