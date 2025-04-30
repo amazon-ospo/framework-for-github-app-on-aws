@@ -3,9 +3,10 @@ import {
   ClientSideError,
   GetInstallationTokenInput,
   GetInstallationTokenOutput,
+  ServerSideError,
 } from '@framework.api/app-framework-ssdk';
 import { getInstallationAccessTokenImpl } from './getInstallationAccessToken';
-import { ClientError } from '../../error';
+import { VisibleError } from '../../error';
 
 /**
  *  Smithy operation that retrieves Installation Access token from GitHub APIs.
@@ -21,12 +22,6 @@ export const getInstallationAccessTokenOperationImpl: Operation<
   { appTable: string; installationTable: string }
 > = async (input, _context) => {
   try {
-    /**
-     * TODO: After we change the smithy model to perform empty string validation, delete these.
-     */
-    // Smithy default validation does not catch errors such as empty strings hence adding in
-    // a second layer of error handling.
-
     const { appId, nodeId } = input as { appId: number; nodeId: string };
     const result = await getInstallationAccessTokenImpl({
       appId,
@@ -36,12 +31,12 @@ export const getInstallationAccessTokenOperationImpl: Operation<
     });
     return result;
   } catch (error) {
-    if (error instanceof ClientError) {
+    if (error instanceof VisibleError) {
       throw new ClientSideError({
         message: error.message,
       });
     }
     console.error(error);
-    throw error;
+    throw new ServerSideError({ message: 'Internal Server Error' });
   }
 };

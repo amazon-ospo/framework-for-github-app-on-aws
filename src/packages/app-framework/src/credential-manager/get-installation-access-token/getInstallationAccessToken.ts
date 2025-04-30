@@ -142,7 +142,9 @@ export const getInstallationIdImpl: GetInstallationId = async ({
 
     if (installationID === -1) {
       console.log('Response from GitHub:', JSON.stringify(result));
-      throw new NotFound('Installation ID not found in response');
+      throw new NotFound(
+        `Installation not found in response for app Id: ${appId} and target: ${nodeId}`,
+      );
     }
 
     return installationID;
