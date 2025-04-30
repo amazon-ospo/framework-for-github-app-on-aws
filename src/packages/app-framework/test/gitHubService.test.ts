@@ -15,6 +15,7 @@ const mockOctokitRest = {
   apps: {
     listInstallations: jest.fn<MockOctokitResponse<any>, []>(),
     createInstallationAccessToken: jest.fn<MockOctokitResponse<any>, [any]>(),
+    getAuthenticated: jest.fn<MockOctokitResponse<any>, [any]>(),
   },
 };
 
@@ -149,6 +150,60 @@ describe('GitHubAPIService', () => {
       await expect(
         service.getInstallationToken({
           installationId,
+          ocktokitClient: () => new Octokit() as any,
+        }),
+      ).rejects.toThrow(GitHubError);
+    });
+  });
+
+  describe('getAuthenticatedApp', () => {
+    const id = 1234;
+    const name = 'foo';
+    const output = { id, name };
+
+    it('should return id and name if able to get GitHub output', async () => {
+      mockOctokitRest.apps.getAuthenticated.mockResolvedValue({
+        status: 201,
+        data: output,
+        headers: {},
+        url: '',
+      });
+
+      const result = await service.getAuthenticatedApp({
+        ocktokitClient: () => new Octokit() as any,
+      });
+      expect(result).toEqual(output);
+    });
+
+    it('should throw error if unable to find id or name in GitHub output', async () => {
+      mockOctokitRest.apps.getAuthenticated.mockResolvedValue({
+        status: 201,
+        data: {
+          expires_at: '2017-07-08T16:18:44-04:00',
+          permissions: {},
+          repository_selection: 'selected',
+        },
+        headers: {},
+        url: '',
+      });
+
+      await expect(
+        service.getAuthenticatedApp({
+          ocktokitClient: () => new Octokit() as any,
+        }),
+      ).rejects.toThrow(DataError);
+    });
+
+    it('should throw error if GitHub API has an error', async () => {
+      mockOctokitRest.apps.getAuthenticated.mockResolvedValue({
+        status: 401,
+        data: 'Invalid token',
+        headers: { 'content-type': 'text/plain' },
+        url: '',
+      });
+
+      await expect(
+        service.getAuthenticatedApp({
           ocktokitClient: () => new Octokit() as any,
         }),
       ).rejects.toThrow(GitHubError);

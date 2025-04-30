@@ -2,6 +2,7 @@ import { createHash } from 'crypto';
 import { KMSClient, SignCommand } from '@aws-sdk/client-kms';
 import { getAppKeyArnByIdImpl, GetAppKeyArnById } from '../../data';
 import { GitHubError, ServerError, VisibleError } from '../../error';
+import { GitHubAPIService } from '../../gitHubService';
 
 export const kms = new KMSClient({});
 
@@ -93,23 +94,11 @@ export const validateAppTokenImpl: ValidateAppToken = async ({
   appToken,
 }) => {
   try {
-    const response = await fetch('https://api.github.com/app', {
-      headers: {
-        // eslint-disable-next-line quote-props
-        Authorization: `Bearer ${appToken}`,
-        // eslint-disable-next-line quote-props
-        Accept: 'application/vnd.github.v3+json',
-        'User-Agent': 'KMS-Key-Importer/1.0',
-      },
+    const githubService = new GitHubAPIService({
+      appToken,
+      userAgent: 'KMS-Key-Importer/1.0',
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new GitHubError(
-        `GitHub API Error: status: ${response.status}, statusText: ${response.statusText}, error: ${errorText}`,
-      );
-    }
-    const data = (await response.json()) as { id: number; name: string };
+    const data = await githubService.getAuthenticatedApp({});
     if (data.id !== appId) {
       throw new GitHubError(
         `App ID mismatch: Expected ${appId}, got ${data.id}`,
