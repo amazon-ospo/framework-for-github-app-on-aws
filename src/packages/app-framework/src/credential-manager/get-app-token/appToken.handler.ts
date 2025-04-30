@@ -8,7 +8,7 @@ import {
   GetAppTokenOutput,
   ServerSideError,
 } from '@framework.api/app-framework-ssdk';
-import { APIGatewayProxyEventV2, APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { EnvironmentVariables } from './constants';
 import { getAppTokenOperation as getAppTokenOperationImpl } from './getAppTokenOperation';
 import { EnvironmentError } from '../../error';
@@ -17,7 +17,7 @@ import { EnvironmentError } from '../../error';
  */
 export const handler = async (
   event: APIGatewayProxyEventV2,
-): Promise<APIGatewayProxyResult> => {
+): Promise<APIGatewayProxyResultV2> => {
   return handlerImpl({ event });
 };
 
@@ -35,7 +35,7 @@ export type Handler = ({
     input: GetAppTokenInput,
     _context: { tableName: string },
   ) => Promise<GetAppTokenOutput>;
-}) => Promise<APIGatewayProxyResult>;
+}) => Promise<APIGatewayProxyResultV2>;
 
 /**
  * Core Lambda handler logic for processing GetAppToken requests.

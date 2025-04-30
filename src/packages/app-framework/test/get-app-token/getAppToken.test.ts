@@ -6,6 +6,7 @@ import {
   validateAppTokenImpl,
   kmsSignImpl,
 } from '../../src/credential-manager/get-app-token/getAppToken';
+
 const mockKmsClient = mockClient(KMSClient);
 describe('kmsSignImpl', () => {
   const mockAppKeyArn = 'arn:aws:kms:region:account:key/mock-key-id';

@@ -2,7 +2,7 @@ import {
   GetAppTokenOutput,
   ServerSideError,
 } from '@framework.api/app-framework-ssdk';
-import { APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyResultV2 } from 'aws-lambda';
 import {
   handlerImpl,
   checkEnvironmentImpl,
@@ -29,13 +29,14 @@ describe('handlerImpl', () => {
     const path = 'tokens/app';
     const body = JSON.stringify({ appId: 123456 });
     const event = apiGatewayEventHelper({ path, body });
-    const response: APIGatewayProxyResult = await handlerImpl({
+    const response: APIGatewayProxyResultV2 = await handlerImpl({
       event,
       getAppTokenOperation: mockGetAppTokenOperation,
       checkEnvironment: () => ({ tableName: appTable }),
     });
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toEqual(
+    const parseResponse = JSON.parse(JSON.stringify(response));
+    expect(parseResponse.statusCode).toBe(200);
+    expect(parseResponse.body).toEqual(
       JSON.stringify({
         appId: 123456,
         appToken: 'mock-token',
@@ -46,12 +47,13 @@ describe('handlerImpl', () => {
     const path = 'tokens/app';
     const body = JSON.stringify({ appId: 0 });
     const badEvent = apiGatewayEventHelper({ path, body });
-    const response: APIGatewayProxyResult = await handlerImpl({
+    const response: APIGatewayProxyResultV2 = await handlerImpl({
       event: badEvent,
       getAppTokenOperation: mockGetAppTokenOperation,
       checkEnvironment: () => ({ tableName: appTable }),
     });
-    expect(response.body).toEqual(
+    const parseResponse = JSON.parse(JSON.stringify(response));
+    expect(parseResponse.body).toEqual(
       JSON.stringify({
         fieldList: [
           {
@@ -69,12 +71,13 @@ describe('handlerImpl', () => {
     const path = 'tokens/app';
     const body = JSON.stringify({});
     const badEvent = apiGatewayEventHelper({ path, body });
-    const response: APIGatewayProxyResult = await handlerImpl({
+    const response: APIGatewayProxyResultV2 = await handlerImpl({
       event: badEvent,
       getAppTokenOperation: mockGetAppTokenOperation,
       checkEnvironment: () => ({ tableName: appTable }),
     });
-    expect(response.body).toEqual(
+    const parseResponse = JSON.parse(JSON.stringify(response));
+    expect(parseResponse.body).toEqual(
       JSON.stringify({
         fieldList: [
           {
@@ -102,7 +105,8 @@ describe('handlerImpl', () => {
       getAppTokenOperation: mockRejectedValue,
       checkEnvironment: () => ({ tableName: appTable }),
     });
-    expect(response.body).toEqual(
+    const parseResponse = JSON.parse(JSON.stringify(response));
+    expect(parseResponse.body).toEqual(
       JSON.stringify({ message: 'Internal Server Error' }),
     );
   });
