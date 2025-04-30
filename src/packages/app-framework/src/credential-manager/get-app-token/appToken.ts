@@ -9,6 +9,7 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import { EnvironmentVariables } from './constants';
 import { LAMBDA_DEFAULTS } from '../../lambdaDefaults';
+import { TAG_KEYS, TAG_VALUES } from '../constants';
 
 export interface GitHubAppTokenProps {
   readonly appTableName: string;
@@ -57,12 +58,16 @@ export class GitHubAppToken extends Construct {
         ],
         conditions: {
           StringEquals: {
-            'aws:ResourceTag/FrameworkForGitHubAppOnAwsManaged': 'true',
-            'aws:ResourceTag/Status': 'Active',
+            [`aws:ResourceTag/${TAG_KEYS.FRAMEWORK_FOR_GITHUB_APP_ON_AWS_MANAGED}`]:
+              TAG_VALUES.TRUE,
+            [`aws:ResourceTag/${TAG_KEYS.STATUS}`]: TAG_VALUES.ACTIVE,
           },
         },
       }),
     );
-    Tags.of(this.functionUrl).add('CredentialManager', 'AppTokenEndpoint');
+    Tags.of(this.functionUrl).add(
+      TAG_KEYS.CREDENTIAL_MANAGER,
+      TAG_VALUES.APP_TOKEN_ENDPOINT,
+    );
   }
 }

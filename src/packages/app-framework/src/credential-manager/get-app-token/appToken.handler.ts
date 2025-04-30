@@ -6,6 +6,7 @@ import {
   getGetAppTokenHandler,
   GetAppTokenInput,
   GetAppTokenOutput,
+  ServerSideError,
 } from '@framework.api/app-framework-ssdk';
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { EnvironmentVariables } from './constants';
@@ -53,11 +54,18 @@ export const handlerImpl: Handler = async ({
   checkEnvironment = checkEnvironmentImpl,
   getAppTokenOperation = getAppTokenOperationImpl,
 }) => {
-  const context = checkEnvironment();
-  const httpRequest = convertEvent(event);
-  const appTokenHandler = getGetAppTokenHandler(getAppTokenOperation);
-  const response = await appTokenHandler.handle(httpRequest, context);
-  return convertVersion1Response(response);
+  try {
+    const context = checkEnvironment();
+    const httpRequest = convertEvent(event);
+    const appTokenHandler = getGetAppTokenHandler(getAppTokenOperation);
+    const response = await appTokenHandler.handle(httpRequest, context);
+    return convertVersion1Response(response);
+  } catch (error) {
+    if (error instanceof EnvironmentError) {
+      throw new ServerSideError({ message: 'Internal Server Error' });
+    }
+    throw error;
+  }
 };
 
 /**

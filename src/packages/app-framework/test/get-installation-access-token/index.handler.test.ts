@@ -22,6 +22,7 @@ beforeEach(() => {
 describe('handlerImpl', () => {
   const path = '/tokens/installation';
   const nodeId = 'foo';
+  const body = JSON.stringify({ appId: 1234, nodeId: nodeId });
   const mockCheckEnvironment = jest.fn().mockResolvedValue({
     appTable: 'appTable',
     installationTable: 'installationTable',
@@ -33,7 +34,7 @@ describe('handlerImpl', () => {
   });
   it('should return installation access token with app id and node id', async () => {
     const response: APIGatewayProxyResult = await handlerImpl({
-      event: apiGatewayEventHelper({ path, nodeId }),
+      event: apiGatewayEventHelper({ path, body }),
       getInstallationAccessTokenOperation:
         mockGetInstallationAccessTokenOperation,
       checkEnvironment: mockCheckEnvironment,
@@ -48,14 +49,15 @@ describe('handlerImpl', () => {
   });
   it('should return empty json for any error occuring inside of operation', async () => {
     const response: APIGatewayProxyResult = await handlerImpl({
-      event: apiGatewayEventHelper({ path, nodeId }),
+      event: apiGatewayEventHelper({ path, body }),
       checkEnvironment: mockCheckEnvironment,
     });
     expect(response.body).toEqual(JSON.stringify({}));
   });
   it('should return message for request error', async () => {
+    const badInput = JSON.stringify({ appId: 1234, nodeId: '' });
     const response: APIGatewayProxyResult = await handlerImpl({
-      event: apiGatewayEventHelper({ path, nodeId: '' }),
+      event: apiGatewayEventHelper({ path, body: badInput }),
       checkEnvironment: mockCheckEnvironment,
     });
     expect(response.body).toEqual(

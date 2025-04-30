@@ -1,6 +1,6 @@
 import { Runtime, Tracing } from 'aws-cdk-lib/aws-lambda';
 
-export const LAMBDA_NODE_VERSION = Runtime.NODEJS_18_X;
+export const LAMBDA_NODE_VERSION = Runtime.NODEJS_22_X;
 export const LAMBDA_DEFAULTS = {
   runtime: LAMBDA_NODE_VERSION,
   tracing: Tracing.ACTIVE,
