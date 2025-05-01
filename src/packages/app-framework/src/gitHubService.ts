@@ -1,68 +1,92 @@
+import { Octokit } from '@octokit/rest';
 import { DataError, GitHubError } from './error';
-import { AppInstallationType, InstallationAccessTokenResponse } from './types';
+import {
+  AppAuthenticationResponseType,
+  AppInstallationsResponseType,
+  GetInstallationAccessTokenResponseType,
+} from './types';
 
 export interface GitHubAPIServiceInput {
   readonly appToken?: string;
+  readonly userAgent?: string;
 }
 
 export class GitHubAPIService {
   private readonly config: GitHubAPIServiceInput;
+
   constructor(input: GitHubAPIServiceInput) {
     this.config = input;
   }
 
-  // TODO: Replace all fetch calls with calls from the Octokit
-  async getInstallations(): Promise<AppInstallationType[]> {
-    const response = await fetch('https://api.github.com/app/installations', {
-      headers: {
-        // eslint-disable-next-line quote-props
-        Authorization: `Bearer ${this.config.appToken}`,
-        // eslint-disable-next-line quote-props
-        Accept: 'application/vnd.github.v3+json',
-      },
+  getOctokitClient() {
+    return new Octokit({
+      auth: this.config.appToken,
+      userAgent: this.config.userAgent,
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new GitHubError(
-        `GitHub API Error: status: ${response.status}, statusText: ${response.statusText}, error: ${errorText}`,
-      );
-    }
-
-    const result: any = (await response.json()) as AppInstallationType[];
-    return result;
   }
 
-  async getInstallationToken(installationId: number): Promise<string> {
-    const response = await fetch(
-      `https://api.github.com/app/installations/${installationId}/access_tokens`,
-      {
-        method: 'POST',
-        headers: {
-          // eslint-disable-next-line quote-props
-          Authorization: `Bearer ${this.config.appToken}`,
-          // eslint-disable-next-line quote-props
-          Accept: 'application/vnd.github.v3+json',
-        },
-      },
-    );
+  async getInstallations({
+    ocktokitClient = this.getOctokitClient.bind(this),
+  }: {
+    ocktokitClient?: () => Octokit;
+  }): Promise<AppInstallationsResponseType> {
+    const octokit = ocktokitClient();
+    const response = await octokit.rest.apps.listInstallations();
 
-    if (!response.ok) {
-      const errorText = await response.text();
+    if (response.status >= 400) {
       throw new GitHubError(
-        `GitHub API Error: status: ${response.status}, statusText: ${response.statusText}, error: ${errorText}`,
+        `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
       );
     }
 
-    const result: InstallationAccessTokenResponse =
-      (await response.json()) as InstallationAccessTokenResponse;
+    return response.data;
+  }
 
-    if (!!result.token) {
-      return result.token;
+  async getInstallationToken({
+    installationId,
+    ocktokitClient = this.getOctokitClient.bind(this),
+  }: {
+    installationId: number;
+    ocktokitClient?: () => Octokit;
+  }): Promise<GetInstallationAccessTokenResponseType> {
+    const octokit = ocktokitClient();
+    const response = await octokit.rest.apps.createInstallationAccessToken({
+      installation_id: installationId,
+    });
+
+    if (response.status >= 400) {
+      throw new GitHubError(
+        `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
+      );
     }
-    console.error('GitHub Output:', JSON.stringify(result));
+
+    if (!!response.data.token) {
+      return response.data;
+    }
+    console.error('GitHub Output:', JSON.stringify(response.data));
     throw new DataError(
       'GitHub API Error: No installation access token returned',
+    );
+  }
+
+  async getAuthenticatedApp({
+    ocktokitClient = this.getOctokitClient.bind(this),
+  }: {
+    ocktokitClient?: () => Octokit;
+  }): Promise<AppAuthenticationResponseType> {
+    const octokit = ocktokitClient();
+    const response = await octokit.rest.apps.getAuthenticated();
+    if (response.status >= 400) {
+      throw new GitHubError(
+        `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
+      );
+    }
+    if (!!response.data && !!response.data.id && !!response.data.name) {
+      return response.data;
+    }
+    console.error('GitHub Output:', JSON.stringify(response.data));
+    throw new DataError(
+      'GitHub API Error: No name or id returned for authenticated app',
     );
   }
 }

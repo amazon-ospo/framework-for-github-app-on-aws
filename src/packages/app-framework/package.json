@@ -65,6 +65,8 @@
     "@aws-smithy/server-apigateway": "^1.0.0-alpha.10",
     "@aws-smithy/server-common": "^1.0.0-alpha.10",
     "@framework.api/app-framework-ssdk": "^0.0.1",
+    "@octokit/rest": "^21.1.1",
+    "@octokit/types": "^14.0.0",
     "aws-lambda": "^1.0.7",
     "aws-xray-sdk": "^3.10.3",
     "re2-wasm": "^1.0.2"
@@ -76,6 +78,8 @@
     "@aws-smithy/server-apigateway",
     "@aws-smithy/server-common",
     "@framework.api/app-framework-ssdk",
+    "@octokit/rest",
+    "@octokit/types",
     "aws-lambda",
     "aws-xray-sdk",
     "re2-wasm"

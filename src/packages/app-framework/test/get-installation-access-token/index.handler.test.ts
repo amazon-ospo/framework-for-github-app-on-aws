@@ -10,6 +10,20 @@ import { apiGatewayEventHelper } from '../helper';
 const installationTable = 'baz';
 const appTable = 'foo';
 let environment: { [key: string]: string | undefined };
+
+//TODO: Remove mock after Jest is able to build properly with Octokit
+
+const mockGetInstallations = jest.fn();
+const mockGetInstallationToken = jest.fn();
+
+jest.mock('../../src/gitHubService', () => {
+  return {
+    GitHubAPIService: jest.fn().mockImplementation(() => ({
+      getInstallations: mockGetInstallations,
+      getInstallationToken: mockGetInstallationToken,
+    })),
+  };
+});
 beforeEach(() => {
   environment = { ...process.env };
   process.env[
@@ -47,12 +61,14 @@ describe('handlerImpl', () => {
       }),
     );
   });
-  it('should return empty json for any error occuring inside of operation', async () => {
+  it('should return internal server error for any error occuring inside of operation', async () => {
     const response: APIGatewayProxyResult = await handlerImpl({
       event: apiGatewayEventHelper({ path, body }),
       checkEnvironment: mockCheckEnvironment,
     });
-    expect(response.body).toEqual(JSON.stringify({}));
+    expect(response.body).toEqual(
+      JSON.stringify({ message: 'Internal Server Error' }),
+    );
   });
   it('should return message for request error', async () => {
     const badInput = JSON.stringify({ appId: 1234, nodeId: '' });

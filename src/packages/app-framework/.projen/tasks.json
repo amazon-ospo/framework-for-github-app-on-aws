@@ -176,13 +176,13 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@types/jest,@types/node,aws-sdk-client-mock,eslint-import-resolver-typescript,eslint-plugin-import,eslint-plugin-md,eslint-plugin-prettier,jest,jsii-diff,jsii-pacmak,markdown-eslint-parser,ts-jest,typescript,@aws-sdk/client-dynamodb,@aws-sdk/client-kms,@aws-sdk/util-dynamodb,@aws-smithy/server-apigateway,@aws-smithy/server-common,@framework.api/app-framework-ssdk,aws-lambda,aws-xray-sdk,re2-wasm"
+          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@types/jest,@types/node,aws-sdk-client-mock,eslint-import-resolver-typescript,eslint-plugin-import,eslint-plugin-md,eslint-plugin-prettier,jest,jsii-diff,jsii-pacmak,markdown-eslint-parser,ts-jest,typescript,@aws-sdk/client-dynamodb,@aws-sdk/client-kms,@aws-sdk/util-dynamodb,@aws-smithy/server-apigateway,@aws-smithy/server-common,@framework.api/app-framework-ssdk,@octokit/rest,@octokit/types,aws-lambda,aws-xray-sdk,re2-wasm"
         },
         {
           "exec": "yarn install --check-files"
         },
         {
-          "exec": "yarn upgrade @stylistic/eslint-plugin @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-sdk-client-mock eslint-import-resolver-typescript eslint-plugin-import eslint-plugin-md eslint-plugin-prettier eslint jest jest-junit jsii-diff jsii-pacmak jsii-rosetta jsii markdown-eslint-parser ts-jest typescript @aws-sdk/client-dynamodb @aws-sdk/client-kms @aws-sdk/util-dynamodb @aws-smithy/server-apigateway @aws-smithy/server-common @framework.api/app-framework-ssdk aws-lambda aws-xray-sdk re2-wasm aws-cdk-lib constructs"
+          "exec": "yarn upgrade @stylistic/eslint-plugin @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-sdk-client-mock eslint-import-resolver-typescript eslint-plugin-import eslint-plugin-md eslint-plugin-prettier eslint jest jest-junit jsii-diff jsii-pacmak jsii-rosetta jsii markdown-eslint-parser ts-jest typescript @aws-sdk/client-dynamodb @aws-sdk/client-kms @aws-sdk/util-dynamodb @aws-smithy/server-apigateway @aws-smithy/server-common @framework.api/app-framework-ssdk @octokit/rest @octokit/types aws-lambda aws-xray-sdk re2-wasm aws-cdk-lib constructs"
         },
         {
           "exec": "npx projen"

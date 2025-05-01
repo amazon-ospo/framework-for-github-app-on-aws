@@ -6,16 +6,32 @@ import {
   validateAppTokenImpl,
   kmsSignImpl,
 } from '../../src/credential-manager/get-app-token/getAppToken';
+import { GitHubError } from '../../src/error';
 
+//TODO: Remove mock after Jest is able to build properly with Octokit
+const mockGetInstallations = jest.fn();
+const mockGetInstallationToken = jest.fn();
+const mockGetAuthenticatedApp = jest.fn();
+jest.mock('../../src/gitHubService', () => {
+  return {
+    GitHubAPIService: jest.fn().mockImplementation(() => ({
+      getInstallations: mockGetInstallations,
+      getInstallationToken: mockGetInstallationToken,
+      getAuthenticatedApp: mockGetAuthenticatedApp,
+    })),
+  };
+});
 const mockKmsClient = mockClient(KMSClient);
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 describe('kmsSignImpl', () => {
   const mockAppKeyArn = 'arn:aws:kms:region:account:key/mock-key-id';
   const mockMessage = 'testMessage';
   const mockSignature = Buffer.from('mock-signature');
   const expectedMessageHash = createHash('sha256').update(mockMessage).digest();
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
   it('should return a valid signature when signing a message with a valid KMS key', async () => {
     const mockSignResponse: SignCommandOutput = {
       $metadata: { requestId: 'mock-request-id' },
@@ -60,20 +76,8 @@ describe('kmsSignImpl', () => {
   });
 });
 describe('validateAppTokenImpl', () => {
-  let mockFetch = jest.spyOn(global, 'fetch');
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
   it('should succeed if GitHub API validates the App Token successfully', async () => {
-    const mockSuccessResponse = new Response(
-      JSON.stringify({ id: 12345, name: 'Test App' }),
-      {
-        status: 200,
-        statusText: 'OK',
-        headers: new Headers({ 'content-type': 'application/json' }),
-      },
-    );
-    mockFetch.mockResolvedValue(mockSuccessResponse);
+    mockGetAuthenticatedApp.mockResolvedValue({ id: 12345, name: 'Test App' });
     await expect(
       validateAppTokenImpl({
         appId: 12345,
@@ -82,15 +86,7 @@ describe('validateAppTokenImpl', () => {
     ).resolves.toBeUndefined();
   });
   it('should throw if the GitHub App ID does not match', async () => {
-    const mismatchResponse = new Response(
-      JSON.stringify({ id: 54321, name: 'Wrong App' }),
-      {
-        status: 200,
-        statusText: 'OK',
-        headers: new Headers({ 'content-type': 'application/json' }),
-      },
-    );
-    mockFetch.mockResolvedValueOnce(mismatchResponse);
+    mockGetAuthenticatedApp.mockResolvedValue({ id: 54321, name: 'Wrong App' });
     await expect(
       validateAppTokenImpl({
         appId: 12345,
@@ -99,12 +95,11 @@ describe('validateAppTokenImpl', () => {
     ).rejects.toThrow('App ID mismatch: Expected 12345, got 54321');
   });
   it('should throw if the GitHub API returns an error', async () => {
-    const errorResponse = new Response('Invalid token', {
-      status: 401,
-      statusText: 'Unauthorized',
-      headers: new Headers({ 'content-type': 'text/plain' }),
-    });
-    mockFetch.mockResolvedValueOnce(errorResponse);
+    mockGetAuthenticatedApp.mockRejectedValueOnce(
+      new GitHubError(
+        'GitHub API Error: status: 401, statusText: Unauthorized, error: Invalid token',
+      ),
+    );
     await expect(
       validateAppTokenImpl({
         appId: 12345,
@@ -115,7 +110,9 @@ describe('validateAppTokenImpl', () => {
     );
   });
   it('should throw if the GitHub API call fails', async () => {
-    mockFetch.mockRejectedValueOnce(new Error('GitHub Network error'));
+    mockGetAuthenticatedApp.mockRejectedValueOnce(
+      new Error('GitHub Network error'),
+    );
     await expect(
       validateAppTokenImpl({
         appId: 12345,
@@ -131,9 +128,6 @@ describe('getAppTokenImpl', () => {
   const mockTableName = 'TestTable';
   const mockArn = 'arn:aws:kms:region:account:key/mock-key-id';
   const mockSignature = Buffer.from('mock-signature');
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
   it('should successfully generate an App token', async () => {
     const mockGetArn = jest.fn().mockResolvedValue(mockArn);
     const mockKmsSign = jest.fn().mockResolvedValue(mockSignature);

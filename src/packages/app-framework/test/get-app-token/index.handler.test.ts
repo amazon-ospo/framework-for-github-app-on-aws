@@ -11,6 +11,20 @@ import { EnvironmentVariables } from '../../src/credential-manager/get-app-token
 import { EnvironmentError } from '../../src/error';
 import { apiGatewayEventHelper } from '../helper';
 
+//TODO: Remove mock after Jest is able to build properly with Octokit
+
+const mockGetInstallations = jest.fn();
+const mockGetInstallationToken = jest.fn();
+
+jest.mock('../../src/gitHubService', () => {
+  return {
+    GitHubAPIService: jest.fn().mockImplementation(() => ({
+      getInstallations: mockGetInstallations,
+      getInstallationToken: mockGetInstallationToken,
+    })),
+  };
+});
+
 const appTable = 'mockAppTable';
 let originalEnv: NodeJS.ProcessEnv;
 beforeEach(() => {

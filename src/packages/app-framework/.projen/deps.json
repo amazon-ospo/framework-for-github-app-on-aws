@@ -112,6 +112,14 @@
       "type": "bundled"
     },
     {
+      "name": "@octokit/rest",
+      "type": "bundled"
+    },
+    {
+      "name": "@octokit/types",
+      "type": "bundled"
+    },
+    {
       "name": "aws-lambda",
       "type": "bundled"
     },
@@ -158,11 +166,23 @@
       "type": "runtime"
     },
     {
+      "name": "@octokit/rest",
+      "type": "runtime"
+    },
+    {
+      "name": "@octokit/types",
+      "type": "runtime"
+    },
+    {
       "name": "aws-lambda",
       "type": "runtime"
     },
     {
       "name": "aws-xray-sdk",
+      "type": "runtime"
+    },
+    {
+      "name": "re2-wasm",
       "type": "runtime"
     }
   ],

@@ -2,32 +2,64 @@ import {
   getInstallationIdImpl,
   getInstallationAccessTokenImpl,
 } from '../../src/credential-manager/get-installation-access-token/getInstallationAccessToken';
-import { GitHubError } from '../../src/error';
-import { GitHubAPIService } from '../../src/gitHubService';
-import { AppInstallationType } from '../../src/types';
+import { GitHubError, NotFound } from '../../src/error';
 
-jest.mock('../../src/gitHubService');
-const mockGitHubService = GitHubAPIService as jest.MockedClass<
-  typeof GitHubAPIService
->;
+const mockGetInstallations = jest.fn();
+const mockGetInstallationToken = jest.fn();
+
+//TODO: Remove mock after Jest is able to build properly with Octokit
+jest.mock('../../src/gitHubService', () => {
+  return {
+    GitHubAPIService: jest.fn().mockImplementation(() => ({
+      getInstallations: mockGetInstallations,
+      getInstallationToken: mockGetInstallationToken,
+    })),
+  };
+});
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 describe('getInstallationAccessTokenImpl', () => {
   it('should return installation access token with app id and node id', async () => {
-    mockGitHubService.prototype.getInstallationToken.mockResolvedValue(
-      'installation-access-token',
-    );
+    mockGetInstallationToken.mockResolvedValue({
+      token: 'installation-access-token',
+      expires_at: '2017-07-08T16:18:44-04:00',
+      permissions: {},
+      repository_selection: 'selected',
+    });
+
     const result = await getInstallationAccessTokenImpl({
       appId: 1234,
       nodeId: 'test-id',
       appTable: 'AppTable',
       installationTable: 'InstallationTable',
-      getAppToken: jest.fn().mockReturnValue('app-token'),
-      getInstallationId: jest.fn().mockReturnValue(6789),
+      getAppToken: jest.fn().mockResolvedValue('app-token'),
+      getInstallationId: jest.fn().mockResolvedValue(6789),
     });
+
     expect(result).toEqual({
       appId: 1234,
       nodeId: 'test-id',
       installationToken: 'installation-access-token',
     });
+  });
+  it('should throw error when receiving an error generating installation access token', async () => {
+    mockGetInstallationToken.mockRejectedValue(
+      new Error('Failed to generate token.'),
+    );
+
+    await expect(
+      getInstallationAccessTokenImpl({
+        appId: 1234,
+        nodeId: 'test-id',
+        appTable: 'AppTable',
+        installationTable: 'InstallationTable',
+        getAppToken: jest.fn().mockResolvedValue('app-token'),
+        getInstallationId: jest.fn().mockResolvedValue(6789),
+      }),
+    ).rejects.toThrow('Failed to generate token.');
   });
 });
 
@@ -37,13 +69,12 @@ describe('getInstallationIdImpl', () => {
   const installationId = 3456;
   const installationTable = 'baz';
   const appToken = 'jwtToken';
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
+
   it('should return Installation ID if able to find in table', async () => {
     const getInstallationIdFromTable = jest
       .fn()
-      .mockReturnValue(installationId);
+      .mockResolvedValue(installationId);
+
     const result = await getInstallationIdImpl({
       appId,
       nodeId,
@@ -51,10 +82,12 @@ describe('getInstallationIdImpl', () => {
       installationTable,
       appToken,
     });
+
     expect(result).toEqual(installationId);
   });
+
   it('should return Installation ID if able to find in GitHub output', async () => {
-    const mockSuccessResponse: AppInstallationType[] = [
+    const mockSuccessResponse = [
       {
         id: installationId,
         account: {
@@ -70,18 +103,20 @@ describe('getInstallationIdImpl', () => {
         app_id: 1011,
       },
     ];
-    mockGitHubService.prototype.getInstallations.mockResolvedValue(
-      mockSuccessResponse,
-    );
+
+    mockGetInstallations.mockResolvedValue(mockSuccessResponse);
+
     const result = await getInstallationIdImpl({
       appId,
       nodeId,
       installationTable,
       appToken,
     });
+
     expect(result).toEqual(installationId);
   });
-  it('should thow error if Installation ID not found in GitHub output', async () => {
+
+  it('should throw error if Installation ID not found in GitHub output', async () => {
     const mockSuccessResponse = [
       {
         id: 788,
@@ -99,9 +134,7 @@ describe('getInstallationIdImpl', () => {
       },
     ];
 
-    mockGitHubService.prototype.getInstallations.mockResolvedValue(
-      mockSuccessResponse,
-    );
+    mockGetInstallations.mockResolvedValue(mockSuccessResponse);
 
     await expect(
       getInstallationIdImpl({
@@ -110,14 +143,15 @@ describe('getInstallationIdImpl', () => {
         installationTable,
         appToken,
       }),
-    ).rejects.toThrow('Installation ID not found in response');
+    ).rejects.toThrow(NotFound);
   });
-  it('should thow error if GitHub API has an error', async () => {
-    mockGitHubService.prototype.getInstallations.mockRejectedValue(() => {
-      throw new GitHubError(
+
+  it('should throw error if GitHub API has an error', async () => {
+    mockGetInstallations.mockRejectedValue(
+      new GitHubError(
         'GitHub API Error: status: 401, statusText: Unauthorized, error: Invalid token',
-      );
-    });
+      ),
+    );
 
     await expect(
       getInstallationIdImpl({

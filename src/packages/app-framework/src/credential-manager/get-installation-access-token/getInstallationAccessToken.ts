@@ -5,7 +5,6 @@ import {
 } from '../../data';
 import { NotFound } from '../../error';
 import { GitHubAPIService } from '../../gitHubService';
-import { AppInstallationType } from '../../types';
 import { GetAppToken, getAppTokenImpl } from '../get-app-token/getAppToken';
 
 export type GetInstallationAccessToken = ({
@@ -62,12 +61,13 @@ export const getInstallationAccessTokenImpl: GetInstallationAccessToken =
         appToken,
       });
       const githubService = new GitHubAPIService({ appToken });
-      const installationAcessToken =
-        await githubService.getInstallationToken(installationID);
+      const installationAccessToken = await githubService.getInstallationToken({
+        installationId: installationID,
+      });
       return {
         appId: appId,
         nodeId: nodeId,
-        installationToken: installationAcessToken,
+        installationToken: installationAccessToken.token,
       };
     } catch (error) {
       console.error(error);
@@ -125,14 +125,14 @@ export const getInstallationIdImpl: GetInstallationId = async ({
   } catch (error) {
     console.log('Unable to read from table trying to read from GitHub API...');
     const githubService = new GitHubAPIService({ appToken });
-    const result = await githubService.getInstallations();
+    const result = await githubService.getInstallations({});
     let installationID = -1;
 
     if (!!result) {
-      result.map((appInstallation: AppInstallationType) => {
+      result.map((appInstallation) => {
         if (
           appInstallation.app_id === appId &&
-          appInstallation.account.node_id === nodeId
+          appInstallation.account!.node_id === nodeId
         ) {
           installationID = appInstallation.id;
         }
@@ -141,7 +141,9 @@ export const getInstallationIdImpl: GetInstallationId = async ({
 
     if (installationID === -1) {
       console.log('Response from GitHub:', JSON.stringify(result));
-      throw new NotFound('Installation ID not found in response');
+      throw new NotFound(
+        `Installation not found in response for app Id: ${appId} and target: ${nodeId}`,
+      );
     }
 
     return installationID;
