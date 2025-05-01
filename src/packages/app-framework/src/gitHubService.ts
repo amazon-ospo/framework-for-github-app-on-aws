@@ -35,7 +35,7 @@ export class GitHubAPIService {
 
     if (response.status >= 400) {
       throw new GitHubError(
-        `GitHub API Error: status: ${response.status}, statusText: ${response.headers}, error: ${response.data}`,
+        `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
       );
     }
 
@@ -56,7 +56,7 @@ export class GitHubAPIService {
 
     if (response.status >= 400) {
       throw new GitHubError(
-        `GitHub API Error: status: ${response.status}, statusText: ${response.headers}, error: ${response.data}`,
+        `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
       );
     }
 
@@ -78,7 +78,7 @@ export class GitHubAPIService {
     const response = await octokit.rest.apps.getAuthenticated();
     if (response.status >= 400) {
       throw new GitHubError(
-        `GitHub API Error: status: ${response.status}, statusText: ${response.headers}, error: ${response.data}`,
+        `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
       );
     }
     if (!!response.data && !!response.data.id && !!response.data.name) {

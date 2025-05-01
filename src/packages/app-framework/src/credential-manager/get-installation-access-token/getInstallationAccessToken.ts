@@ -61,14 +61,13 @@ export const getInstallationAccessTokenImpl: GetInstallationAccessToken =
         appToken,
       });
       const githubService = new GitHubAPIService({ appToken });
-      const getInstallationAcessToken =
-        await githubService.getInstallationToken({
-          installationId: installationID,
-        });
+      const installationAccessToken = await githubService.getInstallationToken({
+        installationId: installationID,
+      });
       return {
         appId: appId,
         nodeId: nodeId,
-        installationToken: getInstallationAcessToken.token,
+        installationToken: installationAccessToken.token,
       };
     } catch (error) {
       console.error(error);
@@ -133,7 +132,7 @@ export const getInstallationIdImpl: GetInstallationId = async ({
       result.map((appInstallation) => {
         if (
           appInstallation.app_id === appId &&
-          appInstallation.account?.node_id === nodeId
+          appInstallation.account!.node_id === nodeId
         ) {
           installationID = appInstallation.id;
         }
