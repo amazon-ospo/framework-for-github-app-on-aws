@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import { GetInstallationTokenOutput } from '@framework.api/app-framework-ssdk';
 import {
   GetInstallationIdFromTable,
@@ -58,16 +59,27 @@ export const getInstallationAccessTokenImpl: GetInstallationAccessToken =
         appId: appId,
         nodeId: nodeId,
         installationTable: installationTable,
-        appToken,
+        appToken: appToken.appToken,
       });
-      const githubService = new GitHubAPIService({ appToken });
+      const githubService = new GitHubAPIService({
+        appToken: appToken.appToken,
+      });
       const installationAccessToken = await githubService.getInstallationToken({
         installationId: installationID,
       });
+      console.log(
+        'Installation Access Token:',
+        encodeURIComponent(
+          createHash('sha256')
+            .update(installationAccessToken.token)
+            .digest('hex'),
+        ),
+      );
       return {
         appId: appId,
         nodeId: nodeId,
         installationToken: installationAccessToken.token,
+        expirationTime: new Date(installationAccessToken.expires_at),
       };
     } catch (error) {
       console.error(error);

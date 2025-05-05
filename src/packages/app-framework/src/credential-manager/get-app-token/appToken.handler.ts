@@ -8,7 +8,12 @@ import {
   GetAppTokenOutput,
   ServerSideError,
 } from '@framework.api/app-framework-ssdk';
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import {
+  APIGatewayEventRequestContextIAMAuthorizer,
+  APIGatewayEventRequestContextV2WithAuthorizer,
+  APIGatewayProxyEventV2,
+  APIGatewayProxyResultV2,
+} from 'aws-lambda';
 import { EnvironmentVariables } from './constants';
 import { getAppTokenOperation as getAppTokenOperationImpl } from './getAppTokenOperation';
 import { EnvironmentError } from '../../error';
@@ -18,6 +23,9 @@ import { EnvironmentError } from '../../error';
 export const handler = async (
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> => {
+  const context =
+    event.requestContext as APIGatewayEventRequestContextV2WithAuthorizer<APIGatewayEventRequestContextIAMAuthorizer>;
+  console.log('Caller Identity:', context.authorizer.iam.userArn);
   return handlerImpl({ event });
 };
 

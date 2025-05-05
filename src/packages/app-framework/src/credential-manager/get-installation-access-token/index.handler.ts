@@ -8,8 +8,9 @@ import {
   getGetInstallationTokenHandler,
 } from '@framework.api/app-framework-ssdk';
 import {
+  APIGatewayEventRequestContextIAMAuthorizer,
+  APIGatewayEventRequestContextV2WithAuthorizer,
   APIGatewayProxyEventV2,
-  APIGatewayProxyResult,
   APIGatewayProxyResultV2,
 } from 'aws-lambda';
 import { InstallationAccessTokenEnvironmentVariables } from './constants';
@@ -22,6 +23,9 @@ import { EnvironmentError } from '../../error';
 export const handler = async (
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> => {
+  const context =
+    event.requestContext as APIGatewayEventRequestContextV2WithAuthorizer<APIGatewayEventRequestContextIAMAuthorizer>;
+  console.log('Caller Identity:', context.authorizer.iam.userArn);
   return handlerImpl({ event });
 };
 
@@ -36,7 +40,7 @@ export type Handler = ({
     input: GetInstallationTokenInput,
     _context: { appTable: string; installationTable: string },
   ) => Promise<GetInstallationTokenOutput>;
-}) => Promise<APIGatewayProxyResult>;
+}) => Promise<APIGatewayProxyResultV2>;
 
 /**
  * Core Lambda handler logic for processing GetAppToken requests.

@@ -182,6 +182,7 @@
         "smithy.api#recommended",
         "smithy.api#required",
         "smithy.api#tags",
+        "smithy.api#timestampFormat",
         "smithy.api#title",
         "smithy.api#trait",
         "smithy.api#traitValidators",

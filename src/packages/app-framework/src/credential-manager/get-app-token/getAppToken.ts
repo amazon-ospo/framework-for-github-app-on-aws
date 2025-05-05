@@ -18,7 +18,7 @@ export type GetAppToken = ({
   getAppKeyArnbyId?: GetAppKeyArnById;
   kmsSign?: KmsSign;
   validateAppToken?: ValidateAppToken;
-}) => Promise<string>;
+}) => Promise<{ appToken: string; expiration_time: Date }>;
 /**
  * Generates a signed App Token using AWS KMS and validates it against the GitHub App API.
  *
@@ -41,15 +41,17 @@ export const getAppTokenImpl: GetAppToken = async ({
   kmsSign = kmsSignImpl,
   validateAppToken = validateAppTokenImpl,
 }) => {
+  console.log('App ID: ', appId);
   try {
     const header = {
       alg: 'RS256',
       typ: 'JWT',
     };
     const now = Math.floor(Date.now() / 1000);
+    const exp = now + 10 * 60;
     const payload = {
       iat: now - 60,
-      exp: now + 10 * 60,
+      exp,
       iss: appId,
     };
     const encodedHeader = Buffer.from(JSON.stringify(header)).toString(
@@ -64,7 +66,11 @@ export const getAppTokenImpl: GetAppToken = async ({
     const encodedSignature = signature.toString('base64url');
     const appToken = `${signingInput}.${encodedSignature}`;
     await validateAppToken({ appId, appToken });
-    return appToken;
+    console.log(
+      'App Token:',
+      encodeURIComponent(createHash('sha256').update(appToken).digest('hex')),
+    );
+    return { appToken, expiration_time: new Date(exp * 1000) };
   } catch (error) {
     if (error instanceof VisibleError) {
       throw error;

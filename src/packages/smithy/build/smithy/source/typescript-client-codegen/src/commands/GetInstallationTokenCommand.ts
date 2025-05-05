@@ -54,6 +54,7 @@ export interface GetInstallationTokenCommandOutput extends GetInstallationTokenO
  * //   installationToken: "STRING_VALUE",
  * //   nodeId: "STRING_VALUE",
  * //   appId: Number("int"),
+ * //   expirationTime: new Date("TIMESTAMP"),
  * // };
  *
  * ```

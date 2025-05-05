@@ -69,12 +69,14 @@ export namespace GetAppTokenInput {
 export interface GetAppTokenOutput {
   appToken?: string | undefined;
   appId?: number | undefined;
+  expirationTime?: Date | undefined;
 }
 
 export namespace GetAppTokenOutput {
   const memberValidators : {
     appToken?: __MultiConstraintValidator<string>,
     appId?: __MultiConstraintValidator<number>,
+    expirationTime?: __MultiConstraintValidator<Date>,
   } = {};
   /**
    * @internal
@@ -91,6 +93,10 @@ export namespace GetAppTokenOutput {
             memberValidators["appId"] = new __NoOpValidator();
             break;
           }
+          case "expirationTime": {
+            memberValidators["expirationTime"] = new __NoOpValidator();
+            break;
+          }
         }
       }
       return memberValidators[member]!!;
@@ -98,6 +104,7 @@ export namespace GetAppTokenOutput {
     return [
       ...getMemberValidator("appToken").validate(obj.appToken, `${path}/appToken`),
       ...getMemberValidator("appId").validate(obj.appId, `${path}/appId`),
+      ...getMemberValidator("expirationTime").validate(obj.expirationTime, `${path}/expirationTime`),
     ];
   }
 }
@@ -250,6 +257,7 @@ export interface GetInstallationTokenOutput {
   installationToken?: string | undefined;
   nodeId?: string | undefined;
   appId?: number | undefined;
+  expirationTime?: Date | undefined;
 }
 
 export namespace GetInstallationTokenOutput {
@@ -257,6 +265,7 @@ export namespace GetInstallationTokenOutput {
     installationToken?: __MultiConstraintValidator<string>,
     nodeId?: __MultiConstraintValidator<string>,
     appId?: __MultiConstraintValidator<number>,
+    expirationTime?: __MultiConstraintValidator<Date>,
   } = {};
   /**
    * @internal
@@ -277,6 +286,10 @@ export namespace GetInstallationTokenOutput {
             memberValidators["appId"] = new __NoOpValidator();
             break;
           }
+          case "expirationTime": {
+            memberValidators["expirationTime"] = new __NoOpValidator();
+            break;
+          }
         }
       }
       return memberValidators[member]!!;
@@ -285,6 +298,7 @@ export namespace GetInstallationTokenOutput {
       ...getMemberValidator("installationToken").validate(obj.installationToken, `${path}/installationToken`),
       ...getMemberValidator("nodeId").validate(obj.nodeId, `${path}/nodeId`),
       ...getMemberValidator("appId").validate(obj.appId, `${path}/appId`),
+      ...getMemberValidator("expirationTime").validate(obj.expirationTime, `${path}/expirationTime`),
     ];
   }
 }
