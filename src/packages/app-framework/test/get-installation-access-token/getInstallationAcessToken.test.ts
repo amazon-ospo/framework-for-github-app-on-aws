@@ -43,6 +43,7 @@ describe('getInstallationAccessTokenImpl', () => {
       appId: 1234,
       nodeId: 'test-id',
       installationToken: 'installation-access-token',
+      expirationTime: new Date('2017-07-08T16:18:44-04:00'),
     });
   });
   it('should throw error when receiving an error generating installation access token', async () => {

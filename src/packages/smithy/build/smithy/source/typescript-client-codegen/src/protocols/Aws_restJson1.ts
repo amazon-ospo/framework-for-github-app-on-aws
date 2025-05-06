@@ -30,6 +30,7 @@ import {
   expectNonNull as __expectNonNull,
   expectObject as __expectObject,
   expectString as __expectString,
+  parseRfc3339DateTimeWithOffset as __parseRfc3339DateTimeWithOffset,
   _json,
   collectBody,
   map,
@@ -104,6 +105,7 @@ export const de_GetAppTokenCommand = async(
   const doc = take(data, {
     'appId': __expectInt32,
     'appToken': __expectString,
+    'expirationTime': _ => __expectNonNull(__parseRfc3339DateTimeWithOffset(_)),
   });
   Object.assign(contents, doc);
   return contents;
@@ -125,6 +127,7 @@ export const de_GetInstallationTokenCommand = async(
   const data: Record<string, any> = __expectNonNull((__expectObject(await parseBody(output.body, context))), "body");
   const doc = take(data, {
     'appId': __expectInt32,
+    'expirationTime': _ => __expectNonNull(__parseRfc3339DateTimeWithOffset(_)),
     'installationToken': __expectString,
     'nodeId': __expectString,
   });
