@@ -7,11 +7,7 @@ import {
   GetInstallationTokenOutput,
   getGetInstallationTokenHandler,
 } from '@framework.api/app-framework-ssdk';
-import {
-  APIGatewayProxyEventV2,
-  APIGatewayProxyResult,
-  APIGatewayProxyResultV2,
-} from 'aws-lambda';
+import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { InstallationAccessTokenEnvironmentVariables } from './constants';
 import { getInstallationAccessTokenOperationImpl } from './getInstallationAccessTokenOperation';
 import { EnvironmentError } from '../../error';
@@ -36,7 +32,7 @@ export type Handler = ({
     input: GetInstallationTokenInput,
     _context: { appTable: string; installationTable: string },
   ) => Promise<GetInstallationTokenOutput>;
-}) => Promise<APIGatewayProxyResult>;
+}) => Promise<APIGatewayProxyResultV2>;
 
 /**
  * Core Lambda handler logic for processing GetAppToken requests.

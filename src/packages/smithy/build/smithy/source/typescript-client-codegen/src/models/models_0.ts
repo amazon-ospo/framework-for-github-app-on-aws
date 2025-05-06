@@ -35,6 +35,7 @@ export interface GetAppTokenInput {
 export interface GetAppTokenOutput {
   appToken?: string | undefined;
   appId?: number | undefined;
+  expirationTime?: Date | undefined;
 }
 
 /**
@@ -119,4 +120,5 @@ export interface GetInstallationTokenOutput {
   installationToken?: string | undefined;
   nodeId?: string | undefined;
   appId?: number | undefined;
+  expirationTime?: Date | undefined;
 }

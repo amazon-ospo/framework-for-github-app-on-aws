@@ -35,7 +35,7 @@ export type GetInstallationAccessToken = ({
  @param getInstallationId Function that retrieves the installation ID from either Installations DynamoDB Table
   or GitHub APIs
  @param getInstallationAccessTokenFromGitHub Function that retrieves Installation Access token from GitHub API
- @returns An Installation Access Token with App ID and Node ID
+ @returns An Installation Access Token with App ID, Node ID and Expiration time
  */
 
 export const getInstallationAccessTokenImpl: GetInstallationAccessToken =
@@ -58,9 +58,11 @@ export const getInstallationAccessTokenImpl: GetInstallationAccessToken =
         appId: appId,
         nodeId: nodeId,
         installationTable: installationTable,
-        appToken,
+        appToken: appToken.appToken,
       });
-      const githubService = new GitHubAPIService({ appToken });
+      const githubService = new GitHubAPIService({
+        appToken: appToken.appToken,
+      });
       const installationAccessToken = await githubService.getInstallationToken({
         installationId: installationID,
       });
@@ -68,6 +70,7 @@ export const getInstallationAccessTokenImpl: GetInstallationAccessToken =
         appId: appId,
         nodeId: nodeId,
         installationToken: installationAccessToken.token,
+        expirationTime: new Date(installationAccessToken.expires_at),
       };
     } catch (error) {
       console.error(error);

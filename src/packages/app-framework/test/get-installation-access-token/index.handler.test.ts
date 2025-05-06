@@ -1,4 +1,4 @@
-import { APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyResultV2 } from 'aws-lambda';
 import { InstallationAccessTokenEnvironmentVariables } from '../../src/credential-manager/get-installation-access-token/constants';
 import {
   checkEnvironmentImpl,
@@ -47,13 +47,14 @@ describe('handlerImpl', () => {
     appId: 1234,
   });
   it('should return installation access token with app id and node id', async () => {
-    const response: APIGatewayProxyResult = await handlerImpl({
+    const response: APIGatewayProxyResultV2 = await handlerImpl({
       event: apiGatewayEventHelper({ path, body }),
       getInstallationAccessTokenOperation:
         mockGetInstallationAccessTokenOperation,
       checkEnvironment: mockCheckEnvironment,
     });
-    expect(response.body).toEqual(
+    const parseResponse = JSON.parse(JSON.stringify(response));
+    expect(parseResponse.body).toEqual(
       JSON.stringify({
         appId: 1234,
         installationToken: 'test-token',
@@ -62,21 +63,25 @@ describe('handlerImpl', () => {
     );
   });
   it('should return internal server error for any error occuring inside of operation', async () => {
-    const response: APIGatewayProxyResult = await handlerImpl({
+    const response: APIGatewayProxyResultV2 = await handlerImpl({
       event: apiGatewayEventHelper({ path, body }),
       checkEnvironment: mockCheckEnvironment,
     });
-    expect(response.body).toEqual(
+    const parseResponse = JSON.parse(JSON.stringify(response));
+    expect(parseResponse.body).toEqual(
       JSON.stringify({ message: 'Internal Server Error' }),
     );
   });
   it('should return message for request error', async () => {
-    const badInput = JSON.stringify({ appId: 1234, nodeId: '' });
-    const response: APIGatewayProxyResult = await handlerImpl({
-      event: apiGatewayEventHelper({ path, body: badInput }),
+    const response: APIGatewayProxyResultV2 = await handlerImpl({
+      event: apiGatewayEventHelper({
+        path,
+        body: JSON.stringify({ appId: 1234, nodeId: '' }),
+      }),
       checkEnvironment: mockCheckEnvironment,
     });
-    expect(response.body).toEqual(
+    const parseResponse = JSON.parse(JSON.stringify(response));
+    expect(parseResponse.body).toEqual(
       JSON.stringify({
         fieldList: [
           {

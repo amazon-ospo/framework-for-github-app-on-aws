@@ -33,7 +33,8 @@ export const getAppTokenOperation: Operation<
     });
     return {
       appId,
-      appToken,
+      appToken: appToken.appToken,
+      expirationTime: appToken.expiration_time,
     };
   } catch (error) {
     if (error instanceof VisibleError) {

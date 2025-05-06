@@ -36,6 +36,7 @@ import {
   expectNonNull as __expectNonNull,
   expectObject as __expectObject,
   expectString as __expectString,
+  serializeDateTime as __serializeDateTime,
   _json,
   collectBody,
   isSerializableHeaderValue,
@@ -126,6 +127,7 @@ export const serializeGetAppTokenResponse = async(
   body = JSON.stringify(take(input, {
     'appId': [],
     'appToken': [],
+    'expirationTime': _ => __serializeDateTime(_),
   }));
   if (body && Object.keys(headers).map((str) => str.toLowerCase()).indexOf('content-length') === -1) {
     const length = calculateBodyLength(body);
@@ -159,6 +161,7 @@ export const serializeGetInstallationTokenResponse = async(
   let body: any;
   body = JSON.stringify(take(input, {
     'appId': [],
+    'expirationTime': _ => __serializeDateTime(_),
     'installationToken': [],
     'nodeId': [],
   }));

@@ -35,6 +35,8 @@ structure GetInstallationTokenOutput {
     installationToken: String
     nodeId: String
     appId: Integer
+    @timestampFormat("date-time")
+    expirationTime: Timestamp
 }
 
 structure GetAppTokenInput {
@@ -46,6 +48,8 @@ structure GetAppTokenInput {
 structure GetAppTokenOutput {
     appToken: String
     appId: Integer
+    @timestampFormat("date-time")
+    expirationTime: Timestamp
 }
 
 @httpError(500)

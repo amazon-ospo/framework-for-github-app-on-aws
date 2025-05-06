@@ -140,7 +140,7 @@ describe('getAppTokenImpl', () => {
       validateAppToken: mockValidateAppToken,
     });
     expect(result).toBeTruthy();
-    expect(typeof result).toBe('string');
+    expect(typeof result).toBe('object');
     expect(mockGetArn).toHaveBeenCalledWith({
       appId: mockAppId,
       tableName: mockTableName,

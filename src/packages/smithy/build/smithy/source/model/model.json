@@ -1938,6 +1938,12 @@
                 },
                 "appId": {
                     "target": "smithy.api#Integer"
+                },
+                "expirationTime": {
+                    "target": "smithy.api#Timestamp",
+                    "traits": {
+                        "smithy.api#timestampFormat": "date-time"
+                    }
                 }
             }
         },
@@ -1999,6 +2005,12 @@
                 },
                 "appId": {
                     "target": "smithy.api#Integer"
+                },
+                "expirationTime": {
+                    "target": "smithy.api#Timestamp",
+                    "traits": {
+                        "smithy.api#timestampFormat": "date-time"
+                    }
                 }
             }
         },

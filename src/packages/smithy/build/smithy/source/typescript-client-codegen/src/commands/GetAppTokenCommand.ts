@@ -52,6 +52,7 @@ export interface GetAppTokenCommandOutput extends GetAppTokenOutput, __MetadataB
  * // { // GetAppTokenOutput
  * //   appToken: "STRING_VALUE",
  * //   appId: Number("int"),
+ * //   expirationTime: new Date("TIMESTAMP"),
  * // };
  *
  * ```
