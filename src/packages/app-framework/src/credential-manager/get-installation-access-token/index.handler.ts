@@ -1,4 +1,3 @@
-import { createHash } from 'crypto';
 import {
   convertEvent,
   convertVersion1Response,
@@ -17,6 +16,7 @@ import {
 import { InstallationAccessTokenEnvironmentVariables } from './constants';
 import { getInstallationAccessTokenOperationImpl } from './getInstallationAccessTokenOperation';
 import { EnvironmentError } from '../../error';
+import { getHashedToken } from '../../helper';
 
 /**
  * Lambda entry point.
@@ -34,11 +34,9 @@ export const handler = async (
     appId: bodyData.appId,
     nodeId: bodyData.nodeId,
     expirationTime: bodyData.expirationTime,
-    installationToken: createHash('sha256')
-      .update(bodyData.installationToken as string)
-      .digest('hex'),
+    installationToken: getHashedToken(bodyData.installationToken as string),
   };
-  console.log(logResponse);
+  console.log(JSON.stringify(logResponse));
   return result;
 };
 

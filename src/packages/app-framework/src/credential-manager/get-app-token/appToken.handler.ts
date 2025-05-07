@@ -1,4 +1,3 @@
-import { createHash } from 'crypto';
 import {
   convertEvent,
   convertVersion1Response,
@@ -18,6 +17,7 @@ import {
 import { EnvironmentVariables } from './constants';
 import { getAppTokenOperation as getAppTokenOperationImpl } from './getAppTokenOperation';
 import { EnvironmentError } from '../../error';
+import { getHashedToken } from '../../helper';
 /**
  * Lambda entry point.
  */
@@ -33,11 +33,9 @@ export const handler = async (
     caller: context.authorizer.iam.userArn,
     appId: bodyData.appId,
     expirationTime: bodyData.expirationTime,
-    appToken: createHash('sha256')
-      .update(bodyData.appToken as string)
-      .digest('hex'),
+    appToken: getHashedToken(bodyData.appToken as string),
   };
-  console.log(logResponse);
+  console.log(JSON.stringify(logResponse));
   return result;
 };
 
