@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import {
   convertEvent,
   convertVersion1Response,
@@ -8,7 +9,12 @@ import {
   GetAppTokenOutput,
   ServerSideError,
 } from '@framework.api/app-framework-ssdk';
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import {
+  APIGatewayEventRequestContextIAMAuthorizer,
+  APIGatewayEventRequestContextV2WithAuthorizer,
+  APIGatewayProxyEventV2,
+  APIGatewayProxyResultV2,
+} from 'aws-lambda';
 import { EnvironmentVariables } from './constants';
 import { getAppTokenOperation as getAppTokenOperationImpl } from './getAppTokenOperation';
 import { EnvironmentError } from '../../error';
@@ -18,7 +24,21 @@ import { EnvironmentError } from '../../error';
 export const handler = async (
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> => {
-  return handlerImpl({ event });
+  const context =
+    event.requestContext as APIGatewayEventRequestContextV2WithAuthorizer<APIGatewayEventRequestContextIAMAuthorizer>;
+  const result = await handlerImpl({ event });
+  const parseResponse = JSON.parse(JSON.stringify(result));
+  const bodyData = JSON.parse(parseResponse.body) as GetAppTokenOutput;
+  const logResponse = {
+    caller: context.authorizer.iam.userArn,
+    appId: bodyData.appId,
+    expirationTime: bodyData.expirationTime,
+    appToken: createHash('sha256')
+      .update(bodyData.appToken as string)
+      .digest('hex'),
+  };
+  console.log(logResponse);
+  return result;
 };
 
 export type CheckEnvironment = () => {
