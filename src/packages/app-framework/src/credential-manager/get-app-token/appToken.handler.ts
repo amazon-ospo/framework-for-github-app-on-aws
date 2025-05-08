@@ -33,7 +33,7 @@ export const handler = async (
     caller: context.authorizer.iam.userArn,
     appId: bodyData.appId,
     expirationTime: bodyData.expirationTime,
-    appToken: getHashedToken(bodyData.appToken as string),
+    hashedToken: getHashedToken(bodyData.appToken as string),
   };
   console.log(JSON.stringify(logResponse));
   return result;

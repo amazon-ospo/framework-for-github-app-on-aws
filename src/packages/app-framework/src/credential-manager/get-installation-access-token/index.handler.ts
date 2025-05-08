@@ -34,7 +34,7 @@ export const handler = async (
     appId: bodyData.appId,
     nodeId: bodyData.nodeId,
     expirationTime: bodyData.expirationTime,
-    installationToken: getHashedToken(bodyData.installationToken as string),
+    hashedToken: getHashedToken(bodyData.installationToken as string),
   };
   console.log(JSON.stringify(logResponse));
   return result;
