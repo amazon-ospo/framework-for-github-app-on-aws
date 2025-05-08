@@ -8,17 +8,35 @@ import {
   GetAppTokenOutput,
   ServerSideError,
 } from '@framework.api/app-framework-ssdk';
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import {
+  APIGatewayEventRequestContextIAMAuthorizer,
+  APIGatewayEventRequestContextV2WithAuthorizer,
+  APIGatewayProxyEventV2,
+  APIGatewayProxyResultV2,
+} from 'aws-lambda';
 import { EnvironmentVariables } from './constants';
 import { getAppTokenOperation as getAppTokenOperationImpl } from './getAppTokenOperation';
 import { EnvironmentError } from '../../error';
+import { getHashedToken } from '../../helper';
 /**
  * Lambda entry point.
  */
 export const handler = async (
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> => {
-  return handlerImpl({ event });
+  const context =
+    event.requestContext as APIGatewayEventRequestContextV2WithAuthorizer<APIGatewayEventRequestContextIAMAuthorizer>;
+  const result = await handlerImpl({ event });
+  const parseResponse = JSON.parse(JSON.stringify(result));
+  const bodyData = JSON.parse(parseResponse.body) as GetAppTokenOutput;
+  const logResponse = {
+    caller: context.authorizer.iam.userArn,
+    appId: bodyData.appId,
+    expirationTime: bodyData.expirationTime,
+    hashedToken: getHashedToken(bodyData.appToken as string),
+  };
+  console.log(JSON.stringify(logResponse));
+  return result;
 };
 
 export type CheckEnvironment = () => {

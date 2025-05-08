@@ -7,10 +7,16 @@ import {
   GetInstallationTokenOutput,
   getGetInstallationTokenHandler,
 } from '@framework.api/app-framework-ssdk';
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import {
+  APIGatewayEventRequestContextIAMAuthorizer,
+  APIGatewayEventRequestContextV2WithAuthorizer,
+  APIGatewayProxyEventV2,
+  APIGatewayProxyResultV2,
+} from 'aws-lambda';
 import { InstallationAccessTokenEnvironmentVariables } from './constants';
 import { getInstallationAccessTokenOperationImpl } from './getInstallationAccessTokenOperation';
 import { EnvironmentError } from '../../error';
+import { getHashedToken } from '../../helper';
 
 /**
  * Lambda entry point.
@@ -18,7 +24,20 @@ import { EnvironmentError } from '../../error';
 export const handler = async (
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> => {
-  return handlerImpl({ event });
+  const context =
+    event.requestContext as APIGatewayEventRequestContextV2WithAuthorizer<APIGatewayEventRequestContextIAMAuthorizer>;
+  const result: APIGatewayProxyResultV2 = await handlerImpl({ event });
+  const parseResponse = JSON.parse(JSON.stringify(result));
+  const bodyData = JSON.parse(parseResponse.body) as GetInstallationTokenOutput;
+  const logResponse = {
+    caller: context.authorizer.iam.userArn,
+    appId: bodyData.appId,
+    nodeId: bodyData.nodeId,
+    expirationTime: bodyData.expirationTime,
+    hashedToken: getHashedToken(bodyData.installationToken as string),
+  };
+  console.log(JSON.stringify(logResponse));
+  return result;
 };
 
 export type Handler = ({
