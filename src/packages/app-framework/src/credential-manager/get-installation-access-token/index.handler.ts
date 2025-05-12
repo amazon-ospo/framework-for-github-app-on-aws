@@ -29,14 +29,21 @@ export const handler = async (
   const result: APIGatewayProxyResultV2 = await handlerImpl({ event });
   const parseResponse = JSON.parse(JSON.stringify(result));
   const bodyData = JSON.parse(parseResponse.body) as GetInstallationTokenOutput;
-  const logResponse = {
-    caller: context.authorizer.iam.userArn,
-    appId: bodyData.appId,
-    nodeId: bodyData.nodeId,
-    expirationTime: bodyData.expirationTime,
-    hashedToken: getHashedToken(bodyData.installationToken as string),
-  };
-  console.log(JSON.stringify(logResponse));
+  if (
+    !!bodyData.installationToken &&
+    !!bodyData.appId &&
+    !!bodyData.nodeId &&
+    !!bodyData.expirationTime
+  ) {
+    const logResponse = {
+      caller: context.authorizer.iam.userArn,
+      appId: bodyData.appId,
+      nodeId: bodyData.nodeId,
+      expirationTime: bodyData.expirationTime,
+      hashedToken: getHashedToken(bodyData.installationToken as string),
+    };
+    console.log(JSON.stringify(logResponse));
+  }
   return result;
 };
 
