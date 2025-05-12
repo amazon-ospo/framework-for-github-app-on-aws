@@ -50,7 +50,7 @@ function createAwsAuthSigv4HttpAuthOption(authParameters: AppFrameworkHttpAuthSc
   return {
     schemeId: "aws.auth#sigv4",
     signingProperties: {
-      name: "execute-api",
+      name: "lambda",
       region: authParameters.region,
     },
     propertiesExtractor: (config, context) => {

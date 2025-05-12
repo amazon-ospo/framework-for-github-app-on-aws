@@ -8,7 +8,7 @@ use smithy.framework#ValidationException
 
 @title("Framework for GitHub Apps on AWS")
 @auth([sigv4])
-@sigv4(name: "execute-api")
+@sigv4(name: "lambda")
 @restJson1
 service AppFramework {
     version: "2024-08-23"

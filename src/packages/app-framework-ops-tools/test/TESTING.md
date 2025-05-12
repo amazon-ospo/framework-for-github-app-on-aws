@@ -32,10 +32,18 @@ accumulate KMS keys.
 
 ## Prerequisites
 
-1. Install a GitHub App and download the private key which is a file in PEM
-   format.
+### Follow Common Setup
 
-1. Keep a track of the file location for the import process
+Refer to the top level [TESTING.md](../../../../test/TESTING.md)
+to set up common prerequisites which include:
+
+- Deploy the infrastructure for Credential Manager
+  to create table resources which will record the appId.
+
+- Install a GitHub App and download the private key which is a file in PEM
+  format.
+
+- Keep a track of the file location for the import process
 
 ## Required AWS Permissions
 
@@ -61,7 +69,7 @@ Ensure AWS credentials have these required permissions:
 1. List available DynamoDB tables:
 
 ```sh
-   npm run get-table-name
+  npm run get-table-name
 ```
 
 1. Set up PEM file path, GitHub App ID,
@@ -70,15 +78,15 @@ Ensure AWS credentials have these required permissions:
 For `DYNAMODB_TABLE_NAME`, select an appropriate table name from `npm run get-table-name`.
 
 ```sh
-export GITHUB_PEM_FILE_PATH=<path-to-your-private-key.pem>
-export GITHUB_APPID=<your-github-app-id>
-export DYNAMODB_TABLE_NAME=<your-dynamo-table-name> # Use the table name you picked from step 1
+  export GITHUB_PEM_FILE_PATH=<path-to-your-private-key.pem>
+  export GITHUB_APPID=<your-github-app-id>
+  export DYNAMODB_TABLE_NAME=<your-dynamo-table-name> # Use the table name you picked from step 1
 ```
 
 1. Execute acceptance tests:
 
 ```sh
-    npm run accept
+  npm run accept
 ```
 
 **Note:** On first run, if the importPrivateKey.ts acceptance tests fail,
@@ -91,7 +99,13 @@ recheck if the environment variables are set correctly.
 
 - To clean up test resources and avoid ongoing costs:
 
-1. Go to your GitHub App settings and delete the generated private keys
+  1. Go to your GitHub App settings and delete the generated private keys
 
-1. Go to AWS KMS console and schedule the KMS keys for deletion with
-   a waiting period between 7 and 30 days
+  1. Go to AWS KMS console and schedule the KMS keys for deletion with
+     a waiting period between 7 and 30 days
+
+  1. Go to AWS console to delete test and nested stack,
+     clean the resources created during the acceptance tests, which include:
+     - Two DynamoDb tables
+     - Three lambda Functions with two lambda Function URLs
+     - One EventBridge scheduler

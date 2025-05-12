@@ -63,6 +63,10 @@
       "type": "build"
     },
     {
+      "name": "jest-runner-groups",
+      "type": "build"
+    },
+    {
       "name": "markdown-eslint-parser",
       "type": "build"
     },
@@ -79,7 +83,19 @@
       "type": "build"
     },
     {
+      "name": "@aws-crypto/sha256-js",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/credential-provider-node",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/hash-node",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws/app-framework-client",
       "type": "runtime"
     },
     {
