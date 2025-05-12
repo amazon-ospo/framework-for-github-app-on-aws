@@ -6,7 +6,7 @@ const projectMetadata = {
   authorAddress: "osa-dev+puzzleglue@amazon.com",
   repositoryUrl:
     "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git",
-  cdkVersion: "2.184.0",
+  cdkVersion: "2.189.1",
   constructsVersion: "10.4.2",
   defaultReleaseBranch: "main",
   name: "framework-for-github-app-on-aws",
