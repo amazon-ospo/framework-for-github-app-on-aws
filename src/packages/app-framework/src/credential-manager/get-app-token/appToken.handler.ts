@@ -29,13 +29,15 @@ export const handler = async (
   const result = await handlerImpl({ event });
   const parseResponse = JSON.parse(JSON.stringify(result));
   const bodyData = JSON.parse(parseResponse.body) as GetAppTokenOutput;
-  const logResponse = {
-    caller: context.authorizer.iam.userArn,
-    appId: bodyData.appId,
-    expirationTime: bodyData.expirationTime,
-    hashedToken: getHashedToken(bodyData.appToken as string),
-  };
-  console.log(JSON.stringify(logResponse));
+  if (!!bodyData.appId && !!bodyData.expirationTime && !!bodyData.appToken) {
+    const logResponse = {
+      caller: context.authorizer.iam.userArn,
+      appId: bodyData.appId,
+      expirationTime: bodyData.expirationTime,
+      hashedToken: getHashedToken(bodyData.appToken as string),
+    };
+    console.log(JSON.stringify(logResponse));
+  }
   return result;
 };
 
