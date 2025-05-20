@@ -53,8 +53,8 @@ export const getAppIdsImpl: GetAppIds = async (
   });
   const items = await tableOperations.scan();
   console.log(`Fetched items from the table: ${JSON.stringify(items)}.`);
-  return Array.from(items.keys()).map<string>((item: number) => {
-    return item.toString();
+  return Array.from(items).map<string>((item) => {
+    return item.AppId.toString();
   });
 };
 
