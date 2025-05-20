@@ -59,7 +59,7 @@ export class TableOperations {
       if (error instanceof NotFound) {
         throw error;
       }
-      throw new Error(`Error getting item from ${this.config.TableName}`);
+      throw new Error(`Error getting item from ${this.config.TableName}: ${error}`);
     }
   }
 
