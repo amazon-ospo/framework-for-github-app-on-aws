@@ -47,10 +47,10 @@ export const handlerImpl = async (
     console.log(`TableName: ${JSON.stringify(tableName)} AppId: ${parseInt(appId)}`);
     console.log(`getAppTokenImplProps: ${JSON.stringify(getAppTokenImplProps)}`);
     
-    const appToken = await getAppTokenImpl(getAppTokenImplProps);
-
-    console.log(`Successfully fetching AppToken.`)
-    console.log(`Creating GitHub client for AppID ${appId}`);
+    const appToken = await getAppTokenImpl({
+      appId: parseInt(appId),
+      tableName: tableName.tableName,
+    });
 
     new GitHubAPIService({
       appToken: appToken.appToken,
@@ -61,7 +61,6 @@ export const handlerImpl = async (
   });
 
   return {
-    body: JSON.stringify({ appId: '', expirationTime: '', appToken: '' }),
   };
 };
 
