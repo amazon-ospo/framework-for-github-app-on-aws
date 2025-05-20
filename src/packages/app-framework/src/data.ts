@@ -23,10 +23,13 @@ export const getAppKeyArnByIdImpl: GetAppKeyArnById = async ({
   tableName,
 }) => {
   try {
+    console.log("Preparing to create TableOperations.")
     const getItem = new TableOperations({ TableName: tableName });
+    console.log("Preparing to getItem.")
     const result = await getItem.getItem({
       AppId: { N: appId.toString() },
     });
+    console.log(`GetItem Result: ${JSON.stringify(result)}`)
     if (!result.KmsKeyArn) {
       throw new DataError(
         `Invalid data: Missing KmsKeyArn for appId: ${appId}`,
