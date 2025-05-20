@@ -63,7 +63,7 @@ export class TableOperations {
    * Retrieves all data within a DynamoDB table.
    * @returns an array of items containing all rows in the table.
    */
-  async scan() {
+  async scan(): Promise<Record<string, AttributeValue>[]> {
     const client = dynamodbClient();
     const command = new ScanCommand({
       TableName: this.config.TableName,
@@ -75,8 +75,8 @@ export class TableOperations {
       throw new NotFound(`Items not found in ${this.config.TableName}`);
     }
 
-    return result.Items.map((item) => {
-      unmarshall(item);
+    return result.Items.map<Record<string, AttributeValue>>((item) => {
+      return unmarshall(item);
     });
   }
 }
