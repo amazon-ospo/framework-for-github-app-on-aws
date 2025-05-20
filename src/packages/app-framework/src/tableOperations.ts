@@ -56,6 +56,7 @@ export class TableOperations {
 
       return unmarshall(result.Item);
     } catch (error) {
+      console.log(`ERROR: ${error}`);
       if (error instanceof NotFound) {
         throw error;
       }
