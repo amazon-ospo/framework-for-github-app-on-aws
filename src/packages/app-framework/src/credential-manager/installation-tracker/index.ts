@@ -6,6 +6,7 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import { LAMBDA_DEFAULTS } from '../../lambdaDefaults';
 import { InstallationAccessTokenEnvironmentVariables } from '../get-installation-access-token/constants';
+import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 
 export interface InstallationTrackerProps {
   readonly AppTable: ITable;
@@ -36,5 +37,15 @@ export class InstallationTracker {
     });
 
     rule.addTarget(new LambdaFunction(installationTrackerFunction));
+
+    installationTrackerFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['dynamodb:scan'],
+        resources: [
+          `*`,
+        ]
+      })
+    );
   }
 }
