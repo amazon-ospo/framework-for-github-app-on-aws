@@ -47,5 +47,16 @@ export class InstallationTracker {
         ]
       })
     );
+
+    installationTrackerFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: ['kms:Sign'],
+        resources: [
+          `*`,
+        ],
+      }),
+    );
+
   }
 }
