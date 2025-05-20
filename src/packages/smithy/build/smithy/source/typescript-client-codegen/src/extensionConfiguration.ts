@@ -1,4 +1,3 @@
-// @ts-nocheck
 // smithy-typescript generated code
 import { HttpAuthExtensionConfiguration } from "./auth/httpAuthExtensionConfiguration";
 import { AwsRegionExtensionConfiguration } from "@aws-sdk/types";

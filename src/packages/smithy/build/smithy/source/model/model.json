@@ -1861,7 +1861,7 @@
             ],
             "traits": {
                 "aws.auth#sigv4": {
-                    "name": "execute-api"
+                    "name": "lambda"
                 },
                 "aws.protocols#restJson1": {},
                 "smithy.api#auth": [

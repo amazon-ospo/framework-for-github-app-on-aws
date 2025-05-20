@@ -265,10 +265,22 @@ const theAppFrameworkTestApp = new awscdk.AwsCdkTypeScriptApp({
   parent: project,
   projenrcTs: false,
   cdkVersion: "2.184.1",
+  deps: [
+    "@aws-sdk/hash-node",
+    "@aws/framework-for-github-app-on-aws",
+    "@aws/app-framework-client",
+    "@aws-crypto/sha256-js",
+    "@aws-sdk/credential-provider-node",
+  ],
+  devDeps: ["jest-runner-groups"],
+  jestOptions: {
+    jestConfig: {
+      runner: "groups",
+      verbose: true,
+    },
+  },
 });
 addTestTargets(theAppFrameworkTestApp);
 addPrettierConfig(theAppFrameworkTestApp);
 configureMarkDownLinting(theAppFrameworkTestApp);
-theAppFrameworkTestApp.addDeps("@aws/framework-for-github-app-on-aws");
-theAppFrameworkTestApp.addDeps("@aws-sdk/hash-node");
 project.synth();
