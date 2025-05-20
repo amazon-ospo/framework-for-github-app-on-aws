@@ -40,13 +40,7 @@ export const handlerImpl = async (
 
    appIds.forEach(async (appId: string) => {
     console.log(`Getting AppToken for ID ${appId}`);
-    const getAppTokenImplProps = {
-      appId: parseInt(appId),
-      tableName: tableName.tableName,
-    };
-    console.log(`TableName: ${JSON.stringify(tableName)} AppId: ${parseInt(appId)}`);
-    console.log(`getAppTokenImplProps: ${JSON.stringify(getAppTokenImplProps)}`);
-    
+
     const appToken = await getAppTokenImpl({
       appId: parseInt(appId),
       tableName: tableName.tableName,

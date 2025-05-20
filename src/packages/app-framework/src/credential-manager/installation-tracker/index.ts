@@ -41,22 +41,11 @@ export class InstallationTracker {
     installationTrackerFunction.addToRolePolicy(
       new PolicyStatement({
         effect: Effect.ALLOW,
-        actions: ['dynamodb:scan'],
+        actions: ["dynamodb:scan", "dynamodb:getItem", "kms:Sign"],
         resources: [
           `*`,
         ]
       })
     );
-
-    installationTrackerFunction.addToRolePolicy(
-      new PolicyStatement({
-        effect: Effect.ALLOW,
-        actions: ['kms:Sign'],
-        resources: [
-          `*`,
-        ],
-      }),
-    );
-
   }
 }
