@@ -39,6 +39,24 @@ export const getAppKeyArnByIdImpl: GetAppKeyArnById = async ({
   }
 };
 
+export type GetAppIds = ({
+  tableName,
+}: {
+  tableName: string;
+}) => Promise<string[]>;
+
+export const getAppIdsImpl: GetAppIds = async (
+  tableName,
+): Promise<string[]> => {
+  const tableOperations = new TableOperations({
+    TableName: tableName.tableName,
+  });
+  const items = await tableOperations.scan();
+  return Array.from(items.keys()).map<string>((item: number) => {
+    return item.toString();
+  });
+};
+
 /**
  * Retrieves the Installation ID associated with a given GitHub App ID and Node ID from DynamoDB.
  *
