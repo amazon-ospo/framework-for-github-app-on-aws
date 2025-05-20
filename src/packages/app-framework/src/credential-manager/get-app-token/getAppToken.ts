@@ -134,17 +134,22 @@ export type KmsSign = ({
  */
 export const kmsSignImpl: KmsSign = async ({ appKeyArn, message }) => {
   const messageHash = createHash('sha256').update(message).digest();
-  const signResponse = await kms.send(
-    new SignCommand({
+
+  try {
+    const signCommand = new SignCommand({
       KeyId: appKeyArn,
       Message: messageHash,
       MessageType: 'DIGEST',
       SigningAlgorithm: 'RSASSA_PKCS1_V1_5_SHA_256',
-    }),
-  );
+    });
+    const signResponse = await kms.send(signCommand);
 
-  if (!signResponse.Signature || signResponse.Signature.length === 0) {
-    throw new ServerError('KMS signing failed: Signature is missing or empty');
+    if (!signResponse.Signature || signResponse.Signature.length === 0) {
+      throw new ServerError('KMS signing failed: Signature is missing or empty');
+    }
+
+    return Buffer.from(signResponse.Signature);
+  } catch (error) {
+    throw error;
   }
-  return Buffer.from(signResponse.Signature);
 };
