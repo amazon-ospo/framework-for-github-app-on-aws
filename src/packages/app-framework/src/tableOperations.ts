@@ -44,7 +44,11 @@ export class TableOperations {
         Key: query,
       });
 
+      console.log(`GetItemCommand: ${JSON.stringify(command)}`)
+
       const result: GetItemCommandOutput = await client.send(command);
+
+      console.log(`GetItem Result: ${JSON.stringify(result)}`)
 
       if (!result.Item) {
         throw new NotFound(`Item not found in ${this.config.TableName}`);
