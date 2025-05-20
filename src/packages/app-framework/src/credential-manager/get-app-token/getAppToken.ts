@@ -66,7 +66,8 @@ export const getAppTokenImpl: GetAppToken = async ({
     const encodedSignature = signature.toString('base64url');
     const appToken = `${signingInput}.${encodedSignature}`;
     await validateAppToken({ appId, appToken });
-    return { appToken, expiration_time: new Date(exp * 1000) };
+    // Add buffer of 10 sec to the returned expiration time
+    return { appToken, expiration_time: new Date((exp - 10) * 1000) };
   } catch (error) {
     if (error instanceof VisibleError) {
       throw error;
