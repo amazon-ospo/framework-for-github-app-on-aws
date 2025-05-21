@@ -46,12 +46,10 @@ export const handlerImpl = async (
       tableName: tableName.tableName,
     });
 
-    new GitHubAPIService({
+    const githubService = new GitHubAPIService({
       appToken: appToken.appToken,
       userAgent: 'GitHub-AppFramework-InstallationTracker/1.0',
     });
-
-    console.log(`Successfully created GitHub client for AppID ${appId}`);
   });
 
   return {

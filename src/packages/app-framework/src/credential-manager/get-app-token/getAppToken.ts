@@ -44,7 +44,6 @@ export const getAppTokenImpl: GetAppToken = async ({
   kmsSign = kmsSignImpl,
   validateAppToken = validateAppTokenImpl,
 }) => {
-  console.log('App ID: ', appId);
   try {
     const header = {
       alg: 'RS256',
@@ -64,19 +63,14 @@ export const getAppTokenImpl: GetAppToken = async ({
       'base64url',
     );
     const signingInput = `${encodedHeader}.${encodedPayload}`;
-    console.log("Completed prep for downstream call.");
     const appKeyArn = await getAppKeyArnbyId({ appId, tableName });
-    console.log("Received ARN.");
     const signature = await kmsSign({ appKeyArn, message: signingInput });
-    console.log("Completed KMS signing.");
     const encodedSignature = signature.toString('base64url');
     const appToken = `${signingInput}.${encodedSignature}`;
-    console.log("Preparing to validate.")
     await validateAppToken({ appId, appToken });
     // Add buffer of 10 sec to the returned expiration time
-    return { appToken, expiration_time: new Date((exp - 10) * 1000) };
     console.log("Completed validation.")
-    return { appToken, expiration_time: new Date((exp - 10) * 1000) };
+    return { appToken, expiration_time: new Date(exp * 1000) };
   } catch (error) {
     if (error instanceof VisibleError) {
       throw error;
