@@ -92,6 +92,7 @@ export class GitHubAPIService {
       console.error('GitHub Output:', JSON.stringify(response.data));      
     } catch (error) {
       console.log(`Uncaught error calling octokit ${JSON.stringify(error)}`);
+      throw error;
     }
 
     throw new DataError(
