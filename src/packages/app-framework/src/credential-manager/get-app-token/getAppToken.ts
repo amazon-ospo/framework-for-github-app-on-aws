@@ -156,4 +156,6 @@ export const kmsSignImpl: KmsSign = async ({ appKeyArn, message }) => {
   } catch (error) {
     console.log(`Call to KMS:Send failed with error ${error}`);
   }
+
+  return Buffer.from("");
 };
