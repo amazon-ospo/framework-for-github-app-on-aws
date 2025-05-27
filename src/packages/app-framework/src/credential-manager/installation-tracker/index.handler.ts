@@ -50,6 +50,8 @@ export const handlerImpl = async (
       appToken: appToken.appToken,
       userAgent: 'GitHub-AppFramework-InstallationTracker/1.0',
     });
+
+    console.log(JSON.stringify(githubService));
   });
 
   return {
