@@ -21,7 +21,21 @@ export class GitHubAPIService {
   getOctokitClient() {
     return new Octokit({
       auth: this.config.appToken,
-      userAgent: this.config.userAgent,
+      userAgent: this.config.userAgent || 'framework-for-github-app-on-aws',
+      request: {
+        timeout: 10000, // 10 seconds timeout
+      },
+      baseUrl: process.env.GITHUB_API_URL || 'https://api.github.com',
+      log: {
+        debug: () => {},
+        info: () => {},
+        warn: console.warn,
+        error: console.error
+      },
+      retry: {
+        enabled: true,
+        retries: 3
+      }
     });
   }
 
