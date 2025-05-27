@@ -74,8 +74,11 @@ export class GitHubAPIService {
   }: {
     ocktokitClient?: () => Octokit;
   }): Promise<AppAuthenticationResponseType> {
+    console.log("Getting octokit client");
     const octokit = ocktokitClient();
+    console.log("Getting octokit client authenticated app");
     const response = await octokit.rest.apps.getAuthenticated();
+    console.log(`Successfully got octokit client authenticated app ${JSON.stringify(response)}`);
     if (response.status >= 400) {
       throw new GitHubError(
         `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
