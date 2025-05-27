@@ -141,17 +141,22 @@ export const kmsSignImpl: KmsSign = async ({ appKeyArn, message }) => {
   console.log(`Signing appKeyARN ${appKeyArn} with message ${message} - creating successfully created hash ${messageHash.toString()}`);
 
   try {
-    const signResponse = await kms.send(
-      new SignCommand({
-        KeyId: appKeyArn,
-        Message: messageHash,
-        MessageType: 'DIGEST',
-        SigningAlgorithm: 'RSASSA_PKCS1_V1_5_SHA_256',
-      }),
-    );
+    console.log(`Creating SignCommand...`);
+    const signCommand = new SignCommand({
+      KeyId: appKeyArn,
+      Message: messageHash,
+      MessageType: 'DIGEST',
+      SigningAlgorithm: 'RSASSA_PKCS1_V1_5_SHA_256',
+    });
+    console.log(`Sending SignCommand ${JSON.stringify(signCommand)} to KMS`);
+    const signResponse = await kms.send(signCommand);
+    console.log(`Successfully signed with KMS: ${JSON.stringify(signResponse)}`);
+
     if (!signResponse.Signature || signResponse.Signature.length === 0) {
       throw new ServerError('KMS signing failed: Signature is missing or empty');
     }
+
+    console.log(`Confirmed KMS signature is well-formed.`);
     return Buffer.from(signResponse.Signature);
   } catch (error) {
     console.log(`Call to KMS:Send failed with error ${error}`);
