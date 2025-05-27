@@ -77,17 +77,23 @@ export class GitHubAPIService {
     console.log("Getting octokit client");
     const octokit = ocktokitClient();
     console.log("Getting octokit client authenticated app");
-    const response = await octokit.rest.apps.getAuthenticated();
-    console.log(`Successfully got octokit client authenticated app ${JSON.stringify(response)}`);
-    if (response.status >= 400) {
-      throw new GitHubError(
-        `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
-      );
+    try {
+      const response = await octokit.rest.apps.getAuthenticated();
+
+      console.log(`Successfully got octokit client authenticated app ${JSON.stringify(response)}`);
+      if (response.status >= 400) {
+        throw new GitHubError(
+          `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
+        );
+      }
+      if (!!response.data && !!response.data.id && !!response.data.name) {
+        return response.data;
+      }
+      console.error('GitHub Output:', JSON.stringify(response.data));      
+    } catch (error) {
+      console.log(`Uncaught error calling octokit ${JSON.stringify(error)}`);
     }
-    if (!!response.data && !!response.data.id && !!response.data.name) {
-      return response.data;
-    }
-    console.error('GitHub Output:', JSON.stringify(response.data));
+
     throw new DataError(
       'GitHub API Error: No name or id returned for authenticated app',
     );
