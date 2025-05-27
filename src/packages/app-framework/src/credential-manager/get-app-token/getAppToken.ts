@@ -103,17 +103,21 @@ export const validateAppTokenImpl: ValidateAppToken = async ({
   appToken,
 }) => {
   try {
+    console.log(`Creating GitHubService with appToken ${appToken}`);
     const githubService = new GitHubAPIService({
       appToken,
       userAgent: 'KMS-Key-Importer/1.0',
     });
+    console.log(`Successfully created GitHubService. Getting authenticated app.`);
     const data = await githubService.getAuthenticatedApp({});
+    console.log(`Successfully retrieved app. Confirming response from GitHub is well formed.`);
     if (!!data && data.id !== appId) {
       throw new GitHubError(
         `App ID mismatch: Expected ${appId}, got ${data.id}`,
       );
     }
   } catch (error) {
+    console.log(`There was a problem validating app token. See: ${JSON.stringify(error)}`);
     throw new GitHubError(`App token Authentication Failed: ${error}`);
   }
 };
