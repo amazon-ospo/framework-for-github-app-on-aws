@@ -28,31 +28,36 @@ export const handler = async (
 export const handlerImpl = async (
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> => {
-  console.log(`Event occurred. event: ${JSON.stringify(event)}`);
+  try {
 
-  const tableName = checkEnvironmentImpl();
+    console.log(`Event occurred. event: ${JSON.stringify(event)}`);
 
-  console.log("Fetching AppIDs...");
+    const tableName = checkEnvironmentImpl();
 
-  const appIds = await getAppIdsImpl(tableName);
+    console.log("Fetching AppIDs...");
 
-  console.log(`Found AppIDs: ${JSON.stringify(appIds)}`);
+    const appIds = await getAppIdsImpl(tableName);
 
-   appIds.forEach(async (appId: string) => {
-    console.log(`Getting AppToken for ID ${appId}`);
+    console.log(`Found AppIDs: ${JSON.stringify(appIds)}`);
 
-    const appToken = await getAppTokenImpl({
-      appId: parseInt(appId),
-      tableName: tableName.tableName,
+    appIds.forEach(async (appId: string) => {
+      console.log(`Getting AppToken for ID ${appId}`);
+
+      const appToken = await getAppTokenImpl({
+        appId: parseInt(appId),
+        tableName: tableName.tableName,
+      });
+
+      const githubService = new GitHubAPIService({
+        appToken: appToken.appToken,
+        userAgent: 'GitHub-AppFramework-InstallationTracker/1.0',
+      });
+
+      console.log(JSON.stringify(githubService));
     });
-
-    const githubService = new GitHubAPIService({
-      appToken: appToken.appToken,
-      userAgent: 'GitHub-AppFramework-InstallationTracker/1.0',
-    });
-
-    console.log(JSON.stringify(githubService));
-  });
+  } catch (error) {
+    console.log(`An uncaught error has occurred: ${JSON.stringify(error)}`);
+  }
 
   return {
   };
