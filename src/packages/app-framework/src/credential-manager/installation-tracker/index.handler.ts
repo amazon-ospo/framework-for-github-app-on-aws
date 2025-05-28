@@ -1,5 +1,5 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
-import { getAppIdsImpl } from '../../data';
+// import { getAppIdsImpl } from '../../data';
 import { EnvironmentError } from '../../error';
 // import { GitHubAPIService } from '../../gitHubService';
 import { getHashedToken } from '../../helper';
