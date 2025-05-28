@@ -43,17 +43,10 @@ export const handlerImpl = async (
     appIds.forEach(async (appId: string) => {
       console.log(`Getting AppToken for ID ${appId}`);
 
-      const appToken = await getAppTokenImpl({
+      await getAppTokenImpl({
         appId: parseInt(appId),
         tableName: tableName.tableName,
       });
-
-      const githubService = new GitHubAPIService({
-        appToken: appToken.appToken,
-        userAgent: 'GitHub-AppFramework-InstallationTracker/1.0',
-      });
-
-      console.log(JSON.stringify(githubService));
     });
   } catch (error) {
     console.log(`An uncaught error has occurred: ${JSON.stringify(error)}`);
