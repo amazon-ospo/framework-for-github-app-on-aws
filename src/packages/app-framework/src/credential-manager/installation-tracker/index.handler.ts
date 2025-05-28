@@ -17,8 +17,6 @@ export const handler = async (
 
   const logResponse = {
     appId: bodyData.appId,
-    expirationTime: bodyData.expirationTime,
-    hashedToken: getHashedToken(bodyData.appToken as string),
   };
 
   console.log(JSON.stringify(logResponse));
@@ -28,11 +26,12 @@ export const handler = async (
 export const handlerImpl = async (
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> => {
-  try {
-
     console.log(`Event occurred. event: ${JSON.stringify(event)}`);
+    
+    const appId = 1222135;
+    
     await getAppTokenImpl({
-      appId: 1222135,
+      appId: appId,
       tableName: "the-app-framework-test-stack-CredentialManagerNestedStackCredentialManagerNestedStackR-Q1YMEM4SB95W-AppTable815C50BC-1FJENP0I5OQ0E",
     });
     
@@ -55,11 +54,9 @@ export const handlerImpl = async (
     //     tableName: tableName.tableName,
     //   });
     // });
-  } catch (error) {
-    console.log(`An uncaught error has occurred: ${JSON.stringify(error)}`);
-  }
-
   return {
+    body: JSON.stringify({ appId: appId }),
+    statusCode: 200,
   };
 };
 
