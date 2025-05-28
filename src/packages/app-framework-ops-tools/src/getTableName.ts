@@ -3,8 +3,11 @@ import {
   GetResourcesCommand,
   GetResourcesCommandOutput,
 } from '@aws-sdk/client-resource-groups-tagging-api';
-import { TagName, RESOURCES_PER_PAGE } from './constants';
-const taggingClient = new ResourceGroupsTaggingAPIClient({});
+import { TagName, RESOURCES_PER_PAGE, USER_AGENT } from './constants';
+
+const taggingClient = new ResourceGroupsTaggingAPIClient({
+  customUserAgent: USER_AGENT,
+});
 
 /**
  * Fetches DynamoDB tables tagged with FRAMEWORK_FOR_GITHUB_APP_ON_AWS_MANAGED and CREDENTIAL_MANAGER

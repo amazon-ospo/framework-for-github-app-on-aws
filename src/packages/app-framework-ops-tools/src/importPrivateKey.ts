@@ -20,11 +20,15 @@ import {
   SignCommand,
   TagResourceCommand,
 } from '@aws-sdk/client-kms';
-import { WRAPPING_SPEC, CREATE_KEY_SPEC } from './constants';
+import { WRAPPING_SPEC, CREATE_KEY_SPEC, USER_AGENT } from './constants';
 import { listTablesByTags } from './getTableName';
 
-export const kms = new KMSClient({});
-export const dynamoDB = new DynamoDBClient({});
+export const kms = new KMSClient({
+  customUserAgent: USER_AGENT,
+});
+export const dynamoDB = new DynamoDBClient({
+  customUserAgent: USER_AGENT,
+});
 
 export type ImportPrivateKey = ({
   pemFilePath,
@@ -680,7 +684,6 @@ export const validateJWTImpl: ValidateJWT = async ({ appId, signFunction }) => {
         Authorization: `Bearer ${jwt}`,
         // eslint-disable-next-line quote-props
         Accept: 'application/vnd.github.v3+json',
-        'User-Agent': 'KMS-Key-Importer/1.0',
       },
     });
 

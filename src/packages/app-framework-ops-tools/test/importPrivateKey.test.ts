@@ -918,10 +918,6 @@ describe('validateJWTImpl', () => {
       'Accept',
       'application/vnd.github.v3+json',
     );
-    expect(fetchCall?.headers).toHaveProperty(
-      'User-Agent',
-      'KMS-Key-Importer/1.0',
-    );
   });
   it('should return false if the GitHub App ID does not match', async () => {
     const mismatchResponse = new Response(

@@ -1,3 +1,4 @@
+import { name, version } from '../package.json';
 // Tags for DynamoDB App Table
 export enum TagName {
   FRAMEWORK_FOR_GITHUB_APP_ON_AWS_MANAGED = 'FrameworkForGitHubAppOnAwsManaged',
@@ -12,3 +13,5 @@ export const WRAPPING_SPEC = 'RSA_4096';
 export const CREATE_KEY_SPEC = 'RSA_2048';
 
 export const RESOURCES_PER_PAGE = 10;
+
+export const USER_AGENT = `${name}/${version}`;
