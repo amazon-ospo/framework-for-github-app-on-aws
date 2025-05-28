@@ -25,6 +25,7 @@ export class InstallationTracker {
       functionName: 'InstallationTracker',
       bundling: {
         ...LAMBDA_DEFAULTS.bundling,
+        nodeModules: ['re2-wasm'],
       },
       environment: {
         [InstallationAccessTokenEnvironmentVariables.APP_TABLE_NAME]:
