@@ -31,23 +31,30 @@ export const handlerImpl = async (
   try {
 
     console.log(`Event occurred. event: ${JSON.stringify(event)}`);
-
-    const tableName = checkEnvironmentImpl();
-
-    console.log("Fetching AppIDs...");
-
-    const appIds = await getAppIdsImpl(tableName);
-
-    console.log(`Found AppIDs: ${JSON.stringify(appIds)}`);
-
-    appIds.forEach(async (appId: string) => {
-      console.log(`Getting AppToken for ID ${appId}`);
-
-      await getAppTokenImpl({
-        appId: parseInt(appId),
-        tableName: tableName.tableName,
-      });
+    await getAppTokenImpl({
+      appId: 1222135,
+      tableName: "the-app-framework-test-stack-CredentialManagerNestedStackCredentialManagerNestedStackR-Q1YMEM4SB95W-AppTable815C50BC-1FJENP0I5OQ0E",
     });
+    
+    // console.log(`Event occurred. event: ${JSON.stringify(event)}`);
+
+    //const tableName = checkEnvironmentImpl();
+
+    // console.log("Fetching AppIDs...");
+
+    //const appIds = await getAppIdsImpl(tableName);
+
+    // console.log(`Found AppIDs: ${JSON.stringify(appIds)}`);
+
+
+    // appIds.forEach(async (appId: string) => {
+    //   console.log(`Getting AppToken for ID ${appId}`);
+
+    //   await getAppTokenImpl({
+    //     appId: parseInt(appId),
+    //     tableName: tableName.tableName,
+    //   });
+    // });
   } catch (error) {
     console.log(`An uncaught error has occurred: ${JSON.stringify(error)}`);
   }
