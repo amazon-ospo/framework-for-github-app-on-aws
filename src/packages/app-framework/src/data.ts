@@ -46,17 +46,17 @@ export type GetAppIds = ({
   tableName,
 }: {
   tableName: string;
-}) => Promise<string[]>;
+}) => Promise<number[]>;
 
 export const getAppIdsImpl: GetAppIds = async (
   tableName,
-): Promise<string[]> => {
+): Promise<number[]> => {
   const tableOperations = new TableOperations({
     TableName: tableName.tableName,
   });
   const items = await tableOperations.scan();
-  return Array.from(items).map<string>((item) => {
-    return item.AppId.toString();
+  return Array.from(items).map<number>((item) => {
+    return (item.AppId.N ?? 0) as number;
   });
 };
 

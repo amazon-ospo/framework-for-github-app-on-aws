@@ -1,5 +1,5 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
-// import { getAppIdsImpl } from '../../data';
+import { getAppIdsImpl } from '../../data';
 import { EnvironmentError } from '../../error';
 // import { GitHubAPIService } from '../../gitHubService';
 // import { getHashedToken } from '../../helper';
@@ -28,11 +28,15 @@ export const handlerImpl = async (
 ): Promise<APIGatewayProxyResultV2> => {
     console.log(`Event occurred. event: ${JSON.stringify(event)}`);
     
-    const appId = 1222135;
-    
+    const appId: number = 1222135;
+    const tableName: string = "the-app-framework-test-stack-CredentialManagerNestedStackCredentialManagerNestedStackR-Q1YMEM4SB95W-AppTable815C50BC-1FJENP0I5OQ0E";
+
+    const appIds: number[] = await getAppIdsImpl({ tableName: tableName });
+    console.log(`Found AppIDs: ${JSON.stringify(appIds)}`);
+
     await getAppTokenImpl({
       appId: appId,
-      tableName: "the-app-framework-test-stack-CredentialManagerNestedStackCredentialManagerNestedStackR-Q1YMEM4SB95W-AppTable815C50BC-1FJENP0I5OQ0E",
+      tableName: tableName,
     });
     
     // console.log(`Event occurred. event: ${JSON.stringify(event)}`);
