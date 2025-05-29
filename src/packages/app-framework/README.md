@@ -19,6 +19,9 @@ or directly manage sensitive keys.
 The component integrates with your CDK application
 and exposes well-defined APIs and permission grants
 for secure credential access.
+By placing this functionality behind a dedicated API,
+you not only simplify implementation but also gain an
+additional layer of fine-grained access control via IAM policies
 
 The Credential Manager simplifies and secures
 GitHub App credential handling by providing:
@@ -52,107 +55,6 @@ without handling or accessing the key directly.
 This design eliminates the need to embed key logic in your business code,
 reduces the attack surface,
 and enforces least privilege through fine-grained IAM controls.
-
-## What Resources Are Created by Credential Manager
-
-### DynamoDB Tables
-
-#### App Table
-
-Stores GitHub App IDs and their corresponding private key ARNs
-
-- Schema:
-
-  - Partition Key: `AppId` (NUMBER)
-
-- Configuration:
-
-  - Billing Mode: PAY_PER_REQUEST
-  - Point-in-Time Recovery: Enabled
-  - Removal Policy: RETAIN
-
-#### Installation Table
-
-Tracks GitHub App installations with node_id, installation_id, and app_id
-
-- Schema:
-
-  - Partition Key: `AppId` (NUMBER)
-  - Sort Key: `NodeId` (STRING)
-
-- Global Secondary Indexes:
-
-  - `NodeID`:
-
-    - Partition Key: `NodeId` (STRING)
-    - Sort Key: `AppId` (NUMBER)
-
-  - `InstallationID`:
-    - Partition Key: `InstallationId` (NUMBER)
-    - Sort Key: `AppId` (NUMBER)
-
-- Configuration:
-
-  - Billing Mode: PAY_PER_REQUEST
-  - Point-in-Time Recovery: Enabled
-
-### Lambda Functions
-
-#### GitHub App Token Generator
-
-The App Token Generator is a Lambda function
-that generates short-lived JWTs used to authenticate the GitHub App itself.
-It exposes a Function URL with AWS IAM authentication
-and performs RSA signing operations through KMS.
-Access is restricted to IAM principals explicitly granted through `grantGetAppToken`.
-
-- Configuration:
-
-  - Memory: 1024 MB
-  - Timeout: 10 seconds
-  - Function URL with AWS IAM auth
-
-- Environment Variables:
-
-  - `APP_TABLE_NAME`
-  - `INSTALLATION_TABLE_NAME`
-
-- Permissions:
-
-  - KMS:Sign for GitHub App private keys
-  - DynamoDB Read access to App table
-
-#### Installation Access Token Generator
-
-The Installation Access Token Generator is a Lambda function
-that retrieves GitHub Installation Access Tokens
-for a specific installation of your GitHub App.
-It is exposed through a Function URL with IAM authentication,
-and access is controlled via `grantGetInstallationAccessToken`.
-
-- Configuration:
-
-  - Memory: 512 MB
-  - Function URL with AWS IAM auth
-
-- Environment Variables:
-
-  - `APP_TABLE_NAME`
-  - `INSTALLATIONS_TABLE_NAME`
-
-- Permissions:
-
-  - KMS:Sign for GitHub App private keys
-  - DynamoDB Read access to both tables
-
-### Scheduler
-
-#### GitHub App Sync Scheduler
-
-Scans the GitHub App installation metadata every 30 minutes
-and updates the Installation Table.
-This ensures the table stays in sync with active installations
-and can be used to track installation lifecycles reliably.
 
 ## Usage
 
@@ -271,27 +173,113 @@ const response = await client.send(command);
 const token = response.appToken;
 ```
 
+## What Resources Are Created by Credential Manager
+
+### DynamoDB Tables
+
+#### App Table
+
+Stores GitHub App IDs and their corresponding private key ARNs
+
+- Schema:
+
+  - Partition Key: `AppId` (NUMBER)
+
+- Configuration:
+
+  - Billing Mode: PAY_PER_REQUEST
+  - Point-in-Time Recovery: Enabled
+  - Removal Policy: RETAIN
+
+#### Installation Table
+
+Tracks GitHub App installations with node_id, installation_id, and app_id
+
+- Schema:
+
+  - Partition Key: `AppId` (NUMBER)
+  - Sort Key: `NodeId` (STRING)
+
+- Global Secondary Indexes:
+
+  - `NodeID`:
+
+    - Partition Key: `NodeId` (STRING)
+    - Sort Key: `AppId` (NUMBER)
+
+  - `InstallationID`:
+    - Partition Key: `InstallationId` (NUMBER)
+    - Sort Key: `AppId` (NUMBER)
+
+- Configuration:
+
+  - Billing Mode: PAY_PER_REQUEST
+  - Point-in-Time Recovery: Enabled
+
+### Lambda Functions
+
+#### GitHub App Token Generator
+
+The App Token Generator is a Lambda function
+that generates short-lived JWTs used to authenticate the GitHub App itself.
+It exposes a Function URL with AWS IAM authentication
+and performs RSA signing operations through KMS.
+Access is restricted to IAM principals explicitly granted through `grantGetAppToken`.
+
+- Permissions:
+
+  - KMS:Sign for GitHub App private keys
+  - DynamoDB Read access to App table
+
+#### Installation Access Token Generator
+
+The Installation Access Token Generator is a Lambda function
+that retrieves GitHub Installation Access Tokens
+for a specific installation of your GitHub App.
+It is exposed through a Function URL with IAM authentication,
+and access is controlled via `grantGetInstallationAccessToken`.
+
+- Permissions:
+
+  - KMS:Sign for GitHub App private keys
+  - DynamoDB Read access to both tables
+
+### Scheduler
+
+#### GitHub App Sync Scheduler
+
+Scans the GitHub App installation metadata every 30 minutes
+and updates the Installation Table.
+This ensures the table stays in sync with active installations
+and can be used to track installation lifecycles reliably.
+
 ## Security Considerations
 
-**Data Protection**
+### Data Protection
+
 Credential Manager stores your
-GitHub App signing key securely using AWS KMS.
+GitHub App signing key using AWS KMS.
 All signing operations are delegated to KMS,
 ensuring that the private key never leaves KMS-managed HSMs.
+
+AWS KMS keys with imported key material are not included under the
+durability protections afforded other KMS keys.
+In the event of a Regionwide failure in AWS KMS,
+imported key material may need to be reimported into a KMS key.
+However, the impact in this use case is low,
+you can simply go to your GitHub App settings and generate a new private key,
+then re-import the new key into KMS to resume operation.
+
 Metadata is stored in DynamoDB with Point-in-Time Recovery enabled,
 and the App table uses a `RETAIN` removal policy
 to prevent accidental data loss.
 
-**Access Control**
+### Access Control
+
 Function URLs require AWS IAM authentication,
 and only explicitly granted IAM principals can invoke them.
 Access to KMS keys is restricted via tag-based policies
 to enforce fine-grained permissions.
-
-**Network Security**
-All APIs are secured with IAM-based authorization.
-Lambda Function URLs can optionally be configured with CORS
-for cross-origin requests.
 
 ## Cost Impact
 
@@ -314,38 +302,22 @@ These AWS resources incur usage-based charges:
    - Key storage fees
    - Signing operation charges
 
-1. **Important Note**:
-   The App table's RETAIN removal policy means it will persist
+**Important Note**:
+
+1. The App table's RETAIN removal policy means it will persist
    even if the stack is deleted,
    potentially leading to ongoing costs.
+
+1. When you rotate App signing key,
+   we do not automatically schedule the old key for deletion.
+   You will need to schedule the old key for deletion using AWS Console.
+   Failure to do so can result in ongoing KMS storage charges for unused keys.
 
 ## Resource Identification
 
 The Credential Manager uses AWS resource tags for resource identification
 and access control instead of relying on static resource names.
 This approach provides better flexibility and control over resource management.
-
-### Tag Keys
-
-- `FrameworkForGitHubAppOnAwsManaged`:
-  Used to identify resources managed by the framework
-
-- `Status`:
-  Indicates the status of resources (particularly for KMS keys)
-
-- `CredentialManager`:
-  Identifies resources specific to the credential manager
-
-### Tag Values
-
-- `true`: General boolean indicator
-
-- `Active`: Used for active resources (e.g., KMS keys)
-
-- `AppTokenEndpoint`: Identifies the App token generation endpoint
-
-- `InstallationAccessTokenEndpoint`:
-  Identifies the installation access token endpoint
 
 ### Resources Tags
 
