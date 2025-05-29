@@ -1,10 +1,10 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { getAppIdsImpl } from '../../data';
 import { EnvironmentError } from '../../error';
-// import { GitHubAPIService } from '../../gitHubService';
-// import { getHashedToken } from '../../helper';
 import { EnvironmentVariables } from '../get-app-token/constants';
 import { getAppTokenImpl } from '../get-app-token/getAppToken';
+import { GitHubAPIService } from '../../gitHubService';
+import { TableOperations } from '../../tableOperations';
 
 export const handler = async (
   event: APIGatewayProxyEventV2,
@@ -16,7 +16,8 @@ export const handler = async (
   const bodyData = JSON.parse(parseResponse.body);
 
   const logResponse = {
-    appId: bodyData.appId,
+    unverifiedInstallations: bodyData.unverifiedInstallations,
+    missingInstallations: bodyData.missingInstallations,
   };
 
   console.log(JSON.stringify(logResponse));
@@ -26,40 +27,49 @@ export const handler = async (
 export const handlerImpl = async (
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> => {
-    console.log(`Event occurred. event: ${JSON.stringify(event)}`);
-    
-    const appId: number = 1222135;
-    const tableName: string = "the-app-framework-test-stack-CredentialManagerNestedStackCredentialManagerNestedStackR-Q1YMEM4SB95W-AppTable815C50BC-1FJENP0I5OQ0E";
+  console.log(`Event occurred. event: ${JSON.stringify(event)}`);
 
-    const appIds: number[] = await getAppIdsImpl({ tableName: tableName });
-    console.log(`Found AppIDs: ${JSON.stringify(appIds)}`);
+  const tableName: string = checkEnvironmentImpl().tableName;
+  const appIds: number[] = await getAppIdsImpl({ tableName: tableName });
 
-    await getAppTokenImpl({
+  appIds.forEach(async (appId) => {
+    const appToken = (await getAppTokenImpl({
       appId: appId,
       tableName: tableName,
+    })).appToken;
+
+    const githubService = new GitHubAPIService({
+      appToken: appToken,
+      userAgent: "InstallationTracker/1.0"
     });
-    
-    // console.log(`Event occurred. event: ${JSON.stringify(event)}`);
 
-    //const tableName = checkEnvironmentImpl();
+    const actualInstallations = githubService.getInstallations({ });
 
-    // console.log("Fetching AppIDs...");
-
-    //const appIds = await getAppIdsImpl(tableName);
-
-    // console.log(`Found AppIDs: ${JSON.stringify(appIds)}`);
+    console.log(`Installations for appId ${appId}: ${JSON.stringify(actualInstallations)}`)
+  });
 
 
-    // appIds.forEach(async (appId: string) => {
-    //   console.log(`Getting AppToken for ID ${appId}`);
+  // console.log(`Event occurred. event: ${JSON.stringify(event)}`);
 
-    //   await getAppTokenImpl({
-    //     appId: parseInt(appId),
-    //     tableName: tableName.tableName,
-    //   });
-    // });
+  //const tableName = checkEnvironmentImpl();
+
+  // console.log("Fetching AppIDs...");
+
+  //const appIds = await getAppIdsImpl(tableName);
+
+  // console.log(`Found AppIDs: ${JSON.stringify(appIds)}`);
+
+
+  // appIds.forEach(async (appId: string) => {
+  //   console.log(`Getting AppToken for ID ${appId}`);
+
+  //   await getAppTokenImpl({
+  //     appId: parseInt(appId),
+  //     tableName: tableName.tableName,
+  //   });
+  // });
   return {
-    body: JSON.stringify({ appId: appId }),
+    body: JSON.stringify({ unverifiedInstallations: [], missingInstallations: [] }),
     statusCode: 200,
   };
 };
