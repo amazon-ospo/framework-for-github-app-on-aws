@@ -55,6 +55,7 @@ export const getAppIdsImpl: GetAppIds = async (
     TableName: tableName.tableName,
   });
   const items = await tableOperations.scan();
+  console.log(`Items returned from DDB: ${items}`);
   return Array.from(items).map<number>((item) => {
     return (item.AppId.N ?? 0) as number;
   });
