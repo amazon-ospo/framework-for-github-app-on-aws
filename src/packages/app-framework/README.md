@@ -262,12 +262,13 @@ GitHub App signing key using AWS KMS.
 All signing operations are delegated to KMS,
 ensuring that the private key never leaves KMS-managed HSMs.
 
-AWS KMS keys with imported key material are not included under the
-durability protections afforded other KMS keys.
-In the event of a Regionwide failure in AWS KMS,
-imported key material may need to be reimported into a KMS key.
-However, the impact in this use case is low,
-you can simply go to your GitHub App settings and generate a new private key,
+[AWS KMS does not maintain the durability of imported key materials
+at the same level as key material that AWS KMS generates.](https://docs.aws.amazon.com/kms/latest/developerguide/import-keys-protect.html)
+In the unlikely event of certain region-wide failures that affect AWS KMS,
+your imported key material may need to be re-imported into a new KMS key.
+However, the impact in this use case should be low,
+because you can simply go to your GitHub App settings
+and generate a new private key,
 then re-import the new key into KMS to resume operation.
 
 Metadata is stored in DynamoDB with Point-in-Time Recovery enabled,
@@ -310,7 +311,7 @@ These AWS resources incur usage-based charges:
 
 1. When you rotate App signing key,
    we do not automatically schedule the old key for deletion.
-   You will need to schedule the old key for deletion using AWS Console.
+   You will need to schedule the old key for deletion.
    Failure to do so can result in ongoing KMS storage charges for unused keys.
 
 ## Resource Identification
