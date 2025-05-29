@@ -76,7 +76,7 @@ export class CredentialManager extends NestedStack {
     });
 
     // GitHubAppToken construct, which creates a lambda function with a Function URL.
-    const getAppTokenEndpoint = new GitHubAppToken(this, 'AppToken', {
+    const getAppTokenEndpoint = new GitHubAppToken(this, 'AppTokenGenerator', {
       appTableName: this.appTable.tableName,
       installationTableName: this.installationTable.tableName,
     });
