@@ -1,5 +1,7 @@
+import { RecordSet } from 'aws-cdk-lib/aws-route53';
 import { DataError } from './error';
 import { TableOperations } from './tableOperations';
+import { AttributeValue } from '@aws-sdk/client-dynamodb';
 
 export type GetAppKeyArnById = ({
   appId,
@@ -42,6 +44,11 @@ export const getAppKeyArnByIdImpl: GetAppKeyArnById = async ({
   }
 };
 
+type AppRow = {
+  AppId: number,
+  KmsKeyArn: string,
+}
+
 export type GetAppIds = ({
   tableName,
 }: {
@@ -54,11 +61,16 @@ export const getAppIdsImpl: GetAppIds = async (
   const tableOperations = new TableOperations({
     TableName: tableName.tableName,
   });
-  const items = await tableOperations.scan();
+
+  const items: Record<string, AttributeValue>[] = await tableOperations.scan();
   console.log(`Items returned from DDB: ${JSON.stringify(items)}`);
-  return Array.from(items).map<number>((item) => {
-    return (item.AppId.N ?? 0) as number;
-  });
+  const appIds: number[] = [];
+  items.forEach((element, _index, _array) => {
+    if (!!element.AppId.N) {
+      appIds.push(parseInt(element.AppId.N));
+    }
+  })
+  return appIds;
 };
 
 /**
