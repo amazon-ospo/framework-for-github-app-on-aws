@@ -36,7 +36,7 @@ export class GitHubAppToken extends Construct {
           props.installationTableName,
       },
       description: 'Processes events for getting App token.',
-      memorySize: 1024,
+      memorySize: 512,
       timeout: Duration.seconds(10),
     });
     // Enable Function URL
