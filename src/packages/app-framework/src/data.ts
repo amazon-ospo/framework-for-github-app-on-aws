@@ -1,4 +1,3 @@
-import { RecordSet } from 'aws-cdk-lib/aws-route53';
 import { DataError } from './error';
 import { TableOperations } from './tableOperations';
 import { AttributeValue } from '@aws-sdk/client-dynamodb';
@@ -43,11 +42,6 @@ export const getAppKeyArnByIdImpl: GetAppKeyArnById = async ({
     throw error;
   }
 };
-
-type AppRow = {
-  AppId: number,
-  KmsKeyArn: string,
-}
 
 export type GetAppIds = ({
   tableName,
