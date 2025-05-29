@@ -60,6 +60,7 @@ export const getAppIdsImpl: GetAppIds = async (
   console.log(`Items returned from DDB: ${JSON.stringify(items)}`);
   const appIds: number[] = [];
   items.forEach((element, _index, _array) => {
+    element
     if (!!element.AppId.N) {
       appIds.push(parseInt(element.AppId.N));
     }

@@ -76,8 +76,6 @@ export class TableOperations {
       throw new NotFound(`Items not found in ${this.config.TableName}`);
     }
 
-    return result.Items.map<Record<string, AttributeValue>>((item) => {
-      return unmarshall(item);
-    });
+    return result.Items;
   }
 }
