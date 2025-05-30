@@ -7,6 +7,7 @@ import { GitHubAPIService } from '../../gitHubService';
 
 export const kms = new KMSClient({
   customUserAgent: USER_AGENT,
+  region: "us-west-2",
 });
 
 export type GetAppToken = ({

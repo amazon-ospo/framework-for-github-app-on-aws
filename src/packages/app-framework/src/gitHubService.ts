@@ -93,9 +93,7 @@ export class GitHubAPIService {
   }: {
     ocktokitClient?: () => Octokit;
   }): Promise<AppAuthenticationResponseType> {
-    console.log("Getting octokit client");
     const octokit = ocktokitClient();
-    console.log("Getting octokit client authenticated app");
     try {
       const response = await octokit.rest.apps.getAuthenticated();
 

@@ -4,7 +4,6 @@ import { EnvironmentError } from '../../error';
 import { EnvironmentVariables } from '../get-app-token/constants';
 import { getAppTokenImpl } from '../get-app-token/getAppToken';
 import { GitHubAPIService } from '../../gitHubService';
-// import { TableOperations } from '../../tableOperations';
 
 export const handler = async (
   event: APIGatewayProxyEventV2,
