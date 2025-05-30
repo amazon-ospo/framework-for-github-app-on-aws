@@ -5,6 +5,7 @@ import { tmpdir } from 'os';
 import { join, resolve } from 'path';
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
 import { KMSClient, ListResourceTagsCommand } from '@aws-sdk/client-kms';
+import { USER_AGENT } from '../src/constants';
 import { importPrivateKey } from '../src/importPrivateKey';
 
 /**
@@ -56,8 +57,12 @@ describe('importPrivateKey Acceptance Tests', () => {
     const tempDir = mkdtempSync(tmpdir());
     tempPemFile = join(tempDir, 'github-private-key.pem');
     copyFileSync(pemFile, tempPemFile);
-    kmsClient = new KMSClient({});
-    dynamoClient = new DynamoDBClient({});
+    kmsClient = new KMSClient({
+      customUserAgent: USER_AGENT,
+    });
+    dynamoClient = new DynamoDBClient({
+      customUserAgent: USER_AGENT,
+    });
   });
   afterEach(async () => {
     if (existsSync(tempPemFile)) {
