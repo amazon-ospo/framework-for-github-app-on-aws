@@ -32,16 +32,24 @@ export const handlerImpl = async (
   const tableName: string = checkEnvironmentImpl().tableName;
   const appIds: number[] = await getAppIdsImpl({ tableName: tableName });
 
+  console.log(`Starting installation fetch for appIds: ${JSON.stringify(appIds)}`);
+
   appIds.forEach(async (appId) => {
+    console.log(`Starting installation fetch for appId: ${appId}`);
+
     const appToken = (await getAppTokenImpl({
       appId: appId,
       tableName: tableName,
     })).appToken;
 
+    console.log(`Fetched appToken for appId: ${appId} - got ${appToken}`);
+
     const githubService = new GitHubAPIService({
       appToken: appToken,
       userAgent: "InstallationTracker/1.0"
     });
+
+    console.log("Calling GitHub service to fetch required installations.");
 
     const actualInstallations = githubService.getInstallations({ });
 
