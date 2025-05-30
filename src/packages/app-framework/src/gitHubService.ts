@@ -45,7 +45,12 @@ export class GitHubAPIService {
     ocktokitClient?: () => Octokit;
   }): Promise<AppInstallationsResponseType> {
     const octokit = ocktokitClient();
+    
+    console.log("Getting installations for app.");
+    
     const response = await octokit.rest.apps.listInstallations();
+
+    console.log(`Found installations: ${JSON.stringify(response)}`);
 
     if (response.status >= 400) {
       throw new GitHubError(
