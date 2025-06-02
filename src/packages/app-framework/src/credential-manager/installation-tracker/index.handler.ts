@@ -33,7 +33,7 @@ export const handlerImpl = async (
 
   console.log(`Starting installation fetch for appIds: ${JSON.stringify(appIds)}`);
 
-  appIds.forEach(async (appId) => {
+  Promise.all(appIds.map(async (appId) => {
     console.log(`Starting installation fetch for appId: ${appId}`);
 
     const appToken = (await getAppTokenImpl({
@@ -53,7 +53,7 @@ export const handlerImpl = async (
     const actualInstallations = githubService.getInstallations({ });
 
     console.log(`Installations for appId ${appId}: ${JSON.stringify(actualInstallations)}`)
-  });
+  }));
 
 
   // console.log(`Event occurred. event: ${JSON.stringify(event)}`);
