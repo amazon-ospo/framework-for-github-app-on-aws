@@ -44,8 +44,7 @@ export const handlerImpl = async (
     console.log(`Fetched appToken for appId: ${appId} - got ${appToken}`);
 
     const githubService = new GitHubAPIService({
-      appToken: appToken,
-      userAgent: "InstallationTracker/1.0"
+      appToken: appToken
     });
 
     console.log("Calling GitHub service to fetch required installations.");
