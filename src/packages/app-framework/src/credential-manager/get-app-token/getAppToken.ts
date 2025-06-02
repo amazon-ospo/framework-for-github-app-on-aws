@@ -107,7 +107,7 @@ export const validateAppTokenImpl: ValidateAppToken = async ({
     console.log(`Creating GitHubService with appToken ${appToken}`);
     const githubService = new GitHubAPIService({
       appToken,
-      userAgent: 'KMS-Key-Importer/1.0',
+      //userAgent: 'KMS-Key-Importer/1.0',
     });
     console.log(`Successfully created GitHubService. Getting authenticated app.`);
     const data = await githubService.getAuthenticatedApp({});
