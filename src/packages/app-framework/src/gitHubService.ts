@@ -4,10 +4,11 @@ import {
   AppAuthenticationResponseType,
   AppInstallationsResponseType,
   GetInstallationAccessTokenResponseType,
+  GetRateLimitResponseType,
 } from './types';
 
 export interface GitHubAPIServiceInput {
-  readonly appToken?: string;
+  readonly token?: string;
   readonly userAgent?: string;
 }
 
@@ -20,7 +21,7 @@ export class GitHubAPIService {
 
   getOctokitClient() {
     return new Octokit({
-      auth: this.config.appToken,
+      auth: this.config.token,
       userAgent: this.config.userAgent || 'framework-for-github-app-on-aws',
       request: {
         timeout: 10000, // 10 seconds timeout
@@ -106,6 +107,28 @@ export class GitHubAPIService {
       throw error;
     }
 
+    throw new DataError(
+      'GitHub API Error: No name or id returned for authenticated app',
+    );
+  }
+
+  async getRateLimit({
+    ocktokitClient = this.getOctokitClient.bind(this),
+  }: {
+    ocktokitClient?: () => Octokit;
+  }): Promise<GetRateLimitResponseType> {
+    const octokit = ocktokitClient();
+    const response = await octokit.rest.rateLimit.get();
+    if (response.status >= 400) {
+      throw new GitHubError(
+        `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
+      );
+    }
+
+    if (!!response.data) {
+      return response.data;
+    }
+    console.error('GitHub Output:', JSON.stringify(response.data));
     throw new DataError(
       'GitHub API Error: No name or id returned for authenticated app',
     );

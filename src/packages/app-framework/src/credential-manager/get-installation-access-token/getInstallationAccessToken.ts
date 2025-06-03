@@ -61,7 +61,7 @@ export const getInstallationAccessTokenImpl: GetInstallationAccessToken =
         appToken: appToken.appToken,
       });
       const githubService = new GitHubAPIService({
-        appToken: appToken.appToken,
+        token: appToken.appToken,
       });
       const installationAccessToken = await githubService.getInstallationToken({
         installationId: installationID,
@@ -116,7 +116,7 @@ export const getInstallationIdImpl: GetInstallationId = async ({
   appToken,
 }): Promise<number> => {
   console.log(`Received inputs to get installationID: 
-    { appId: ${appId}, nodeId: ${nodeId}}`);
+    { appId: ${appId}, nodeId: ${nodeId} }`);
   try {
     const installationID = await getInstallationIdFromTable({
       appId,
@@ -127,7 +127,7 @@ export const getInstallationIdImpl: GetInstallationId = async ({
     return installationID;
   } catch (error) {
     console.log('Unable to read from table trying to read from GitHub API...');
-    const githubService = new GitHubAPIService({ appToken });
+    const githubService = new GitHubAPIService({ token: appToken });
     const result = await githubService.getInstallations({});
     let installationID = -1;
 

@@ -1,11 +1,34 @@
-import { RemovalPolicy, NestedStack, Tags } from 'aws-cdk-lib';
+import { RemovalPolicy, NestedStack, Tags, Duration } from 'aws-cdk-lib';
+import {
+  Alarm,
+  AlarmWidget,
+  ComparisonOperator,
+  Dashboard,
+  GraphWidget,
+  GraphWidgetView,
+  HorizontalAnnotation,
+  MathExpression,
+  Shading,
+  TreatMissingData,
+} from 'aws-cdk-lib/aws-cloudwatch';
 import { AttributeType, Table, BillingMode } from 'aws-cdk-lib/aws-dynamodb';
 import { Effect, IGrantable, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
+import { ServiceName } from './constants';
 import { GitHubAppToken } from './get-app-token/appToken';
 import { InstallationAcessTokenGenerator } from './get-installation-access-token';
 import { InstallationTracker } from './installation-tracker';
+import { RateLimitTracker } from './rate-limit-tracker';
+import {
+  GitHubAPICallsRemainingPercent,
+  MetricNameSpace,
+  NearingRateLimitThresholdError,
+} from './rate-limit-tracker/constants';
 export interface CredentialManagerProps {}
+
+export interface RateLimitDashboardProps {
+  ({ limit }: { limit?: number }): void;
+}
 
 /**
  * Nested stack for storing GitHub App installation targets and pre-approved lists.
@@ -103,6 +126,11 @@ export class CredentialManager extends NestedStack {
       AppTable: this.appTable,
       InstallationTable: this.installationTable,
     });
+    new RateLimitTracker(this, 'RateLimitTracker', {
+      AppTable: this.appTable,
+      InstallationTable: this.installationTable,
+    });
+    this.rateLimitDashboard({});
   }
 
   // Grants a caller permission to invoke the app token lambda Function URL.
@@ -135,4 +163,61 @@ export class CredentialManager extends NestedStack {
       }),
     );
   }
+
+  rateLimitDashboard: RateLimitDashboardProps = ({ limit = 20 }) => {
+    const dashboard = new Dashboard(this, 'GitHubRateLimitTrackingDashboard', {
+      dashboardName: 'GitHubRateLimitTrackingDashboard',
+    });
+
+    const horizontalAnnotation: HorizontalAnnotation = {
+      value: limit,
+      color: '#ff0000',
+      fill: Shading.NONE,
+      visible: true,
+    };
+
+    const alarmWidget = new AlarmWidget({
+      alarm: new Alarm(this, 'NearingRateLimitAlarm', {
+        alarmName: `${MetricNameSpace}${NearingRateLimitThresholdError}`,
+        alarmDescription:
+          'Alarm triggers if any GitHub calls are approaching rate limit',
+        metric: new MathExpression({
+          expression: `SELECT MIN(${GitHubAPICallsRemainingPercent}) FROM "${MetricNameSpace}" WHERE service = '${ServiceName}'`,
+          label: 'Minimum API Calls Remaining (%)',
+          period: Duration.minutes(5),
+        }),
+        evaluationPeriods: 1,
+        threshold: limit,
+        comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
+        treatMissingData: TreatMissingData.NOT_BREACHING,
+      }),
+      title: 'Nearing RateLimit Alarm',
+      width: 12,
+      height: 8,
+    });
+
+    const widget = new GraphWidget({
+      title: 'GitHub API Calls Remaining (%)',
+      width: 12,
+      height: 8,
+      view: GraphWidgetView.TIME_SERIES,
+      period: Duration.minutes(5),
+      stacked: false,
+      left: [
+        new MathExpression({
+          expression: `SEARCH('{${MetricNameSpace},Category,AppID,InstallationID,service} MetricName="${GitHubAPICallsRemainingPercent}"', 'Average')`,
+          label: 'APICallsRemaining',
+          period: Duration.minutes(5),
+        }),
+      ],
+      leftAnnotations: [horizontalAnnotation],
+      leftYAxis: {
+        min: 0,
+        max: 100,
+        label: 'Percent',
+      },
+    });
+
+    dashboard.addWidgets(alarmWidget, widget);
+  };
 }

@@ -204,6 +204,7 @@ createPackage({
   name: "@aws/app-framework-for-github-apps-on-aws",
   outdir: "src/packages/app-framework",
   deps: [
+    "@aws-lambda-powertools/metrics",
     "@aws-sdk/client-dynamodb",
     "@aws-sdk/client-kms",
     "aws-xray-sdk",
@@ -218,6 +219,7 @@ createPackage({
   ],
   devDeps: ["aws-sdk-client-mock"],
   bundledDeps: [
+    "@aws-lambda-powertools/metrics",
     "@aws-sdk/client-dynamodb",
     "@aws-smithy/server-common",
     "@aws-sdk/client-kms",

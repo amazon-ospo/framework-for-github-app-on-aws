@@ -88,6 +88,10 @@
       "type": "build"
     },
     {
+      "name": "@aws-lambda-powertools/metrics",
+      "type": "bundled"
+    },
+    {
       "name": "@aws-sdk/client-dynamodb",
       "type": "bundled"
     },
@@ -140,6 +144,10 @@
       "name": "constructs",
       "version": "^10.4.2",
       "type": "peer"
+    },
+    {
+      "name": "@aws-lambda-powertools/metrics",
+      "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-dynamodb",

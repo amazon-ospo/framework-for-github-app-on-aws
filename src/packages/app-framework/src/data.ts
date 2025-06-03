@@ -228,3 +228,30 @@ export const getInstallationIdFromTableImpl: GetInstallationIdFromTable =
       throw error;
     }
   };
+
+export type GetInstallationsFromTable = ({
+  tableName,
+}: {
+  tableName: string;
+}) => Promise<{ appId: number; nodeId: string; instllationId: number }[]>;
+
+export const getInstallationsFromTableImpl: GetInstallationsFromTable = async ({
+  tableName,
+}) => {
+  const getInstallations = new TableOperations({ TableName: tableName });
+  const result: { appId: number; nodeId: string; instllationId: number }[] = [];
+  const itemList = await getInstallations.scan();
+  itemList.map((item) => {
+    if (!item.AppId || !item.NodeId || !item.InstallationID) {
+      throw new DataError(
+        'Invalid data: Missing Installation ID, Node ID or App ID',
+      );
+    }
+    result.push({
+      appId: item.AppId as number,
+      nodeId: item.NodeId as string,
+      instllationId: item.InstallationID as number,
+    });
+  });
+  return result;
+};

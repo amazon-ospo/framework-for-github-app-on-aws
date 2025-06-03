@@ -79,6 +79,18 @@
     "@smithy/util-utf8" "^2.0.0"
     tslib "^2.6.2"
 
+"@aws-lambda-powertools/commons@^2.20.0":
+  version "2.20.0"
+  resolved "https://registry.npmjs.org/@aws-lambda-powertools/commons/-/commons-2.20.0.tgz#d18dccdc7676bef0b008f56e57d36bb6d0ad9c37"
+  integrity sha512-OlQ0bqdBqvTpccRYExbT2zMQoSi5zHSQIeUn/Tg5eboSp0A1x3YtwRiG422Eg4V22ICoXnG5F+hNAelgOcExoA==
+
+"@aws-lambda-powertools/metrics@^2.20.0":
+  version "2.20.0"
+  resolved "https://registry.npmjs.org/@aws-lambda-powertools/metrics/-/metrics-2.20.0.tgz#2bb19aca3ba45e7ca1e5b94d3415bdd66ad464fe"
+  integrity sha512-pZRbse0rKauu/LZgivvcBGjCPyNCVFYPnAhD28MA9ZWsaYhj69cgb188EsyL+D+fo6RRZbuJzekuUx0VKrNx0A==
+  dependencies:
+    "@aws-lambda-powertools/commons" "^2.20.0"
+
 "@aws-sdk/client-dynamodb@^3.777.0":
   version "3.830.0"
   resolved "https://registry.npmjs.org/@aws-sdk/client-dynamodb/-/client-dynamodb-3.830.0.tgz"

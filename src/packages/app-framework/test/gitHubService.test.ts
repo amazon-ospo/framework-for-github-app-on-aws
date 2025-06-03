@@ -17,6 +17,9 @@ const mockOctokitRest = {
     createInstallationAccessToken: jest.fn<MockOctokitResponse<any>, [any]>(),
     getAuthenticated: jest.fn<MockOctokitResponse<any>, [any]>(),
   },
+  rateLimit: {
+    get: jest.fn<MockOctokitResponse<any>, [any]>(),
+  },
 };
 
 jest.mock('@octokit/rest', () => ({
@@ -209,5 +212,79 @@ describe('GitHubAPIService', () => {
         }),
       ).rejects.toThrow(GitHubError);
     });
+  });
+
+  describe('getRateLimit', () => {
+    const output = {
+      resources: {
+        core: {
+          limit: 5000,
+          used: 1,
+          remaining: 4999,
+          reset: 1691591363,
+        },
+        search: {
+          limit: 30,
+          used: 12,
+          remaining: 18,
+          reset: 1691591091,
+        },
+        graphql: {
+          limit: 5000,
+          used: 7,
+          remaining: 4993,
+          reset: 1691593228,
+        },
+      },
+      rate: {
+        limit: 5000,
+        used: 1,
+        remaining: 4999,
+        reset: 1372700873,
+      },
+    };
+
+    it('should return id and name if able to get GitHub output', async () => {
+      mockOctokitRest.rateLimit.get.mockResolvedValue({
+        status: 201,
+        data: output,
+        headers: {},
+        url: '',
+      });
+
+      const result = await service.getRateLimit({
+        ocktokitClient: () => new Octokit() as any,
+      });
+      expect(result).toEqual(output);
+    });
+
+    it('should throw error if GitHub API has an error', async () => {
+      mockOctokitRest.rateLimit.get.mockResolvedValue({
+        status: 401,
+        data: 'Invalid token',
+        headers: { 'content-type': 'text/plain' },
+        url: '',
+      });
+
+      await expect(
+        service.getRateLimit({
+          ocktokitClient: () => new Octokit() as any,
+        }),
+      ).rejects.toThrow(GitHubError);
+    });
+  });
+  it('should throw error data error if response returned does not have proper values', async () => {
+    mockOctokitRest.rateLimit.get.mockResolvedValue({
+      status: 201,
+      data: null,
+      headers: { 'content-type': 'text/plain' },
+      url: '',
+    });
+
+    await expect(
+      service.getRateLimit({
+        ocktokitClient: () => new Octokit() as any,
+      }),
+    ).rejects.toThrow(DataError);
   });
 });

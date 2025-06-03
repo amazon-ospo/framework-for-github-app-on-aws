@@ -88,7 +88,7 @@ export const handlerImpl: Handler = async ({
 
       // Using the App identity granted by the AppToken, generate a GitHub client.
       const githubService = new GitHubAPIService({
-        appToken: appToken,
+        token: appToken,
       });
 
       // Fetch installations from GitHub and map them to the fields we need.
