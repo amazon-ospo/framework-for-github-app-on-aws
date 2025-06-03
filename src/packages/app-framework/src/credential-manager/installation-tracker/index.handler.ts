@@ -5,6 +5,8 @@ import { EnvironmentVariables } from '../get-app-token/constants';
 import { getAppTokenImpl } from '../get-app-token/getAppToken';
 import { GitHubAPIService } from '../../gitHubService';
 
+type AppInstallations = Map<number, number[]>;
+
 export const handler = async (
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> => {
@@ -33,6 +35,8 @@ export const handlerImpl = async (
 
   console.log(`Starting installation fetch for appIds: ${JSON.stringify(appIds)}`);
 
+  const githubConfirmedInstallations: AppInstallations = new Map();
+
   Promise.all(appIds.map(async (appId) => {
     console.log(`Starting installation fetch for appId: ${appId}`);
 
@@ -51,9 +55,12 @@ export const handlerImpl = async (
 
     const actualInstallations = await githubService.getInstallations({ });
 
+    githubConfirmedInstallations.set(appId, actualInstallations.map((installation) => { return installation.id}));
+    
     console.log(`Installations for appId ${appId}: ${JSON.stringify(actualInstallations)}`)
   }));
 
+  console.log(`Found all GitHub installations: ${JSON.stringify(githubConfirmedInstallations)}`);
 
   // console.log(`Event occurred. event: ${JSON.stringify(event)}`);
 
