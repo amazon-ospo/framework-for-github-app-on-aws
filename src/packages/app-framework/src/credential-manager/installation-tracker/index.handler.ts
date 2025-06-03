@@ -10,18 +10,21 @@ type AppInstallations = Map<number, number[]>;
 export const handler = async (
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> => {
-  console.log('Entered function');
   const result = Promise.resolve(await handlerImpl(event));
+
+  console.log("Completed Impl handler.");
 
   const parseResponse = JSON.parse(JSON.stringify(result));
   const bodyData = JSON.parse(parseResponse.body);
+
+  console.log("Completed parsing response.");
 
   const logResponse = {
     unverifiedInstallations: bodyData.unverifiedInstallations,
     missingInstallations: bodyData.missingInstallations,
   };
 
-  console.log(JSON.stringify(logResponse));
+  console.log(`Response to be returned: ${JSON.stringify(logResponse)}`);
   return result;
 };
 
