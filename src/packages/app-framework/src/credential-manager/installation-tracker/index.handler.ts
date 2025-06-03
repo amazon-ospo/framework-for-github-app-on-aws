@@ -55,7 +55,7 @@ export const handlerImpl = async (
 
     const actualInstallations = await githubService.getInstallations({ });
 
-    githubConfirmedInstallations.set(appId, actualInstallations.map((installation) => { return installation.id}));
+    githubConfirmedInstallations.set(appId, await Promise.all(actualInstallations.map((installation) => { return installation.id})));
     
     console.log(`Installations for appId ${appId}: ${JSON.stringify(actualInstallations)}`)
   }));
