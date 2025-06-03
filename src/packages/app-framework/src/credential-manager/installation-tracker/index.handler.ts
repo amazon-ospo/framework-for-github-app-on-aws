@@ -49,7 +49,7 @@ export const handlerImpl = async (
 
     console.log("Calling GitHub service to fetch required installations.");
 
-    const actualInstallations = githubService.getInstallations({ });
+    const actualInstallations = await githubService.getInstallations({ });
 
     console.log(`Installations for appId ${appId}: ${JSON.stringify(actualInstallations)}`)
   }));
