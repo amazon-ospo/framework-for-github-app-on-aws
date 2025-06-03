@@ -11,7 +11,7 @@ export const handler = async (
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> => {
   console.log('Entered function');
-  const result = await handlerImpl(event);
+  const result = Promise.resolve(await handlerImpl(event));
 
   const parseResponse = JSON.parse(JSON.stringify(result));
   const bodyData = JSON.parse(parseResponse.body);
