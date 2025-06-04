@@ -13,9 +13,15 @@ export class TheAppFrameworkTestStack extends Stack {
       {},
     );
     const appTokenUrl = credentialManager.appTokenEndpoint;
+    const installationAccessTokenUrl =
+      credentialManager.installationAccessTokenEndpoint;
     new CfnOutput(this, 'AppTokenEndpoint', {
       value: appTokenUrl,
       exportName: 'AppTokenEndpoint',
+    });
+    new CfnOutput(this, 'InstallationAccessTokenEndpoint', {
+      value: installationAccessTokenUrl,
+      exportName: 'InstallationAccessTokenEndpoint',
     });
   }
 }
