@@ -235,6 +235,7 @@ const theAppFrameworkOpsTools = new typescript.TypeScriptProject({
   outdir: "src/packages/app-framework-ops-tools",
   parent: project,
   projenrcTs: false,
+  repository: projectMetadata.repositoryUrl,
   deps: [
     "@aws-sdk/client-resource-groups-tagging-api",
     "@aws-sdk/client-kms",
@@ -264,6 +265,7 @@ const theAppFrameworkTestApp = new awscdk.AwsCdkTypeScriptApp({
   outdir: "src/packages/app-framework-test-app",
   parent: project,
   projenrcTs: false,
+  repository: projectMetadata.repositoryUrl,
   cdkVersion: "2.184.1",
   deps: [
     "@aws-sdk/hash-node",

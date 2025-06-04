@@ -1,5 +1,9 @@
 {
   "name": "app-framework-test-app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git"
+  },
   "scripts": {
     "accept": "npx projen accept",
     "build": "npx projen build",
