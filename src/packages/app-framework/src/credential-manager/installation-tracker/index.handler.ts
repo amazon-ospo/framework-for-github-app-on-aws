@@ -10,7 +10,7 @@ type AppInstallations = Map<number, number[]>;
 export const handler = async (
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> => {
-  const result = Promise.resolve(await handlerImpl(event));
+  const result = await handlerImpl(event);
 
   console.log("Completed Impl handler.");
 
@@ -36,11 +36,11 @@ export const handlerImpl = async (
   const tableName: string = checkEnvironmentImpl().tableName;
   const appIds: number[] = await getAppIdsImpl({ tableName: tableName });
 
-  console.log(`Starting installation fetch for appIds: ${JSON.stringify(appIds)}`);
+  console.log(`Starting installation fetch for all appIds: ${JSON.stringify(appIds)}`);
 
   const githubConfirmedInstallations: AppInstallations = new Map();
 
-  Promise.all(appIds.map(async (appId) => {
+  await Promise.all(appIds.map(async (appId) => {
     console.log(`Starting installation fetch for appId: ${appId}`);
 
     const appToken = (await getAppTokenImpl({
