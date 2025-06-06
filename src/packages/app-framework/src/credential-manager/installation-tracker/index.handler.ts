@@ -38,7 +38,7 @@ export const handlerImpl = async (
 
   console.log(`Starting installation fetch for all appIds: ${JSON.stringify(appIds)}`);
 
-  const githubConfirmedInstallations: AppInstallations = new Map();
+  const githubConfirmedInstallations: AppInstallations = new Map<number, number[]>();
 
   await Promise.all(appIds.map(async (appId) => {
     console.log(`Starting installation fetch for appId: ${appId}`);
@@ -57,12 +57,11 @@ export const handlerImpl = async (
     console.log("Calling GitHub service to fetch required installations.");
 
     const actualInstallations = await githubService.getInstallations({ });
+    const gitHubInstallationIds = await Promise.all(actualInstallations.map((installation) => { return installation.id }));
 
-    githubConfirmedInstallations.set(appId, 
-      await Promise.all(
-        actualInstallations.map((installation) => { return installation.id })
-      )
-    );
+    console.log(`GitHub installation IDs for AppId ${appId}: ${JSON.stringify(gitHubInstallationIds)}`);
+
+    githubConfirmedInstallations.set(appId, gitHubInstallationIds);
     
     const actualInstallationsText = JSON.stringify(actualInstallations);
     console.log(`Installations for appId ${appId}: ${actualInstallationsText}`)
