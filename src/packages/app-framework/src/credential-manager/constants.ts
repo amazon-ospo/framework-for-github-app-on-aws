@@ -1,3 +1,6 @@
+import { name, version } from '../../package.json';
+
+export const USER_AGENT = `${name}/${version}`;
 export const TAG_KEYS = {
   FRAMEWORK_FOR_GITHUB_APP_ON_AWS_MANAGED: 'FrameworkForGitHubAppOnAwsManaged',
   STATUS: 'Status',
@@ -9,3 +12,8 @@ export const TAG_VALUES = {
   APP_TOKEN_ENDPOINT: 'AppTokenEndpoint',
   INSTALLATION_ACCESS_TOKEN_ENDPOINT: 'InstallationAccessTokenEndpoint',
 };
+
+export enum EnvironmentVariables {
+  APP_TABLE_NAME = 'APP_TABLE_NAME',
+  INSTALLATION_TABLE_NAME = 'INSTALLATION_TABLE_NAME',
+}

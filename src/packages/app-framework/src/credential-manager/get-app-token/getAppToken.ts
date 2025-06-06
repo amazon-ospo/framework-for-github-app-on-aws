@@ -1,9 +1,9 @@
 import { createHash } from 'crypto';
 import { KMSClient, SignCommand } from '@aws-sdk/client-kms';
-import { USER_AGENT } from './constants';
 import { getAppKeyArnByIdImpl, GetAppKeyArnById } from '../../data';
 import { GitHubError, ServerError, VisibleError } from '../../error';
 import { GitHubAPIService } from '../../gitHubService';
+import { USER_AGENT } from '../constants';
 
 export const kms = new KMSClient({
   customUserAgent: USER_AGENT,

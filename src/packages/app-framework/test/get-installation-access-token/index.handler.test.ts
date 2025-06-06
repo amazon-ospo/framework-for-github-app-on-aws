@@ -1,5 +1,5 @@
 import { APIGatewayProxyResultV2 } from 'aws-lambda';
-import { InstallationAccessTokenEnvironmentVariables } from '../../src/credential-manager/get-installation-access-token/constants';
+import { EnvironmentVariables } from '../../src/credential-manager/constants';
 import {
   checkEnvironmentImpl,
   handlerImpl,
@@ -26,11 +26,8 @@ jest.mock('../../src/gitHubService', () => {
 });
 beforeEach(() => {
   environment = { ...process.env };
-  process.env[
-    InstallationAccessTokenEnvironmentVariables.INSTALLATIONS_TABLE_NAME
-  ] = installationTable;
-  process.env[InstallationAccessTokenEnvironmentVariables.APP_TABLE_NAME] =
-    appTable;
+  process.env[EnvironmentVariables.INSTALLATION_TABLE_NAME] = installationTable;
+  process.env[EnvironmentVariables.APP_TABLE_NAME] = appTable;
 });
 
 describe('handlerImpl', () => {
@@ -110,7 +107,7 @@ describe('checkEnvironmentImpl', () => {
     process.env = { ...environment };
   });
 
-  it.each(Object.keys(InstallationAccessTokenEnvironmentVariables))(
+  it.each(Object.keys(EnvironmentVariables))(
     'fails when %s environment variable is not set',
     (value) => {
       delete process.env[value];

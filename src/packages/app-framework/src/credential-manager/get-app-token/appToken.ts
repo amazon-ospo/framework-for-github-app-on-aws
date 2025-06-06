@@ -7,9 +7,8 @@ import {
 } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
-import { EnvironmentVariables } from './constants';
 import { LAMBDA_DEFAULTS } from '../../lambdaDefaults';
-import { TAG_KEYS, TAG_VALUES } from '../constants';
+import { EnvironmentVariables, TAG_KEYS, TAG_VALUES } from '../constants';
 
 export interface GitHubAppTokenProps {
   readonly appTableName: string;
