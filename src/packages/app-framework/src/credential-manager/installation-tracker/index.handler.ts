@@ -40,7 +40,7 @@ export const handlerImpl = async (
 
   const githubConfirmedInstallations: AppInstallations = new Map<number, number[]>();
 
-  await Promise.all(appIds.map(async (appId) => {
+  await Promise.all(appIds.map(async (appId: number) => {
     console.log(`Starting installation fetch for appId: ${appId}`);
 
     const appToken = (await getAppTokenImpl({
@@ -57,7 +57,7 @@ export const handlerImpl = async (
     console.log("Calling GitHub service to fetch required installations.");
 
     const actualInstallations = await githubService.getInstallations({ });
-    const gitHubInstallationIds = await Promise.all(actualInstallations.map((installation) => { return installation.id }));
+    const gitHubInstallationIds: number[] = await Promise.all(actualInstallations.map((installation) => { return installation.id }));
 
     console.log(`GitHub installation IDs for AppId ${appId}: ${JSON.stringify(gitHubInstallationIds)}`);
 
@@ -67,7 +67,7 @@ export const handlerImpl = async (
     console.log(`Installations for appId ${appId}: ${actualInstallationsText}`)
   }));
 
-  console.log(`Found all GitHub installations: ${JSON.stringify(githubConfirmedInstallations)}`);
+  console.log(`Found all GitHub installations: ${JSON.stringify(Array.from(githubConfirmedInstallations.entries()))}`);
 
   // console.log(`Event occurred. event: ${JSON.stringify(event)}`);
 
