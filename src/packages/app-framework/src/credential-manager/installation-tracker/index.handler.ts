@@ -1,5 +1,5 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
-import { getAppIdsImpl } from '../../data';
+import { getAppIdsImpl, getInstallationIdsImpl } from '../../data';
 import { EnvironmentError } from '../../error';
 import { EnvironmentVariables } from '../get-app-token/constants';
 import { getAppTokenImpl } from '../get-app-token/getAppToken';
@@ -33,61 +33,34 @@ export const handlerImpl = async (
 ): Promise<APIGatewayProxyResultV2> => {
   console.log(`Event occurred. event: ${JSON.stringify(event)}`);
 
-  const tableName: string = checkEnvironmentImpl().tableName;
-  const appIds: number[] = await getAppIdsImpl({ tableName: tableName });
+  const envVars = checkEnvironmentImpl();
+  const appTableName: string = envVars.appTableName;
+  const installationTableName: string = envVars.installationTableName;
 
-  console.log(`Starting installation fetch for all appIds: ${JSON.stringify(appIds)}`);
+  const appIds: number[] = await getAppIdsImpl({ tableName: appTableName });
+  const installationIds: AppInstallations = await getInstallationIdsImpl({ tableName: installationTableName});
 
   const githubConfirmedInstallations: AppInstallations = new Map<number, number[]>();
 
   await Promise.all(appIds.map(async (appId: number) => {
-    console.log(`Starting installation fetch for appId: ${appId}`);
-
     const appToken = (await getAppTokenImpl({
       appId: appId,
-      tableName: tableName,
+      tableName: appTableName,
     })).appToken;
-
-    console.log(`Fetched appToken for appId: ${appId} - got ${appToken}`);
 
     const githubService = new GitHubAPIService({
       appToken: appToken
     });
 
-    console.log("Calling GitHub service to fetch required installations.");
-
     const actualInstallations = await githubService.getInstallations({ });
     const gitHubInstallationIds: number[] = await Promise.all(actualInstallations.map((installation) => { return installation.id }));
 
-    console.log(`GitHub installation IDs for AppId ${appId}: ${JSON.stringify(gitHubInstallationIds)}`);
-
     githubConfirmedInstallations.set(appId, gitHubInstallationIds);
-    
-    const actualInstallationsText = JSON.stringify(actualInstallations);
-    console.log(`Installations for appId ${appId}: ${actualInstallationsText}`)
   }));
 
+  console.log(`Found all DynamoDB installations: ${JSON.stringify(Array.from(installationIds.entries()))}`);
   console.log(`Found all GitHub installations: ${JSON.stringify(Array.from(githubConfirmedInstallations.entries()))}`);
 
-  // console.log(`Event occurred. event: ${JSON.stringify(event)}`);
-
-  //const tableName = checkEnvironmentImpl();
-
-  // console.log("Fetching AppIDs...");
-
-  //const appIds = await getAppIdsImpl(tableName);
-
-  // console.log(`Found AppIDs: ${JSON.stringify(appIds)}`);
-
-
-  // appIds.forEach(async (appId: string) => {
-  //   console.log(`Getting AppToken for ID ${appId}`);
-
-  //   await getAppTokenImpl({
-  //     appId: parseInt(appId),
-  //     tableName: tableName.tableName,
-  //   });
-  // });
   return {
     body: JSON.stringify({ unverifiedInstallations: [], missingInstallations: [] }),
     statusCode: 200,
@@ -95,18 +68,25 @@ export const handlerImpl = async (
 };
 
 export type CheckEnvironment = () => {
-  tableName: string;
+  appTableName: string;
+  installationTableName: string;
 };
 /**
  * Verifies that required environment variables are set and attempts to App table name,
  * throws a EnvironmentError if the environment is not correctly configured.
  */
 export const checkEnvironmentImpl: CheckEnvironment = () => {
-  const tableName = process.env.APP_TABLE_NAME;
-  if (!tableName) {
+  const appTableName = process.env.APP_TABLE_NAME;
+  if (!appTableName) {
     throw new EnvironmentError(
       `No value found in ${EnvironmentVariables.APP_TABLE_NAME} environment variable.`,
     );
   }
-  return { tableName };
+  const installationTableName = process.env.INSTALLATION_TABLE_NAME;
+  if (!installationTableName) {
+        throw new EnvironmentError(
+      `No value found in ${EnvironmentVariables.INSTALLATION_TABLE_NAME} environment variable.`,
+    );
+  }
+  return { appTableName: appTableName, installationTableName: installationTableName };
 };

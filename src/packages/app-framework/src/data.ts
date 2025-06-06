@@ -68,6 +68,39 @@ export const getAppIdsImpl: GetAppIds = async (
   return appIds;
 };
 
+export type GetInstallationIds = ({
+  tableName,
+}: {
+  tableName: string;
+}) => Promise<Map<number, number[]>>;
+
+export const getInstallationIdsImpl: GetInstallationIds = async (
+  tableName,
+): Promise<Map<number, number[]>> => {
+  const tableOperations = new TableOperations({
+    TableName: tableName.tableName,
+  });
+
+  const items: Record<string, AttributeValue>[] = await tableOperations.scan();
+  console.log(`Items returned from DDB: ${JSON.stringify(items)}`);
+  const installationIds: Map<number, number[]> = new Map();
+  items.forEach((element, _index, _array) => {
+    element
+    if (!!element.AppId.N && !!element.InstallationId.N) {
+      const appId = parseInt(element.AppId.N);
+      const installationId = parseInt(element.InstallationId.N);
+
+      const existingInstallationIds = installationIds.get(appId) ?? [];
+      existingInstallationIds.push(installationId);
+
+      installationIds.set(appId, existingInstallationIds);
+    }
+  });
+
+  return installationIds;
+};
+
+
 /**
  * Retrieves the Installation ID associated with a given GitHub App ID and Node ID from DynamoDB.
  *
