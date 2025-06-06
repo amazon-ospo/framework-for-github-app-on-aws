@@ -1,9 +1,9 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { getAppIdsImpl, getInstallationIdsImpl } from '../../data';
 import { EnvironmentError } from '../../error';
-import { EnvironmentVariables } from '../get-app-token/constants';
 import { getAppTokenImpl } from '../get-app-token/getAppToken';
 import { GitHubAPIService } from '../../gitHubService';
+import { InstallationAccessTokenEnvironmentVariables } from '../get-installation-access-token/constants';
 
 type AppInstallations = Map<number, number[]>;
 
@@ -79,13 +79,13 @@ export const checkEnvironmentImpl: CheckEnvironment = () => {
   const appTableName = process.env.APP_TABLE_NAME;
   if (!appTableName) {
     throw new EnvironmentError(
-      `No value found in ${EnvironmentVariables.APP_TABLE_NAME} environment variable.`,
+      `No value found in ${InstallationAccessTokenEnvironmentVariables.APP_TABLE_NAME} environment variable.`,
     );
   }
   const installationTableName = process.env.INSTALLATION_TABLE_NAME;
   if (!installationTableName) {
         throw new EnvironmentError(
-      `No value found in ${EnvironmentVariables.INSTALLATION_TABLE_NAME} environment variable.`,
+      `No value found in ${InstallationAccessTokenEnvironmentVariables.INSTALLATIONS_TABLE_NAME} environment variable.`,
     );
   }
   return { appTableName: appTableName, installationTableName: installationTableName };
