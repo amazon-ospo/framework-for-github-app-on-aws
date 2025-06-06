@@ -3,11 +3,11 @@ import {
   ServerSideError,
 } from '@framework.api/app-framework-ssdk';
 import { APIGatewayProxyResultV2 } from 'aws-lambda';
+import { EnvironmentVariables } from '../../src/credential-manager/constants';
 import {
   handlerImpl,
   checkEnvironmentImpl,
 } from '../../src/credential-manager/get-app-token/appToken.handler';
-import { EnvironmentVariables } from '../../src/credential-manager/get-app-token/constants';
 import { EnvironmentError } from '../../src/error';
 import { apiGatewayEventHelper } from '../helper';
 

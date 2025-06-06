@@ -13,7 +13,7 @@ import {
   APIGatewayProxyEventV2,
   APIGatewayProxyResultV2,
 } from 'aws-lambda';
-import { InstallationAccessTokenEnvironmentVariables } from './constants';
+import { EnvironmentVariables } from '../constants';
 import { getInstallationAccessTokenOperationImpl } from './getInstallationAccessTokenOperation';
 import { EnvironmentError } from '../../error';
 import { getHashedToken } from '../../helper';
@@ -104,20 +104,17 @@ export type CheckEnvironment = () => {
  @throws EnvironmentError incase Installations Table or App Table names are not present
  */
 export const checkEnvironmentImpl: CheckEnvironment = () => {
-  const appTableName =
-    process.env[InstallationAccessTokenEnvironmentVariables.APP_TABLE_NAME]!;
+  const appTableName = process.env[EnvironmentVariables.APP_TABLE_NAME]!;
   if (!appTableName) {
     throw new EnvironmentError(
-      `No value found in ${InstallationAccessTokenEnvironmentVariables.APP_TABLE_NAME} environment variable.`,
+      `No value found in ${EnvironmentVariables.APP_TABLE_NAME} environment variable.`,
     );
   }
   const installationTableName =
-    process.env[
-      InstallationAccessTokenEnvironmentVariables.INSTALLATIONS_TABLE_NAME
-    ]!;
+    process.env[EnvironmentVariables.INSTALLATION_TABLE_NAME]!;
   if (!installationTableName) {
     throw new EnvironmentError(
-      `No value found in ${InstallationAccessTokenEnvironmentVariables.INSTALLATIONS_TABLE_NAME} environment variable.`,
+      `No value found in ${EnvironmentVariables.INSTALLATION_TABLE_NAME} environment variable.`,
     );
   }
   return { appTable: appTableName, installationTable: installationTableName };

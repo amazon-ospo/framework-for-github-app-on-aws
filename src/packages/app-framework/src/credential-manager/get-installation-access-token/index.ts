@@ -8,9 +8,8 @@ import {
 } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
-import { InstallationAccessTokenEnvironmentVariables } from './constants';
 import { LAMBDA_DEFAULTS } from '../../lambdaDefaults';
-import { TAG_KEYS, TAG_VALUES } from '../constants';
+import { EnvironmentVariables, TAG_KEYS, TAG_VALUES } from '../constants';
 
 export interface InstallationAcessTokenProps {
   readonly AppTable: ITable;
@@ -32,9 +31,8 @@ export class InstallationAcessTokenGenerator extends Construct {
         nodeModules: ['re2-wasm'],
       },
       environment: {
-        [InstallationAccessTokenEnvironmentVariables.APP_TABLE_NAME]:
-          props.AppTable.tableName,
-        [InstallationAccessTokenEnvironmentVariables.INSTALLATIONS_TABLE_NAME]:
+        [EnvironmentVariables.APP_TABLE_NAME]: props.AppTable.tableName,
+        [EnvironmentVariables.INSTALLATION_TABLE_NAME]:
           props.InstallationTable.tableName,
       },
       description: 'Generates Installation Access Token',

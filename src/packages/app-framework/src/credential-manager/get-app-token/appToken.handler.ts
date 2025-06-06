@@ -14,7 +14,7 @@ import {
   APIGatewayProxyEventV2,
   APIGatewayProxyResultV2,
 } from 'aws-lambda';
-import { EnvironmentVariables } from './constants';
+import { EnvironmentVariables } from '../constants';
 import { getAppTokenOperation as getAppTokenOperationImpl } from './getAppTokenOperation';
 import { EnvironmentError } from '../../error';
 import { getHashedToken } from '../../helper';
