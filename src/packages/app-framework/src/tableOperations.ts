@@ -2,6 +2,8 @@ import {
   AttributeValue,
   GetItemCommand,
   GetItemCommandOutput,
+  PutItemCommand,
+  PutItemCommandOutput,
   ScanCommand,
   ScanCommandOutput,
 } from '@aws-sdk/client-dynamodb';
@@ -57,6 +59,21 @@ export class TableOperations {
         throw error;
       }
       throw new Error(`Error getting item from ${this.config.TableName}: ${error}`);
+    }
+  }
+
+  async putItem(item: Record<string, AttributeValue>) {
+    const client = dynamodbClient();
+    try {
+      const command = new PutItemCommand({
+        TableName: this.config.TableName,
+        Item: item,
+      });
+
+      await client.send(command);
+    } catch (error) {
+      console.log(`ERRORL ${error}`);
+      throw new Error(`Error putting item in ${this.config.TableName}: ${error}`);
     }
   }
 

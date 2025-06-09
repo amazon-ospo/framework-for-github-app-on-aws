@@ -24,13 +24,10 @@ export const getAppKeyArnByIdImpl: GetAppKeyArnById = async ({
   tableName,
 }) => {
   try {
-    console.log(`Creating table operations for name ${tableName}`);
     const getItem = new TableOperations({ TableName: tableName });
-    console.log(`Fetching ARN with AppId ${appId.toString()}`);
     const result = await getItem.getItem({
       AppId: { N: appId.toString() },
     });
-    console.log(`Successfully fetched ARN ${JSON.stringify(result)}`);
     if (!result.KmsKeyArn) {
       throw new DataError(
         `Invalid data: Missing KmsKeyArn for appId: ${appId}`,
@@ -57,7 +54,6 @@ export const getAppIdsImpl: GetAppIds = async (
   });
 
   const items: Record<string, AttributeValue>[] = await tableOperations.scan();
-  console.log(`Items returned from DDB: ${JSON.stringify(items)}`);
   const appIds: number[] = [];
   items.forEach((element, _index, _array) => {
     element
@@ -82,7 +78,6 @@ export const getInstallationIdsImpl: GetInstallationIds = async (
   });
 
   const items: Record<string, AttributeValue>[] = await tableOperations.scan();
-  console.log(`Items returned from DDB: ${JSON.stringify(items)}`);
   const installationIds: Map<number, number[]> = new Map();
   items.forEach((element, _index, _array) => {
     element
@@ -100,6 +95,38 @@ export const getInstallationIdsImpl: GetInstallationIds = async (
   return installationIds;
 };
 
+export type PutInstallationId = ({
+  tableName,
+  appId,
+  nodeId,
+  installationId
+}: {
+  tableName: string;
+  appId: number;
+  nodeId: string;
+  installationId: number;
+
+}) => Promise<void>;
+
+export const PutInstallationId: PutInstallationId = async ({  
+  tableName,
+  appId,
+  nodeId,
+  installationId,
+}): Promise<void> => {
+  const tableOperations = new TableOperations({
+    TableName: tableName,
+  });
+
+  await tableOperations.putItem({
+    TableName: { "S": tableName },
+    AppId: { "N": appId.toString() },
+    NodeId: { "S": nodeId },
+    InstallationID: { "N": installationId.toString() },
+  });
+
+  return;
+};
 
 /**
  * Retrieves the Installation ID associated with a given GitHub App ID and Node ID from DynamoDB.

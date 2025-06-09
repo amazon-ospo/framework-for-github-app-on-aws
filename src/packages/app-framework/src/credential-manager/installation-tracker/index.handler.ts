@@ -37,11 +37,15 @@ export const handlerImpl = async (
   const appTableName: string = envVars.appTableName;
   const installationTableName: string = envVars.installationTableName;
 
+  // Find all AppIds for this account.
   const appIds: number[] = await getAppIdsImpl({ tableName: appTableName });
-  const installationIds: AppInstallations = await getInstallationIdsImpl({ tableName: installationTableName});
+
+  // Find all installations for this account, split by AppId.
+  const registeredInstallationIds: AppInstallations = await getInstallationIdsImpl({ tableName: installationTableName });
 
   const githubConfirmedInstallations: AppInstallations = new Map<number, number[]>();
 
+  // Find all installations for this account, according to GitHub.
   await Promise.all(appIds.map(async (appId: number) => {
     const appToken = (await getAppTokenImpl({
       appId: appId,
@@ -52,14 +56,40 @@ export const handlerImpl = async (
       appToken: appToken
     });
 
-    const actualInstallations = await githubService.getInstallations({ });
+    const actualInstallations = await githubService.getInstallations({});
     const gitHubInstallationIds: number[] = await Promise.all(actualInstallations.map((installation) => { return installation.id }));
 
     githubConfirmedInstallations.set(appId, gitHubInstallationIds);
   }));
 
-  console.log(`Found all DynamoDB installations: ${JSON.stringify(Array.from(installationIds.entries()))}`);
+  console.log(`Found all DynamoDB installations: ${JSON.stringify(Array.from(registeredInstallationIds.entries()))}`);
   console.log(`Found all GitHub installations: ${JSON.stringify(Array.from(githubConfirmedInstallations.entries()))}`);
+
+  // Calculate the differences for each AppId.
+  appIds.forEach((appId) => {
+    // Calculate missing installations.
+    const missingInstallations: number[] = [];
+    const unverifiedInstallations: number[] = [];
+
+    const gitHubInstallationIdsForAppId = githubConfirmedInstallations.get(appId);
+    const registeredInstallationIdsForAppId = registeredInstallationIds.get(appId);
+
+    if (!!gitHubInstallationIdsForAppId) {
+      gitHubInstallationIdsForAppId.forEach((installationId) => {
+        if (!registeredInstallationIds.has(installationId)) {
+          unverifiedInstallations.push(installationId);
+        }
+      });
+    }
+
+    if (!!registeredInstallationIdsForAppId) {
+      registeredInstallationIdsForAppId.forEach((installationId) => {
+        if (!gitHubInstallationIdsForAppId || !(gitHubInstallationIdsForAppId.indexOf(installationId) < 0)) {
+          missingInstallations.push(installationId);
+        }
+      });
+    }
+  });
 
   return {
     body: JSON.stringify({ unverifiedInstallations: [], missingInstallations: [] }),
@@ -84,7 +114,7 @@ export const checkEnvironmentImpl: CheckEnvironment = () => {
   }
   const installationTableName = process.env.INSTALLATIONS_TABLE_NAME;
   if (!installationTableName) {
-        throw new EnvironmentError(
+    throw new EnvironmentError(
       `No value found in ${InstallationAccessTokenEnvironmentVariables.INSTALLATIONS_TABLE_NAME} environment variable.`,
     );
   }
