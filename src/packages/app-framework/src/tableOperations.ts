@@ -3,7 +3,6 @@ import {
   GetItemCommand,
   GetItemCommandOutput,
   PutItemCommand,
-  PutItemCommandOutput,
   ScanCommand,
   ScanCommandOutput,
 } from '@aws-sdk/client-dynamodb';
