@@ -69,8 +69,8 @@ export const handlerImpl = async (
     githubConfirmedInstallations[appId] = gitHubInstallations;
   }));
 
-  console.log(`Found all DynamoDB installations: ${JSON.stringify(Array.from(registeredInstallations.entries()))}`);
-  console.log(`Found all GitHub installations: ${JSON.stringify(Array.from(githubConfirmedInstallations.entries()))}`);
+  console.log(`Found all DynamoDB installations: ${JSON.stringify(registeredInstallations)}`);
+  console.log(`Found all GitHub installations: ${JSON.stringify(githubConfirmedInstallations)}`);
 
   // Calculate the differences for each AppId.
   appIds.forEach((appId) => {
