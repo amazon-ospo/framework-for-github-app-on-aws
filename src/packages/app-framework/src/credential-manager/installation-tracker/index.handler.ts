@@ -1,11 +1,13 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
-import { getAppIdsImpl, getInstallationIdsImpl } from '../../data';
+import { getAppIdsImpl, getInstallationIdsImpl, InstallationRecord } from '../../data';
 import { EnvironmentError } from '../../error';
 import { getAppTokenImpl } from '../get-app-token/getAppToken';
 import { GitHubAPIService } from '../../gitHubService';
 import { InstallationAccessTokenEnvironmentVariables } from '../get-installation-access-token/constants';
 
-type AppInstallations = Map<number, number[]>;
+type AppInstallations = {
+  [appId: number]: InstallationRecord[]
+};
 
 export const handler = async (
   event: APIGatewayProxyEventV2,
@@ -39,11 +41,12 @@ export const handlerImpl = async (
 
   // Find all AppIds for this account.
   const appIds: number[] = await getAppIdsImpl({ tableName: appTableName });
-
-  // Find all installations for this account, split by AppId.
-  const registeredInstallationIds: AppInstallations = await getInstallationIdsImpl({ tableName: installationTableName });
-
-  const githubConfirmedInstallations: AppInstallations = new Map<number, number[]>();
+  
+  // Find all installations for this account, split by AppId. 
+  // Registered installations are known in DynamoDB.
+  const registeredInstallations: AppInstallations = await getInstallationIdsImpl({ tableName: installationTableName });
+  // GitHub installations are actual installations that GitHub has.
+  const githubConfirmedInstallations: AppInstallations = {};
 
   // Find all installations for this account, according to GitHub.
   await Promise.all(appIds.map(async (appId: number) => {
@@ -57,35 +60,39 @@ export const handlerImpl = async (
     });
 
     const actualInstallations = await githubService.getInstallations({});
-    const gitHubInstallationIds: number[] = await Promise.all(actualInstallations.map((installation) => { return installation.id }));
+    const gitHubInstallations: InstallationRecord[] = await Promise.all(actualInstallations.map((installation) => { return {
+      installationId: installation.id,
+      appId: appId,
+      nodeId: installation.account ? installation.account.node_id : "",
+    }}));
 
-    githubConfirmedInstallations.set(appId, gitHubInstallationIds);
+    githubConfirmedInstallations[appId] = gitHubInstallations;
   }));
 
-  console.log(`Found all DynamoDB installations: ${JSON.stringify(Array.from(registeredInstallationIds.entries()))}`);
+  console.log(`Found all DynamoDB installations: ${JSON.stringify(Array.from(registeredInstallations.entries()))}`);
   console.log(`Found all GitHub installations: ${JSON.stringify(Array.from(githubConfirmedInstallations.entries()))}`);
 
   // Calculate the differences for each AppId.
   appIds.forEach((appId) => {
     // Calculate missing installations.
-    const missingInstallations: number[] = [];
-    const unverifiedInstallations: number[] = [];
+    const missingInstallations: InstallationRecord[] = [];
+    const unverifiedInstallations: InstallationRecord[] = [];
 
-    const gitHubInstallationIdsForAppId = githubConfirmedInstallations.get(appId);
-    const registeredInstallationIdsForAppId = registeredInstallationIds.get(appId);
+    const gitHubInstallationsForAppId = githubConfirmedInstallations[appId];
+    const registeredInstallationsForAppId = registeredInstallations[appId];
 
-    if (!!gitHubInstallationIdsForAppId) {
-      gitHubInstallationIdsForAppId.forEach((installationId) => {
-        if (!registeredInstallationIds.has(installationId)) {
-          unverifiedInstallations.push(installationId);
+    if (!!gitHubInstallationsForAppId) {
+      gitHubInstallationsForAppId.forEach((installation) => {
+        if (registeredInstallationsForAppId.indexOf(installation) < 0) {
+          unverifiedInstallations.push(installation);
         }
       });
     }
 
-    if (!!registeredInstallationIdsForAppId) {
-      registeredInstallationIdsForAppId.forEach((installationId) => {
-        if (!gitHubInstallationIdsForAppId || !(gitHubInstallationIdsForAppId.indexOf(installationId) < 0)) {
-          missingInstallations.push(installationId);
+    if (!!registeredInstallationsForAppId) {
+      registeredInstallationsForAppId.forEach((installation) => {
+        if (gitHubInstallationsForAppId.indexOf(installation) < 0) {
+          missingInstallations.push(installation);
         }
       });
     }

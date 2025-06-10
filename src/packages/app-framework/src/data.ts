@@ -9,6 +9,17 @@ export type GetAppKeyArnById = ({
   appId: number;
   tableName: string;
 }) => Promise<string>;
+
+export type InstallationRecord = {
+  appId: number,
+  installationId: number,
+  nodeId: string,
+};
+
+type AppInstallations = {
+  [appId: number]: InstallationRecord[]
+};
+
 /**
  * Retrieves the AWS KMS Key ARN associated with a given GitHub App ID from DynamoDB.
  *
@@ -64,31 +75,36 @@ export const getAppIdsImpl: GetAppIds = async (
   return appIds;
 };
 
-export type GetInstallationIds = ({
+export type GetInstallations = ({
   tableName,
 }: {
   tableName: string;
-}) => Promise<Map<number, number[]>>;
+}) => Promise<AppInstallations>;
 
-export const getInstallationIdsImpl: GetInstallationIds = async (
+export const getInstallationIdsImpl: GetInstallations = async (
   tableName,
-): Promise<Map<number, number[]>> => {
+): Promise<AppInstallations> => {
   const tableOperations = new TableOperations({
     TableName: tableName.tableName,
   });
 
   const items: Record<string, AttributeValue>[] = await tableOperations.scan();
-  const installationIds: Map<number, number[]> = new Map();
+  const installationIds: AppInstallations = {};
   items.forEach((element, _index, _array) => {
     element
     if (!!element.AppId.N && !!element.InstallationId.N) {
       const appId = parseInt(element.AppId.N);
       const installationId = parseInt(element.InstallationId.N);
+      const nodeId = element.nodeId.S;
 
-      const existingInstallationIds = installationIds.get(appId) ?? [];
-      existingInstallationIds.push(installationId);
+      const existingInstallationIds = installationIds[appId] ?? [];
+      existingInstallationIds.push({ 
+        installationId: installationId, 
+        appId: appId, 
+        nodeId: nodeId ?? "" 
+      });
 
-      installationIds.set(appId, existingInstallationIds);
+      installationIds[appId] = existingInstallationIds;
     }
   });
 
@@ -108,7 +124,7 @@ export type PutInstallationId = ({
 
 }) => Promise<void>;
 
-export const PutInstallationId: PutInstallationId = async ({  
+export const PutInstallationIdImpl: PutInstallationId = async ({  
   tableName,
   appId,
   nodeId,
