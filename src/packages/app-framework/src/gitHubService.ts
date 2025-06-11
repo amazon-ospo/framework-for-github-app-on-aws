@@ -46,11 +46,7 @@ export class GitHubAPIService {
   }): Promise<AppInstallationsResponseType> {
     const octokit = ocktokitClient();
     
-    console.log("Getting installations for app.");
-    
     const response = await octokit.rest.apps.listInstallations();
-
-    console.log(`Found installations: ${JSON.stringify(response)}`);
 
     if (response.status >= 400) {
       throw new GitHubError(
@@ -63,12 +59,12 @@ export class GitHubAPIService {
 
   async getInstallationToken({
     installationId,
-    ocktokitClient = this.getOctokitClient.bind(this),
+    ocktokitClient: octokitClient = this.getOctokitClient.bind(this),
   }: {
     installationId: number;
     ocktokitClient?: () => Octokit;
   }): Promise<GetInstallationAccessTokenResponseType> {
-    const octokit = ocktokitClient();
+    const octokit = octokitClient();
     const response = await octokit.rest.apps.createInstallationAccessToken({
       installation_id: installationId,
     });

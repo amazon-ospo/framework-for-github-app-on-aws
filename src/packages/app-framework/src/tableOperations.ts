@@ -61,6 +61,10 @@ export class TableOperations {
     }
   }
 
+  /** 
+   * Writes an item to DynamoDB.
+   * @param item the item to write to this table.
+   */
   async putItem(item: Record<string, AttributeValue>) {
     const client = dynamodbClient();
     try {

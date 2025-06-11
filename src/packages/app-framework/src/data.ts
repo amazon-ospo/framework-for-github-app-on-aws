@@ -51,6 +51,11 @@ export const getAppKeyArnByIdImpl: GetAppKeyArnById = async ({
   }
 };
 
+/**
+ * Fetches all AppIds from the Apps DynamoDB table.
+ * @param tableName the name of the App table.
+ * @returns all the numerical AppIds in the DynamoDB table.
+ */
 export type GetAppIds = ({
   tableName,
 }: {
@@ -75,6 +80,11 @@ export const getAppIdsImpl: GetAppIds = async (
   return appIds;
 };
 
+/**
+ * Fetches all Installations from the DynamoDB installations table.
+ * @param tableName
+ * @returns the mapping of AppId to the nodeId and installationId of each installation.
+ */
 export type GetInstallations = ({
   tableName,
 }: {
@@ -91,8 +101,6 @@ export const getInstallationIdsImpl: GetInstallations = async (
   const items: Record<string, AttributeValue>[] = await tableOperations.scan();
   const installationIds: AppInstallations = {};
   items.forEach((element, _index, _array) => {
-    console.log(`Element: ${JSON.stringify(element)}`);
-
     if (!!element.AppId.N && !!element.InstallationId.N) {
       const appId = parseInt(element["AppId"].N);
       const installationId = parseInt(element["InstallationId"].N);
@@ -112,6 +120,13 @@ export const getInstallationIdsImpl: GetInstallations = async (
   return installationIds;
 };
 
+/**
+ * Writes an installation into the DynamoDB table.
+ * @param tableName the name of the installation table.
+ * @param appId the AppId of the app that has been installed.
+ * @param nodeId the NodeId showing where the installation was installed.
+ * @param installationId the ID of the installation.
+ */
 export type PutInstallation = ({
   tableName,
   appId,
@@ -142,8 +157,6 @@ export const putInstallationImpl: PutInstallation = async ({
     InstallationId: { "N": installationId.toString() },
   };
 
-  console.log(`Writing ${JSON.stringify(item)} to DynamoDB.`);
-
   await tableOperations.putItem(item);
 
   return;
@@ -161,7 +174,6 @@ export const putInstallationImpl: PutInstallation = async ({
  @throws NotFound if the app ID or node ID does not exist in the table.
  @throws DataError if the record is missing the Installation ID field.
  */
-
 export type GetInstallationIdFromTable = ({
   appId,
   nodeId,
