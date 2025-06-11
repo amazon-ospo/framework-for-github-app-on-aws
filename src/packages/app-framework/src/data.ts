@@ -91,11 +91,12 @@ export const getInstallationIdsImpl: GetInstallations = async (
   const items: Record<string, AttributeValue>[] = await tableOperations.scan();
   const installationIds: AppInstallations = {};
   items.forEach((element, _index, _array) => {
-    element
+    console.log(`Element: ${JSON.stringify(element)}`);
+
     if (!!element.AppId.N && !!element.InstallationId.N) {
       const appId = parseInt(element.AppId.N);
       const installationId = parseInt(element.InstallationId.N);
-      const nodeId = element.nodeId.S;
+      const nodeId = element.NodeId.S;
 
       const existingInstallationIds = installationIds[appId] ?? [];
       existingInstallationIds.push({ 
