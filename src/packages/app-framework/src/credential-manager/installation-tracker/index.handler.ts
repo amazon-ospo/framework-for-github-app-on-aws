@@ -73,7 +73,7 @@ export const handlerImpl = async (
   console.log(`Found all GitHub installations: ${JSON.stringify(githubConfirmedInstallations)}`);
 
   // Calculate the differences for each AppId.
-  appIds.forEach((appId) => {
+  await Promise.all(appIds.map(async (appId) => {
     // Calculate missing installations.
     const missingInstallations: InstallationRecord[] = [];
     const unverifiedInstallations: InstallationRecord[] = [];
@@ -90,19 +90,19 @@ export const handlerImpl = async (
     }
 
     if (!!registeredInstallationsForAppId) {
-      registeredInstallationsForAppId.forEach((installation) => {
+      await Promise.all(registeredInstallationsForAppId.map(async (installation) => {
         if (gitHubInstallationsForAppId && gitHubInstallationsForAppId.indexOf(installation) < 0) {
           missingInstallations.push(installation);
-          putInstallationImpl({ 
+          await putInstallationImpl({ 
             tableName: installationTableName, 
             appId: installation.appId,
             nodeId: installation.nodeId,
             installationId: installation.installationId,
           });
         }
-      });
+      }));
     }
-  });
+  }));
 
   return {
     body: JSON.stringify({ unverifiedInstallations: [], missingInstallations: [] }),
