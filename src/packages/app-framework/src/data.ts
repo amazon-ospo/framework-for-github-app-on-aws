@@ -94,8 +94,8 @@ export const getInstallationIdsImpl: GetInstallations = async (
     console.log(`Element: ${JSON.stringify(element)}`);
 
     if (!!element.AppId.N && !!element.InstallationId.N) {
-      const appId = parseInt(element.AppId.N);
-      const installationId = parseInt(element.InstallationId.N);
+      const appId = parseInt(element["AppId"].N);
+      const installationId = parseInt(element["InstallationId"].N);
       const nodeId = element.NodeId.S;
 
       const existingInstallationIds = installationIds[appId] ?? [];
@@ -139,7 +139,7 @@ export const putInstallationImpl: PutInstallation = async ({
     TableName: { "S": tableName },
     AppId: { "N": appId.toString() },
     NodeId: { "S": nodeId },
-    InstallationID: { "N": installationId.toString() },
+    InstallationId: { "N": installationId.toString() },
   };
 
   console.log(`Writing ${JSON.stringify(item)} to DynamoDB.`);
