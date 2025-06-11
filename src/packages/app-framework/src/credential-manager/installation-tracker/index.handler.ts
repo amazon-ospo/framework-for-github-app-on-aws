@@ -82,17 +82,10 @@ export const handlerImpl = async (
     const registeredInstallationsForAppId = registeredInstallations[appId];
 
     if (!!gitHubInstallationsForAppId) {
-      gitHubInstallationsForAppId.forEach((installation) => {
+      await Promise.all(gitHubInstallationsForAppId.map(async (installation) => {
         if (registeredInstallationsForAppId && registeredInstallationsForAppId.indexOf(installation) < 0) {
           unverifiedInstallations.push(installation);
-        }
-      });
-    }
-
-    if (!!registeredInstallationsForAppId) {
-      await Promise.all(registeredInstallationsForAppId.map(async (installation) => {
-        if (gitHubInstallationsForAppId && gitHubInstallationsForAppId.indexOf(installation) < 0) {
-          missingInstallations.push(installation);
+          
           await putInstallationImpl({ 
             tableName: installationTableName, 
             appId: installation.appId,
@@ -101,6 +94,14 @@ export const handlerImpl = async (
           });
         }
       }));
+    }
+
+    if (!!registeredInstallationsForAppId) {
+      registeredInstallationsForAppId.map(async (installation) => {      
+        if (gitHubInstallationsForAppId && gitHubInstallationsForAppId.indexOf(installation) < 0) {
+          missingInstallations.push(installation);
+        }
+      });
     }
   }));
 
