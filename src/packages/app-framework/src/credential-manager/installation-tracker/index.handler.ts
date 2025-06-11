@@ -1,5 +1,5 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
-import { getAppIdsImpl, getInstallationIdsImpl, InstallationRecord } from '../../data';
+import { getAppIdsImpl, putInstallationImpl, getInstallationIdsImpl, InstallationRecord } from '../../data';
 import { EnvironmentError } from '../../error';
 import { getAppTokenImpl } from '../get-app-token/getAppToken';
 import { GitHubAPIService } from '../../gitHubService';
@@ -93,6 +93,12 @@ export const handlerImpl = async (
       registeredInstallationsForAppId.forEach((installation) => {
         if (gitHubInstallationsForAppId && gitHubInstallationsForAppId.indexOf(installation) < 0) {
           missingInstallations.push(installation);
+          putInstallationImpl({ 
+            tableName: installationTableName, 
+            appId: installation.appId,
+            nodeId: installation.nodeId,
+            installationId: installation.installationId,
+          });
         }
       });
     }

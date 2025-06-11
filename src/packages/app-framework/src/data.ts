@@ -111,7 +111,7 @@ export const getInstallationIdsImpl: GetInstallations = async (
   return installationIds;
 };
 
-export type PutInstallationId = ({
+export type PutInstallation = ({
   tableName,
   appId,
   nodeId,
@@ -124,7 +124,7 @@ export type PutInstallationId = ({
 
 }) => Promise<void>;
 
-export const PutInstallationIdImpl: PutInstallationId = async ({  
+export const putInstallationImpl: PutInstallation = async ({  
   tableName,
   appId,
   nodeId,

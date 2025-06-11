@@ -42,7 +42,7 @@ export class InstallationTracker {
     installationTrackerFunction.addToRolePolicy(
       new PolicyStatement({
         effect: Effect.ALLOW,
-        actions: ["dynamodb:Scan", "dynamodb:GetItem", "kms:Sign", "lambda:Invoke"],
+        actions: ["dynamodb:Scan", "dynamodb:GetItem", "dynamodb:PutItem", "kms:Sign", "lambda:Invoke"],
         resources: [
           `*`,
         ]
