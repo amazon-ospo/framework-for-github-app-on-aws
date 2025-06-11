@@ -83,7 +83,7 @@ export const handlerImpl = async (
 
     if (!!gitHubInstallationsForAppId) {
       gitHubInstallationsForAppId.forEach((installation) => {
-        if (registeredInstallationsForAppId.indexOf(installation) < 0) {
+        if (registeredInstallationsForAppId && registeredInstallationsForAppId.indexOf(installation) < 0) {
           unverifiedInstallations.push(installation);
         }
       });
@@ -91,7 +91,7 @@ export const handlerImpl = async (
 
     if (!!registeredInstallationsForAppId) {
       registeredInstallationsForAppId.forEach((installation) => {
-        if (gitHubInstallationsForAppId.indexOf(installation) < 0) {
+        if (gitHubInstallationsForAppId && gitHubInstallationsForAppId.indexOf(installation) < 0) {
           missingInstallations.push(installation);
         }
       });
