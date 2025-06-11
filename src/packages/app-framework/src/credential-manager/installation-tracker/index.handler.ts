@@ -78,18 +78,16 @@ export const handlerImpl = async (
 
   // Calculate the differences for each AppId.
   await Promise.all(appIds.map(async (appId) => {
-    const gitHubInstallationsForAppId = githubConfirmedInstallations[appId];
-    const registeredInstallationsForAppId = registeredInstallations[appId];
+    const gitHubInstallationsForAppId = githubConfirmedInstallations[appId] ?? [];
+    const registeredInstallationsForAppId = registeredInstallations[appId] ?? [];
 
     console.log("Starting round-up portion...");
 
-    if (!!gitHubInstallationsForAppId) {
-      console.log(`Found GitHub installations: ${JSON.stringify(gitHubInstallationsForAppId)}`);
-
+    if (gitHubInstallationsForAppId.length > 0) {
       await Promise.all(gitHubInstallationsForAppId.map(async (installation) => {
         console.log(`Working on installation: ${JSON.stringify(installation)}`);
 
-        if (registeredInstallationsForAppId && registeredInstallationsForAppId.indexOf(installation) < 0) {
+        if (registeredInstallationsForAppId.indexOf(installation) < 0) {
           console.log(`Adding installation ${JSON.stringify(installation)} to unverified list and writing to DDB.`);
           unverifiedInstallations.push(installation);
 
@@ -103,9 +101,7 @@ export const handlerImpl = async (
       }));
     }
 
-    if (!!registeredInstallationsForAppId) {
-      console.log(`Found registered installations: ${JSON.stringify(registeredInstallationsForAppId)}`);  
-      
+    if (registeredInstallationsForAppId.length > 0) {
       registeredInstallationsForAppId.forEach(async (installation) => {   
         console.log(`Working on installation: ${JSON.stringify(installation)}`);
         if (gitHubInstallationsForAppId && gitHubInstallationsForAppId.indexOf(installation) < 0) {
