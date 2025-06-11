@@ -134,12 +134,16 @@ export const putInstallationImpl: PutInstallation = async ({
     TableName: tableName,
   });
 
-  await tableOperations.putItem({
+  const item = {
     TableName: { "S": tableName },
     AppId: { "N": appId.toString() },
     NodeId: { "S": nodeId },
     InstallationID: { "N": installationId.toString() },
-  });
+  };
+
+  console.log(`Writing ${JSON.stringify(item)} to DynamoDB.`);
+
+  await tableOperations.putItem(item);
 
   return;
 };

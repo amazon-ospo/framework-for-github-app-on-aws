@@ -41,7 +41,7 @@ export const handlerImpl = async (
 
   // Find all AppIds for this account.
   const appIds: number[] = await getAppIdsImpl({ tableName: appTableName });
-  
+
   // Find all installations for this account, split by AppId. 
   // Registered installations are known in DynamoDB.
   const registeredInstallations: AppInstallations = await getInstallationIdsImpl({ tableName: installationTableName });
@@ -60,11 +60,13 @@ export const handlerImpl = async (
     });
 
     const actualInstallations = await githubService.getInstallations({});
-    const gitHubInstallations: InstallationRecord[] = await Promise.all(actualInstallations.map((installation) => { return {
-      installationId: installation.id,
-      appId: appId,
-      nodeId: installation.account ? installation.account.node_id : "",
-    }}));
+    const gitHubInstallations: InstallationRecord[] = await Promise.all(actualInstallations.map((installation) => {
+      return {
+        installationId: installation.id,
+        appId: appId,
+        nodeId: installation.account ? installation.account.node_id : "",
+      }
+    }));
 
     githubConfirmedInstallations[appId] = gitHubInstallations;
   }));
@@ -72,27 +74,22 @@ export const handlerImpl = async (
   console.log(`Found all DynamoDB installations: ${JSON.stringify(registeredInstallations)}`);
   console.log(`Found all GitHub installations: ${JSON.stringify(githubConfirmedInstallations)}`);
 
-    const missingInstallations: InstallationRecord[] = [];
-    const unverifiedInstallations: InstallationRecord[] = [];
-
+  const missingInstallations: InstallationRecord[] = [];
+  const unverifiedInstallations: InstallationRecord[] = [];
 
   // Calculate the differences for each AppId.
   await Promise.all(appIds.map(async (appId) => {
     const gitHubInstallationsForAppId = githubConfirmedInstallations[appId] ?? [];
     const registeredInstallationsForAppId = registeredInstallations[appId] ?? [];
 
-    console.log("Starting round-up portion...");
-
     if (gitHubInstallationsForAppId.length > 0) {
       await Promise.all(gitHubInstallationsForAppId.map(async (installation) => {
-        console.log(`Working on installation: ${JSON.stringify(installation)}`);
 
         if (registeredInstallationsForAppId.indexOf(installation) < 0) {
-          console.log(`Adding installation ${JSON.stringify(installation)} to unverified list and writing to DDB.`);
           unverifiedInstallations.push(installation);
 
-          await putInstallationImpl({ 
-            tableName: installationTableName, 
+          await putInstallationImpl({
+            tableName: installationTableName,
             appId: installation.appId,
             nodeId: installation.nodeId,
             installationId: installation.installationId,
@@ -102,17 +99,13 @@ export const handlerImpl = async (
     }
 
     if (registeredInstallationsForAppId.length > 0) {
-      registeredInstallationsForAppId.forEach(async (installation) => {   
-        console.log(`Working on installation: ${JSON.stringify(installation)}`);
+      registeredInstallationsForAppId.forEach(async (installation) => {
         if (gitHubInstallationsForAppId && gitHubInstallationsForAppId.indexOf(installation) < 0) {
-          console.log(`Adding installation ${JSON.stringify(installation)} to missing list.`);
           missingInstallations.push(installation);
         }
       });
     }
   }));
-
-  console.log("Completed round-up portion.");
 
   return {
     body: JSON.stringify({ unverifiedInstallations: unverifiedInstallations, missingInstallations: missingInstallations }),

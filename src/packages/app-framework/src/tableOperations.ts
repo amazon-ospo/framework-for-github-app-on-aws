@@ -69,9 +69,10 @@ export class TableOperations {
         Item: item,
       });
 
-      await client.send(command);
+      const response = await client.send(command);
+      console.log(`Response from DynamoDB putItem: ${JSON.stringify(response)}`);
     } catch (error) {
-      console.log(`ERRORL ${error}`);
+      console.log(`ERROR: ${error}`);
       throw new Error(`Error putting item in ${this.config.TableName}: ${error}`);
     }
   }
