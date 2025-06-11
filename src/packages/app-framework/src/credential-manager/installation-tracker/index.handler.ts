@@ -85,7 +85,7 @@ export const handlerImpl = async (
       await Promise.all(gitHubInstallationsForAppId.map(async (installation) => {
         if (registeredInstallationsForAppId && registeredInstallationsForAppId.indexOf(installation) < 0) {
           unverifiedInstallations.push(installation);
-          
+
           await putInstallationImpl({ 
             tableName: installationTableName, 
             appId: installation.appId,
@@ -97,7 +97,7 @@ export const handlerImpl = async (
     }
 
     if (!!registeredInstallationsForAppId) {
-      registeredInstallationsForAppId.map(async (installation) => {      
+      registeredInstallationsForAppId.forEach(async (installation) => {      
         if (gitHubInstallationsForAppId && gitHubInstallationsForAppId.indexOf(installation) < 0) {
           missingInstallations.push(installation);
         }
