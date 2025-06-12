@@ -32,9 +32,7 @@ export const getInstallationAccessTokenOperationImpl: Operation<
     return result;
   } catch (error) {
     if (error instanceof VisibleError) {
-      throw new ClientSideError({
-        message: error.message,
-      });
+      throw new ClientSideError({ message: `Invalid Request: ${error}` });
     }
     console.error(error);
     throw new ServerSideError({ message: 'Internal Server Error' });

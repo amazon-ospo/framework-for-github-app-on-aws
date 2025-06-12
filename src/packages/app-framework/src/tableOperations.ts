@@ -27,7 +27,8 @@ export class TableOperations {
       const result: GetItemCommandOutput = await client.send(command);
 
       if (!result.Item) {
-        throw new NotFound(`Item not found in ${this.config.TableName}`);
+        console.error(`Item not found in ${this.config.TableName}`);
+        throw new NotFound('Item not found');
       }
 
       return unmarshall(result.Item);

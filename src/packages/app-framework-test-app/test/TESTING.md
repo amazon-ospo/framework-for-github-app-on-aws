@@ -58,13 +58,16 @@ and store the output in `cdk-output.json` file:
 
 Make sure the `cdk-output.json` file
 is present at `app-framework-test-app` package
-and includes a valid AppTokenEndpoint value.
+and includes a valid AppTokenEndpoint value and
+a valid InstallationAccessTokenEndpoint value.
 The generated `cdk-output.json` file should include:
 
 ```sh
     {
       "the-app-framework-test-stack": {
-        "AppTokenEndpoint": <your-lambda-function-url-for-app-token>
+        "AppTokenEndpoint": <your-lambda-function-url-for-app-token>,
+        "InstallationAccessTokenEndpoint": <your-lambda-function-url-for-installation-token>,
+        "Region": <your-aws-account-region>
       }
     }
 ```
@@ -82,6 +85,7 @@ Before running the tests, set the required environment variable:
 
 ```sh
     export GITHUB_APPID=<your-github-app-id>
+    export GITHUB_NODEID=<your-github-node-id>
 ```
 
 ## Running Tests

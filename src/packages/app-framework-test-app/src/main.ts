@@ -1,5 +1,5 @@
 import { CredentialManager } from '@aws/framework-for-github-app-on-aws';
-import { App, Stack, StackProps, CfnOutput } from 'aws-cdk-lib';
+import { App, Stack, StackProps, CfnOutput, Aws } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 // CDK App entry for @aws/framework-for-github-app-on-aws acceptance test.
 // This stack is intended for testing @aws/framework-for-github-app-on-aws library.
@@ -22,6 +22,10 @@ export class TheAppFrameworkTestStack extends Stack {
     new CfnOutput(this, 'InstallationAccessTokenEndpoint', {
       value: installationAccessTokenUrl,
       exportName: 'InstallationAccessTokenEndpoint',
+    });
+    new CfnOutput(this, 'Region', {
+      value: Aws.REGION,
+      exportName: 'Region',
     });
   }
 }
