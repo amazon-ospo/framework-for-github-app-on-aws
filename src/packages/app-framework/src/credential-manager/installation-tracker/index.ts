@@ -5,8 +5,8 @@ import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import { LAMBDA_DEFAULTS } from '../../lambdaDefaults';
-import { InstallationAccessTokenEnvironmentVariables } from '../get-installation-access-token/constants';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { EnvironmentVariables } from '../constants';
 
 export interface InstallationTrackerProps {
   readonly AppTable: ITable;
@@ -28,9 +28,9 @@ export class InstallationTracker {
         nodeModules: ['re2-wasm'],
       },
       environment: {
-        [InstallationAccessTokenEnvironmentVariables.APP_TABLE_NAME]:
+        [EnvironmentVariables.APP_TABLE_NAME]:
           props.AppTable.tableName,
-        [InstallationAccessTokenEnvironmentVariables.INSTALLATIONS_TABLE_NAME]:
+        [EnvironmentVariables.INSTALLATION_TABLE_NAME]:
           props.InstallationTable.tableName,
       },
       description: 'Tracks app installations',

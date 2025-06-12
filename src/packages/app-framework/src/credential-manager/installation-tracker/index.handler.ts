@@ -3,7 +3,7 @@ import { getAppIdsImpl, putInstallationImpl, getInstallationIdsImpl, Installatio
 import { EnvironmentError } from '../../error';
 import { getAppTokenImpl } from '../get-app-token/getAppToken';
 import { GitHubAPIService } from '../../gitHubService';
-import { InstallationAccessTokenEnvironmentVariables } from '../get-installation-access-token/constants';
+import { EnvironmentVariables } from '../constants';
 
 /**
  * Mapping of AppId to all the installations associated with it.
@@ -177,13 +177,13 @@ export const checkEnvironmentImpl: CheckEnvironment = () => {
   const appTableName = process.env.APP_TABLE_NAME;
   if (!appTableName) {
     throw new EnvironmentError(
-      `No value found in ${InstallationAccessTokenEnvironmentVariables.APP_TABLE_NAME} environment variable.`,
+      `No value found in ${EnvironmentVariables.APP_TABLE_NAME} environment variable.`,
     );
   }
   const installationTableName = process.env.INSTALLATIONS_TABLE_NAME;
   if (!installationTableName) {
     throw new EnvironmentError(
-      `No value found in ${InstallationAccessTokenEnvironmentVariables.INSTALLATIONS_TABLE_NAME} environment variable.`,
+      `No value found in ${EnvironmentVariables.INSTALLATION_TABLE_NAME} environment variable.`,
     );
   }
   return { appTableName: appTableName, installationTableName: installationTableName };
