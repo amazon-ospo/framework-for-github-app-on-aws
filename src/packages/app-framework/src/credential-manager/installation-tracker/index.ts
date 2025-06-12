@@ -16,7 +16,7 @@ export interface InstallationTrackerProps {
 export class InstallationTracker {
   constructor(scope: Construct, _id: string, props: InstallationTrackerProps) {
     const rule = new Rule(scope, 'installationTrackerRule', {
-      schedule: Schedule.rate(Duration.minutes(5)),
+      schedule: Schedule.rate(Duration.minutes(30)),
       enabled: true,
     });
 
