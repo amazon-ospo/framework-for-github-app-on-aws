@@ -180,7 +180,7 @@ export const checkEnvironmentImpl: CheckEnvironment = () => {
       `No value found in ${EnvironmentVariables.APP_TABLE_NAME} environment variable.`,
     );
   }
-  const installationTableName = process.env.INSTALLATIONS_TABLE_NAME;
+  const installationTableName = process.env.INSTALLATION_TABLE_NAME;
   if (!installationTableName) {
     throw new EnvironmentError(
       `No value found in ${EnvironmentVariables.INSTALLATION_TABLE_NAME} environment variable.`,
