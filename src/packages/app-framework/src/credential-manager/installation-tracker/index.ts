@@ -1,4 +1,4 @@
-import { Duration } from 'aws-cdk-lib';
+import { Duration, Stack } from 'aws-cdk-lib';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
@@ -6,7 +6,7 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import { LAMBDA_DEFAULTS } from '../../lambdaDefaults';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { EnvironmentVariables } from '../constants';
+import { EnvironmentVariables, TAG_KEYS, TAG_VALUES } from '../constants';
 
 export interface InstallationTrackerProps {
   readonly AppTable: ITable;
@@ -42,10 +42,28 @@ export class InstallationTracker {
     installationTrackerFunction.addToRolePolicy(
       new PolicyStatement({
         effect: Effect.ALLOW,
-        actions: ["dynamodb:Scan", "dynamodb:GetItem", "dynamodb:PutItem", "kms:Sign", "lambda:Invoke"],
+        actions: [ "dynamodb:Scan", "dynamodb:GetItem", "dynamodb:PutItem" ],
         resources: [
-          `*`,
+          props.AppTable.tableArn,
+          props.InstallationTable.tableArn
         ]
+      })
+    );
+
+    installationTrackerFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: [ "kms:Sign" ],
+        resources: [
+          `arn:aws:kms:${Stack.of(scope).region}:${Stack.of(scope).account}:key/*`,
+        ],
+        conditions: {
+          StringEquals: {
+            [`aws:ResourceTag/${TAG_KEYS.FRAMEWORK_FOR_GITHUB_APP_ON_AWS_MANAGED}`]:
+              TAG_VALUES.TRUE,
+            [`aws:ResourceTag/${TAG_KEYS.STATUS}`]: TAG_VALUES.ACTIVE,
+          },
+        },
       })
     );
   }
