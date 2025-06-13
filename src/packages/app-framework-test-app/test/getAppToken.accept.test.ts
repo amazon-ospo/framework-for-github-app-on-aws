@@ -28,7 +28,7 @@ describe('Smithy client for app token API', () => {
     }
     const output = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
     endpoint = output['the-app-framework-test-stack'].AppTokenEndpoint;
-    region = 'us-west-2';
+    region = output['the-app-framework-test-stack'].Region;
     if (!endpoint) {
       throw new Error(
         `Invalid or missing endpoint in cdk-output.json: ${JSON.stringify(endpoint)}`,

@@ -116,7 +116,7 @@ export const getInstallationIdImpl: GetInstallationId = async ({
   appToken,
 }): Promise<number> => {
   console.log(`Received inputs to get installationID: 
-    { appId: ${appId}, nodeId: ${nodeId}`);
+    { appId: ${appId}, nodeId: ${nodeId}}`);
   try {
     const installationID = await getInstallationIdFromTable({
       appId,
