@@ -151,7 +151,6 @@ export const putInstallationImpl: PutInstallation = async ({
   });
 
   const item = {
-    TableName: { "S": tableName },
     AppId: { "N": appId.toString() },
     NodeId: { "S": nodeId },
     InstallationId: { "N": installationId.toString() },
