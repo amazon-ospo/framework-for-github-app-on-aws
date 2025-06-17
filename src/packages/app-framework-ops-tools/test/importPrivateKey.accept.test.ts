@@ -70,8 +70,8 @@ describe('importPrivateKey Acceptance Tests', () => {
     }
   });
   afterAll(async () => {
-    const absolutePemPath = resolve(pemFile);
-    if (existsSync(absolutePemPath)) {
+    if (existsSync(pemFile)) {
+      const absolutePemPath = resolve(pemFile);
       await unlink(absolutePemPath);
       console.log(`Deleted pem file found at ${absolutePemPath}`);
     }

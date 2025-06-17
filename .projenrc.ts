@@ -240,6 +240,7 @@ const theAppFrameworkOpsTools = new typescript.TypeScriptProject({
     "@aws-sdk/client-resource-groups-tagging-api",
     "@aws-sdk/client-kms",
     "@aws-sdk/client-dynamodb",
+    "commander@^11.0.0",
   ],
   devDeps: [
     "aws-sdk-client-mock",
@@ -253,6 +254,9 @@ const theAppFrameworkOpsTools = new typescript.TypeScriptProject({
       verbose: true,
     },
   },
+});
+theAppFrameworkOpsTools.package.addBin({
+  "app-framework": "lib/app-framework-cli.js",
 });
 theAppFrameworkScripts(theAppFrameworkOpsTools);
 addTestTargets(theAppFrameworkOpsTools);

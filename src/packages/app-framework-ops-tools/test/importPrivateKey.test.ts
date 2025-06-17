@@ -56,13 +56,25 @@ import {
 } from '../src/importPrivateKey';
 import * as importKey from '../src/importPrivateKey';
 
-const mockKmsClient = mockClient(KMSClient);
-const mockDynamoDBClient = mockClient(DynamoDBClient);
+beforeAll(() => {
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+afterAll(() => {
+  jest.restoreAllMocks();
+});
+
 afterEach(() => {
   mockKmsClient.reset();
   mockDynamoDBClient.reset();
   jest.clearAllMocks();
+  mockFs.restore();
 });
+
+const mockKmsClient = mockClient(KMSClient);
+const mockDynamoDBClient = mockClient(DynamoDBClient);
+
 describe('validateInputsImpl', () => {
   let mockValidateJWT = jest.fn();
   let mockListTables = jest.fn();
