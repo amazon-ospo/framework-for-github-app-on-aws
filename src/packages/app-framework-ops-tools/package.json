@@ -4,6 +4,9 @@
     "type": "git",
     "url": "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git"
   },
+  "bin": {
+    "app-framework": "lib/app-framework-cli.js"
+  },
   "scripts": {
     "accept": "npx projen accept",
     "build": "npx projen build",
@@ -46,7 +49,8 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.777.0",
     "@aws-sdk/client-kms": "^3.777.0",
-    "@aws-sdk/client-resource-groups-tagging-api": "^3.777.0"
+    "@aws-sdk/client-resource-groups-tagging-api": "^3.777.0",
+    "commander": "^11.0.0"
   },
   "main": "lib/index.js",
   "license": "Apache-2.0",
