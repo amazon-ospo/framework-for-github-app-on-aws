@@ -198,7 +198,7 @@ export const createPackage = (config: PackageConfig) => {
 };
 
 createPackage({
-  name: "@aws/framework-for-github-app-on-aws",
+  name: "@amazon-ospo/framework-for-github-app-on-aws",
   outdir: "src/packages/app-framework",
   deps: [
     "@aws-sdk/client-dynamodb",
@@ -273,7 +273,7 @@ const theAppFrameworkTestApp = new awscdk.AwsCdkTypeScriptApp({
   cdkVersion: "2.184.1",
   deps: [
     "@aws-sdk/hash-node",
-    "@aws/framework-for-github-app-on-aws",
+    "@amazon-ospo/framework-for-github-app-on-aws",
     "@aws/app-framework-client",
     "@aws-crypto/sha256-js",
     "@aws-sdk/credential-provider-node",
