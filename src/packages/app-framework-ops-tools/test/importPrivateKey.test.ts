@@ -54,7 +54,6 @@ import {
   importPrivateKey,
   tagKeyAsFailedImpl,
 } from '../src/importPrivateKey';
-import * as importKey from '../src/importPrivateKey';
 
 beforeAll(() => {
   jest.spyOn(console, 'log').mockImplementation(() => {});
@@ -1365,78 +1364,4 @@ describe('importPrivateKey', () => {
       }
     },
   );
-});
-
-describe('main', () => {
-  const originalArgs = process.argv;
-  const mockExit = jest
-    .spyOn(process, 'exit')
-    .mockImplementation((): never => undefined as never);
-  const mockConsoleError = jest.spyOn(console, 'error');
-  const pemFilePath = '/path/to/privatekey.pem';
-  const appIdAsString = '12345';
-  const tableName = 'validTable';
-
-  afterAll(() => {
-    jest.clearAllMocks();
-    process.argv = originalArgs;
-  });
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    process.argv = [...originalArgs];
-  });
-
-  it('should execute successfully with all required parameters', async () => {
-    const fetchSpy = jest
-      .spyOn(importKey, 'importPrivateKey')
-      .mockImplementation(() => Promise.resolve());
-    process.argv = ['', '', pemFilePath, appIdAsString, tableName];
-    await expect(importKey.main()).resolves.toBeUndefined();
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
-    expect(fetchSpy).toHaveBeenCalledWith({
-      pemFilePath,
-      appId: Number(appIdAsString),
-      tableName,
-    });
-  });
-
-  it.each([
-    ['should exit with error when all args are missing', ['', '', '']],
-    [
-      'should exit with error when appId and pemFilePath are missing',
-      ['', '', tableName],
-    ],
-    [
-      'should exit with error when appId and tableName are missing',
-      [pemFilePath, '', ''],
-    ],
-    [
-      'should exit with error when pemFilePath and tableName are missing',
-      ['', appIdAsString, ''],
-    ],
-    [
-      'should exit with error when pemFilePath is missing',
-      ['', appIdAsString, tableName],
-    ],
-    [
-      'should exit with error when appId is missing',
-      [pemFilePath, '', tableName],
-    ],
-    [
-      'should exit with error when tableName is missing',
-      [pemFilePath, appIdAsString, ''],
-    ],
-  ])('%s', async (_: string, args) => {
-    process.argv = args;
-    const errorMessage = [
-      'Please provide GitHub App PEM file path, GitHub AppId and the table name to store the AppId and Key ARN',
-      'Usage: npm run import-private-key <path-to-private-key.pem> <GitHubAppId> <TableName>',
-      'NOTE: For TableName, `npm run get-table-name` should list the available tables',
-      '',
-    ].join('\n\n');
-    await expect(importKey.main()).resolves.toBeUndefined();
-    expect(mockExit).toHaveBeenCalledWith(1);
-    expect(mockConsoleError).toHaveBeenCalledWith(errorMessage);
-  });
 });

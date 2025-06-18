@@ -22,8 +22,7 @@
     "upgrade": "npx projen upgrade",
     "watch": "npx projen watch",
     "projen": "npx projen",
-    "import-private-key": "ts-node ../../../src/packages/app-framework-ops-tools/src/importPrivateKey.ts",
-    "get-table-name": "ts-node ../../../src/packages/app-framework-ops-tools/src/getTableName.ts"
+    "cli": "ts-node ../../../src/packages/app-framework-ops-tools/src/app-framework-cli.ts"
   },
   "author": {
     "name": "Amazon OSPO",
@@ -87,6 +86,9 @@
   "keywords": [
     "cdk"
   ],
+  "engines": {
+    "node": ">18.0.0"
+  },
   "main": "lib/index.js",
   "license": "Apache-2.0",
   "version": "0.0.0",

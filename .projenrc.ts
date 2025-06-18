@@ -9,7 +9,7 @@ const projectMetadata = {
   cdkVersion: "2.189.1",
   constructsVersion: "10.4.2",
   defaultReleaseBranch: "main",
-  name: "framework-for-github-app-on-aws",
+  name: "@aws/framework-for-github-app-on-aws",
 };
 
 export const configureMarkDownLinting = (tsProject: TypeScriptAppProject) => {
@@ -80,15 +80,11 @@ export const addTestTargets = (subProject: Project) => {
   });
 };
 
-// TODO: Publish these ops tools as a CLI
 const theAppFrameworkScripts = (
   subProject: awscdk.AwsCdkConstructLibrary | typescript.TypeScriptProject,
 ) => {
   subProject.addScripts({
-    "import-private-key":
-      "ts-node ../../../src/packages/app-framework-ops-tools/src/importPrivateKey.ts",
-    "get-table-name":
-      "ts-node ../../../src/packages/app-framework-ops-tools/src/getTableName.ts",
+    cli: "ts-node ../../../src/packages/app-framework-ops-tools/src/app-framework-cli.ts",
   });
 };
 
@@ -154,12 +150,13 @@ project.package.file.addOverride("workspaces", [
 // waits for each package to complete before showing its logs.
 project.preCompileTask.exec("npx lerna run build --concurrency=1 --no-stream");
 project.addScripts({
-  "import-private-key":
-    "ts-node src/packages/app-framework-ops-tools/src/importPrivateKey.ts",
-  "get-table-name":
-    "ts-node src/packages/app-framework-ops-tools/src/getTableName.ts",
+  cli: "ts-node src/packages/app-framework-ops-tools/src/app-framework-cli.ts",
 });
-
+project.addFields({
+  engines: {
+    node: ">18.0.0",
+  },
+});
 addTestTargets(project);
 configureMarkDownLinting(project);
 
@@ -194,6 +191,11 @@ export const createPackage = (config: PackageConfig) => {
   addTestTargets(tsProject);
   addPrettierConfig(tsProject);
   configureMarkDownLinting(tsProject);
+  tsProject.addFields({
+    engines: {
+      node: ">18.0.0",
+    },
+  });
   return tsProject;
 };
 
@@ -231,7 +233,7 @@ createPackage({
 
 const theAppFrameworkOpsTools = new typescript.TypeScriptProject({
   ...projectMetadata,
-  name: "app-framework-ops-tools",
+  name: "@aws/app-framework-ops-tools",
   outdir: "src/packages/app-framework-ops-tools",
   parent: project,
   projenrcTs: false,
@@ -258,6 +260,11 @@ const theAppFrameworkOpsTools = new typescript.TypeScriptProject({
 theAppFrameworkOpsTools.package.addBin({
   "app-framework": "lib/app-framework-cli.js",
 });
+theAppFrameworkOpsTools.addFields({
+  engines: {
+    node: ">18.0.0",
+  },
+});
 theAppFrameworkScripts(theAppFrameworkOpsTools);
 addTestTargets(theAppFrameworkOpsTools);
 addPrettierConfig(theAppFrameworkOpsTools);
@@ -265,7 +272,7 @@ configureMarkDownLinting(theAppFrameworkOpsTools);
 
 const theAppFrameworkTestApp = new awscdk.AwsCdkTypeScriptApp({
   ...projectMetadata,
-  name: "app-framework-test-app",
+  name: "@aws/app-framework-test-app",
   outdir: "src/packages/app-framework-test-app",
   parent: project,
   projenrcTs: false,
@@ -284,6 +291,11 @@ const theAppFrameworkTestApp = new awscdk.AwsCdkTypeScriptApp({
       runner: "groups",
       verbose: true,
     },
+  },
+});
+theAppFrameworkTestApp.addFields({
+  engines: {
+    node: ">18.0.0",
   },
 });
 addTestTargets(theAppFrameworkTestApp);

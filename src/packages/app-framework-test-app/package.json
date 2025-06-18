@@ -1,5 +1,5 @@
 {
-  "name": "app-framework-test-app",
+  "name": "@aws/app-framework-test-app",
   "repository": {
     "type": "git",
     "url": "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git"
@@ -56,10 +56,10 @@
     "aws-cdk-lib": "^2.184.1",
     "constructs": "^10.4.2"
   },
-  "license": "Apache-2.0",
-  "publishConfig": {
-    "access": "public"
+  "engines": {
+    "node": ">18.0.0"
   },
+  "license": "Apache-2.0",
   "version": "0.0.0",
   "jest": {
     "coverageProvider": "v8",
