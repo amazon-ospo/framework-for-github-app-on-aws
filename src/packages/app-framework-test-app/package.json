@@ -52,7 +52,7 @@
     "@aws-sdk/credential-provider-node": "^3.806.0",
     "@aws-sdk/hash-node": "^3.374.0",
     "@aws/app-framework-client": "^0.0.1",
-    "@aws/framework-for-github-app-on-aws": "^0.0.0",
+    "@amazon-ospo/framework-for-github-app-on-aws": "^0.0.0",
     "aws-cdk-lib": "^2.184.1",
     "constructs": "^10.4.2"
   },

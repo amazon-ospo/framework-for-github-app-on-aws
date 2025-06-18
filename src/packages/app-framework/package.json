@@ -1,5 +1,5 @@
 {
-  "name": "@aws/framework-for-github-app-on-aws",
+  "name": "@amazon-ospo/framework-for-github-app-on-aws",
   "repository": {
     "type": "git",
     "url": "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git"
