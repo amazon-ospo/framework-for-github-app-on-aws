@@ -87,16 +87,37 @@ export class TableOperations {
    */
   async scan(): Promise<Record<string, AttributeValue>[]> {
     const client = dynamodbClient();
-    const command = new ScanCommand({
+    var command = new ScanCommand({
       TableName: this.config.TableName,
     });
-
-    const result: ScanCommandOutput = await client.send(command);
-
-    if (!result.Items) {
-      throw new NotFound(`Items not found in ${this.config.TableName}`);
+    let response = await client.send(command);
+    let results: Record<string, any>[] = (response.Items || []).map((item) =>
+      unmarshall(item as Record<string, AttributeValue>),
+    );
+    while (response.LastEvaluatedKey) {
+      const ExclusiveStartKey = response.LastEvaluatedKey;
+      command = new ScanCommand({
+        TableName: this.config.TableName,
+        ExclusiveStartKey,
+      });
+      response = await client.send(command);
+      const unmarshalledItems = (response.Items || []).map((item) =>
+        unmarshall(item as Record<string, AttributeValue>),
+      );
+      results = results.concat(unmarshalledItems);
     }
+    return results;
+    // const client = dynamodbClient();
+    // const command = new ScanCommand({
+    //   TableName: this.config.TableName,
+    // });
 
-    return result.Items;
+    // const result: ScanCommandOutput = await client.send(command);
+
+    // if (!result.Items) {
+    //   throw new NotFound(`Items not found in ${this.config.TableName}`);
+    // }
+
+    // return result.Items;
   }
 }

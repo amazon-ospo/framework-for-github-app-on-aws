@@ -71,12 +71,12 @@ export const getAppIdsImpl: GetAppIds = async (
 
   const items: Record<string, AttributeValue>[] = await tableOperations.scan();
   const appIds: number[] = [];
-  items.forEach((element, _index, _array) => {
+  items.map((element) => {
     element
     if (!!element.AppId.N) {
       appIds.push(parseInt(element.AppId.N));
     }
-  })
+  });
   return appIds;
 };
 
@@ -100,7 +100,7 @@ export const getInstallationIdsImpl: GetInstallations = async (
 
   const items: Record<string, AttributeValue>[] = await tableOperations.scan();
   const installationIds: AppInstallations = {};
-  items.forEach((element, _index, _array) => {
+  items.map((element) => {
     if (!!element.AppId.N && !!element.InstallationId.N) {
       const appId = parseInt(element["AppId"].N);
       const installationId = parseInt(element["InstallationId"].N);
