@@ -208,6 +208,25 @@ const getUnverifiedInstallations = async (
   return unverifiedInstallations;
 };
 
+/**
+ * Give me the installation records in left that are not in right.
+ *
+ * @param left
+ * @param right
+ */
+export const leftJoinInstallationsForOneApp = (
+  left: InstallationRecord[],
+  right: InstallationRecord[],
+): InstallationRecord[] => {
+  // we know that all installations are for a single app id
+  // we know that all installation ids are unique
+  const rightInstallationIds = right.map((installation) => installation.appId);
+
+  return left.filter((installation) => {
+    return !rightInstallationIds.includes(installation.appId);
+  });
+};
+
 // Miscallaneous environment variable checking functions.
 export type CheckEnvironment = () => {
   appTableName: string;
