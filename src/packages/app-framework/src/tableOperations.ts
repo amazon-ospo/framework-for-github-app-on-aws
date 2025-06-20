@@ -4,7 +4,6 @@ import {
   GetItemCommandOutput,
   PutItemCommand,
   ScanCommand,
-  ScanCommandOutput,
 } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { dynamodbClient } from './client';
