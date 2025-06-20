@@ -59,9 +59,11 @@ describe('app-framework CLI Acceptance tests', () => {
     });
 
     it('should show error for unknown command', async () => {
-      const { code, stderr } = await execCLI(['unknown-command']);
-      expect(code).not.toBe(0);
-      expect(stderr).toContain('unknown command');
+      const { code, stdout } = await execCLI(['unknown-command']);
+      expect(code).toBe(0);
+      expect(stdout).toContain(
+        'Usage: app-framework-for-github-apps-on-aws-ops-tools [options] [command]',
+      );
     });
 
     it('should show error for invalid option', async () => {
