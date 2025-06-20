@@ -157,8 +157,8 @@ describe('getInstallationId', () => {
   describe('getAppIds', () => {
     it('should successfully retrieve all AppIds from DynamoDB', async () => {
       mockTableOperations.prototype.scan.mockResolvedValue([
-        { AppId: { N: mockAppId.toString() } },
-        { AppId: { N: (mockAppId + 1).toString() } },
+        { AppId: mockAppId },
+        { AppId: mockAppId + 1 },
       ]);
       const result = await getAppIdsImpl({
         tableName: mockTableName,
@@ -187,9 +187,9 @@ describe('getInstallationId', () => {
     it('should successfully retrieve all AppIds from DynamoDB', async () => {
       mockTableOperations.prototype.scan.mockResolvedValue([
         {
-          AppId: { N: mockAppId.toString() },
-          InstallationId: { N: mockInstallationId.toString() },
-          NodeId: { S: mockNodeId },
+          AppId: mockAppId,
+          InstallationId: mockInstallationId,
+          NodeId: mockNodeId,
         },
       ]);
       const result = await getInstallationIdsImpl({

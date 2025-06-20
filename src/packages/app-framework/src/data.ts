@@ -1,4 +1,3 @@
-import { AttributeValue } from '@aws-sdk/client-dynamodb';
 import { DataError } from './error';
 import { TableOperations } from './tableOperations';
 
@@ -69,13 +68,10 @@ export const getAppIdsImpl: GetAppIds = async (
     TableName: tableName.tableName,
   });
 
-  const items: Record<string, AttributeValue>[] = await tableOperations.scan();
+  const items = await tableOperations.scan();
   const appIds: number[] = [];
   items.map((element) => {
-    element;
-    if (!!element.AppId.N) {
-      appIds.push(parseInt(element.AppId.N));
-    }
+    appIds.push(element.AppId);
   });
   return appIds;
 };
@@ -98,23 +94,20 @@ export const getInstallationIdsImpl: GetInstallations = async (
     TableName: tableName.tableName,
   });
 
-  const items: Record<string, AttributeValue>[] = await tableOperations.scan();
+  const items = await tableOperations.scan();
   const installationIds: AppInstallations = {};
   items.map((element) => {
-    if (!!element.AppId.N && !!element.InstallationId.N) {
-      const appId = parseInt(element.AppId.N);
-      const installationId = parseInt(element.InstallationId.N);
-      const nodeId = element.NodeId.S;
+    const appId: number = element.appId;
+    const installationId: number = element.installationId;
+    const nodeId: string = element.nodeId ?? '';
 
-      const existingInstallationIds = installationIds[appId] ?? [];
-      existingInstallationIds.push({
-        installationId: installationId,
-        appId: appId,
-        nodeId: nodeId ?? '',
-      });
-
-      installationIds[appId] = existingInstallationIds;
-    }
+    const existingInstallationIds = installationIds[appId] ?? [];
+    existingInstallationIds.push({
+      installationId,
+      appId,
+      nodeId,
+    });
+    installationIds[appId] = existingInstallationIds;
   });
 
   return installationIds;

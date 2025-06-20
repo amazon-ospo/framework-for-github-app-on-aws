@@ -6,6 +6,7 @@ import {
   ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
+import { NativeAttributeValue } from '@aws-sdk/util-dynamodb/dist-types/models';
 import { dynamodbClient } from './client';
 import { NotFound } from './error';
 
@@ -36,7 +37,9 @@ export class TableOperations {
    * @param query the query used to retrieve the row.
    * @returns the row that is returned, or throws an error if no rows are found, or the call fails.
    */
-  async getItem(query?: Record<string, AttributeValue>) {
+  async getItem(
+    query?: Record<string, AttributeValue>,
+  ): Promise<Record<string, NativeAttributeValue>> {
     const client = dynamodbClient();
     try {
       const command = new GetItemCommand({
@@ -88,14 +91,14 @@ export class TableOperations {
    * Retrieves all data within a DynamoDB table.
    * @returns an array of items containing all rows in the table.
    */
-  async scan(): Promise<Record<string, AttributeValue>[]> {
+  async scan(): Promise<Record<string, NativeAttributeValue>[]> {
     const client = dynamodbClient();
     var command = new ScanCommand({
       TableName: this.config.TableName,
     });
     let response = await client.send(command);
     let results: Record<string, any>[] = (response.Items || []).map((item) =>
-      unmarshall(item as Record<string, AttributeValue>),
+      unmarshall(item),
     );
     while (response.LastEvaluatedKey) {
       const ExclusiveStartKey = response.LastEvaluatedKey;
@@ -105,22 +108,10 @@ export class TableOperations {
       });
       response = await client.send(command);
       const unmarshalledItems = (response.Items || []).map((item) =>
-        unmarshall(item as Record<string, AttributeValue>),
+        unmarshall(item),
       );
       results = results.concat(unmarshalledItems);
     }
     return results;
-    // const client = dynamodbClient();
-    // const command = new ScanCommand({
-    //   TableName: this.config.TableName,
-    // });
-
-    // const result: ScanCommandOutput = await client.send(command);
-
-    // if (!result.Items) {
-    //   throw new NotFound(`Items not found in ${this.config.TableName}`);
-    // }
-
-    // return result.Items;
   }
 }
