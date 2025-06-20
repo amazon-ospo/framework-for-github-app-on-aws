@@ -30,12 +30,12 @@ export class GitHubAPIService {
         debug: () => {},
         info: () => {},
         warn: console.warn,
-        error: console.error
+        error: console.error,
       },
       retry: {
         enabled: true,
-        retries: 3
-      }
+        retries: 3,
+      },
     });
   }
 
@@ -45,7 +45,7 @@ export class GitHubAPIService {
     ocktokitClient?: () => Octokit;
   }): Promise<AppInstallationsResponseType> {
     const octokit = ocktokitClient();
-    
+
     const response = await octokit.rest.apps.listInstallations();
 
     if (response.status >= 400) {
@@ -100,7 +100,7 @@ export class GitHubAPIService {
       if (!!response.data && !!response.data.id && !!response.data.name) {
         return response.data;
       }
-      console.error('GitHub Output:', JSON.stringify(response.data));      
+      console.error('GitHub Output:', JSON.stringify(response.data));
     } catch (error) {
       console.error(`Uncaught error calling octokit ${JSON.stringify(error)}`);
       throw error;

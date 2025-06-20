@@ -1,6 +1,6 @@
+import { AttributeValue } from '@aws-sdk/client-dynamodb';
 import { DataError } from './error';
 import { TableOperations } from './tableOperations';
-import { AttributeValue } from '@aws-sdk/client-dynamodb';
 
 export type GetAppKeyArnById = ({
   appId,
@@ -11,13 +11,13 @@ export type GetAppKeyArnById = ({
 }) => Promise<string>;
 
 export type InstallationRecord = {
-  appId: number,
-  installationId: number,
-  nodeId: string,
+  appId: number;
+  installationId: number;
+  nodeId: string;
 };
 
 type AppInstallations = {
-  [appId: number]: InstallationRecord[]
+  [appId: number]: InstallationRecord[];
 };
 
 /**
@@ -72,7 +72,7 @@ export const getAppIdsImpl: GetAppIds = async (
   const items: Record<string, AttributeValue>[] = await tableOperations.scan();
   const appIds: number[] = [];
   items.map((element) => {
-    element
+    element;
     if (!!element.AppId.N) {
       appIds.push(parseInt(element.AppId.N));
     }
@@ -102,15 +102,15 @@ export const getInstallationIdsImpl: GetInstallations = async (
   const installationIds: AppInstallations = {};
   items.map((element) => {
     if (!!element.AppId.N && !!element.InstallationId.N) {
-      const appId = parseInt(element["AppId"].N);
-      const installationId = parseInt(element["InstallationId"].N);
+      const appId = parseInt(element.AppId.N);
+      const installationId = parseInt(element.InstallationId.N);
       const nodeId = element.NodeId.S;
 
       const existingInstallationIds = installationIds[appId] ?? [];
-      existingInstallationIds.push({ 
-        installationId: installationId, 
-        appId: appId, 
-        nodeId: nodeId ?? "" 
+      existingInstallationIds.push({
+        installationId: installationId,
+        appId: appId,
+        nodeId: nodeId ?? '',
       });
 
       installationIds[appId] = existingInstallationIds;
@@ -131,16 +131,15 @@ export type PutInstallation = ({
   tableName,
   appId,
   nodeId,
-  installationId
+  installationId,
 }: {
   tableName: string;
   appId: number;
   nodeId: string;
   installationId: number;
-
 }) => Promise<void>;
 
-export const putInstallationImpl: PutInstallation = async ({  
+export const putInstallationImpl: PutInstallation = async ({
   tableName,
   appId,
   nodeId,
@@ -151,9 +150,9 @@ export const putInstallationImpl: PutInstallation = async ({
   });
 
   const item = {
-    AppId: { "N": appId.toString() },
-    NodeId: { "S": nodeId },
-    InstallationId: { "N": installationId.toString() },
+    AppId: { N: appId.toString() },
+    NodeId: { S: nodeId },
+    InstallationId: { N: installationId.toString() },
   };
 
   await tableOperations.putItem(item);

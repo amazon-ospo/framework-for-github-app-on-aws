@@ -57,11 +57,13 @@ export class TableOperations {
       if (error instanceof NotFound) {
         throw error;
       }
-      throw new Error(`Error getting item from ${this.config.TableName}: ${error}`);
+      throw new Error(
+        `Error getting item from ${this.config.TableName}: ${error}`,
+      );
     }
   }
 
-  /** 
+  /**
    * Writes an item to DynamoDB.
    * @param item the item to write to this table.
    */
@@ -76,7 +78,9 @@ export class TableOperations {
       await client.send(command);
     } catch (error) {
       console.error(`ERROR: ${error}`);
-      throw new Error(`Error putting item in ${this.config.TableName}: ${error}`);
+      throw new Error(
+        `Error putting item in ${this.config.TableName}: ${error}`,
+      );
     }
   }
 

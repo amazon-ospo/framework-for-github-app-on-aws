@@ -145,7 +145,9 @@ export const kmsSignImpl: KmsSign = async ({ appKeyArn, message }) => {
     const signResponse = await kms.send(signCommand);
 
     if (!signResponse.Signature || signResponse.Signature.length === 0) {
-      throw new ServerError('KMS signing failed: Signature is missing or empty');
+      throw new ServerError(
+        'KMS signing failed: Signature is missing or empty',
+      );
     }
 
     return Buffer.from(signResponse.Signature);

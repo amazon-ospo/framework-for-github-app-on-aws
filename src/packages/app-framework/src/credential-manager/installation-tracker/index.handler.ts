@@ -1,15 +1,20 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
-import { getAppIdsImpl, putInstallationImpl, getInstallationIdsImpl, InstallationRecord } from '../../data';
+import {
+  getAppIdsImpl,
+  putInstallationImpl,
+  getInstallationIdsImpl,
+  InstallationRecord,
+} from '../../data';
 import { EnvironmentError } from '../../error';
-import { getAppTokenImpl } from '../get-app-token/getAppToken';
 import { GitHubAPIService } from '../../gitHubService';
 import { EnvironmentVariables } from '../constants';
+import { getAppTokenImpl } from '../get-app-token/getAppToken';
 
 /**
  * Mapping of AppId to all the installations associated with it.
  */
 type AppInstallations = {
-  [appId: number]: InstallationRecord[]
+  [appId: number]: InstallationRecord[];
 };
 
 /**
@@ -32,7 +37,6 @@ export const handler = async (
 export const handlerImpl = async (
   _event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyResultV2> => {
-
   const envVars = checkEnvironmentImpl();
   const appTableName: string = envVars.appTableName;
   const installationTableName: string = envVars.installationTableName;
@@ -40,45 +44,64 @@ export const handlerImpl = async (
   // Find all AppIds for this account.
   const appIds: number[] = await getAppIdsImpl({ tableName: appTableName });
 
-  // Find all installations for this account, split by AppId. 
+  // Find all installations for this account, split by AppId.
   // Registered installations are known in DynamoDB.
-  const registeredInstallations: AppInstallations = await getInstallationIdsImpl({ tableName: installationTableName });
+  const registeredInstallations: AppInstallations =
+    await getInstallationIdsImpl({ tableName: installationTableName });
   // GitHub installations are actual installations that GitHub has.
   const githubConfirmedInstallations: AppInstallations = {};
 
   // Find all installations for this account, according to GitHub.
-  await Promise.all(appIds.map(async (appId: number) => {
-    // Fetch each AppToken for this account.
-    const appToken = (await getAppTokenImpl({
-      appId: appId,
-      tableName: appTableName,
-    })).appToken;
+  await Promise.all(
+    appIds.map(async (appId: number) => {
+      // Fetch each AppToken for this account.
+      const appToken = (
+        await getAppTokenImpl({
+          appId: appId,
+          tableName: appTableName,
+        })
+      ).appToken;
 
-    // Using the App identity granted by the AppToken, generate a GitHub client.
-    const githubService = new GitHubAPIService({
-      appToken: appToken
-    });
+      // Using the App identity granted by the AppToken, generate a GitHub client.
+      const githubService = new GitHubAPIService({
+        appToken: appToken,
+      });
 
-    // Fetch installations from GitHub and map them to the fields we need.
-    const actualInstallations = await githubService.getInstallations({});
-    const gitHubInstallations: InstallationRecord[] = await Promise.all(actualInstallations.map((installation) => {
-      return {
-        installationId: installation.id,
-        appId: appId,
-        nodeId: installation.account ? installation.account.node_id : "",
-      }
-    }));
+      // Fetch installations from GitHub and map them to the fields we need.
+      const actualInstallations = await githubService.getInstallations({});
+      const gitHubInstallations: InstallationRecord[] = await Promise.all(
+        actualInstallations.map((installation) => {
+          return {
+            installationId: installation.id,
+            appId: appId,
+            nodeId: installation.account ? installation.account.node_id : '',
+          };
+        }),
+      );
 
-    githubConfirmedInstallations[appId] = gitHubInstallations;
-  }));
+      githubConfirmedInstallations[appId] = gitHubInstallations;
+    }),
+  );
 
-  // Calculate where GitHub has more installations than we have registed, 
+  // Calculate where GitHub has more installations than we have registed,
   // or where Dynamo has installations GitHub doesn't know about.
-  const { unverifiedInstallations, missingInstallations }: { unverifiedInstallations: InstallationRecord[]; missingInstallations: InstallationRecord[]; }
-    = await calculateInstallationDifferences(appIds, githubConfirmedInstallations, registeredInstallations);
+  const {
+    unverifiedInstallations,
+    missingInstallations,
+  }: {
+    unverifiedInstallations: InstallationRecord[];
+    missingInstallations: InstallationRecord[];
+  } = await calculateInstallationDifferences(
+    appIds,
+    githubConfirmedInstallations,
+    registeredInstallations,
+  );
 
   return {
-    body: JSON.stringify({ unverifiedInstallations: unverifiedInstallations, missingInstallations: missingInstallations }),
+    body: JSON.stringify({
+      unverifiedInstallations: unverifiedInstallations,
+      missingInstallations: missingInstallations,
+    }),
     statusCode: 200,
   };
 };
@@ -93,29 +116,43 @@ export const handlerImpl = async (
 const calculateInstallationDifferences = async (
   appIds: number[],
   githubConfirmedInstallations: AppInstallations,
-  registeredInstallations: AppInstallations): 
-    Promise<{ 
-      missingInstallations: InstallationRecord[], 
-      unverifiedInstallations: InstallationRecord[] }> => {
-        
+  registeredInstallations: AppInstallations,
+): Promise<{
+  missingInstallations: InstallationRecord[];
+  unverifiedInstallations: InstallationRecord[];
+}> => {
   const missingInstallations: InstallationRecord[] = [];
   const unverifiedInstallations: InstallationRecord[] = [];
 
   // Calculate the differences for each AppId.
-  await Promise.all(appIds.map(async (appId) => {
-    const gitHubInstallationsForAppId = githubConfirmedInstallations[appId] ?? [];
-    const registeredInstallationsForAppId = registeredInstallations[appId] ?? [];
+  await Promise.all(
+    appIds.map(async (appId) => {
+      const gitHubInstallationsForAppId =
+        githubConfirmedInstallations[appId] ?? [];
+      const registeredInstallationsForAppId =
+        registeredInstallations[appId] ?? [];
 
-    if (gitHubInstallationsForAppId.length > 0) {
-      unverifiedInstallations.push(...await getUnverifiedInstallations(gitHubInstallationsForAppId, registeredInstallationsForAppId));
-    }
+      if (gitHubInstallationsForAppId.length > 0) {
+        unverifiedInstallations.push(
+          ...(await getUnverifiedInstallations(
+            gitHubInstallationsForAppId,
+            registeredInstallationsForAppId,
+          )),
+        );
+      }
 
-    if (registeredInstallationsForAppId.length > 0) {
-      missingInstallations.push(...await getMissingInstallations(registeredInstallationsForAppId, gitHubInstallationsForAppId));
-    }
-  }));
+      if (registeredInstallationsForAppId.length > 0) {
+        missingInstallations.push(
+          ...(await getMissingInstallations(
+            registeredInstallationsForAppId,
+            gitHubInstallationsForAppId,
+          )),
+        );
+      }
+    }),
+  );
   return { unverifiedInstallations, missingInstallations };
-}
+};
 
 /**
  * Given a list of all GitHub installations and all DynamoDB installations for an AppId,
@@ -123,19 +160,23 @@ const calculateInstallationDifferences = async (
  * @param registeredInstallationsForAppId a list of all  DynamoDB installations for an AppId
  * @param gitHubInstallationsForAppId a list of all GitHub installations for an AppId
  */
-const getMissingInstallations = async (registeredInstallationsForAppId: InstallationRecord[], 
-  gitHubInstallationsForAppId: InstallationRecord[], 
-  ): Promise<InstallationRecord[]> => {
-    const missingInstallations: InstallationRecord[] = [];
-    
-    registeredInstallationsForAppId.forEach(async (installation) => {
-    if (gitHubInstallationsForAppId && gitHubInstallationsForAppId.indexOf(installation) < 0) {
+const getMissingInstallations = async (
+  registeredInstallationsForAppId: InstallationRecord[],
+  gitHubInstallationsForAppId: InstallationRecord[],
+): Promise<InstallationRecord[]> => {
+  const missingInstallations: InstallationRecord[] = [];
+
+  registeredInstallationsForAppId.forEach(async (installation) => {
+    if (
+      gitHubInstallationsForAppId &&
+      gitHubInstallationsForAppId.indexOf(installation) < 0
+    ) {
       missingInstallations.push(installation);
     }
   });
-  
+
   return missingInstallations;
-}
+};
 
 /**
  * Given a list of all GitHub installations and all DynamoDB installations for an AppId,
@@ -143,26 +184,29 @@ const getMissingInstallations = async (registeredInstallationsForAppId: Installa
  * @param gitHubInstallationsForAppId a list of all GitHub installations for an AppId
  * @param registeredInstallationsForAppId a list of all  DynamoDB installations for an AppId
  */
-const getUnverifiedInstallations = async (gitHubInstallationsForAppId: InstallationRecord[], 
-  registeredInstallationsForAppId: InstallationRecord[]): Promise<InstallationRecord[]> => {
-
+const getUnverifiedInstallations = async (
+  gitHubInstallationsForAppId: InstallationRecord[],
+  registeredInstallationsForAppId: InstallationRecord[],
+): Promise<InstallationRecord[]> => {
   const unverifiedInstallations: InstallationRecord[] = [];
   const installationTableName = checkEnvironmentImpl().installationTableName;
-  await Promise.all(gitHubInstallationsForAppId.map(async (installation) => {
-    if (registeredInstallationsForAppId.indexOf(installation) < 0) {
-      unverifiedInstallations.push(installation);
+  await Promise.all(
+    gitHubInstallationsForAppId.map(async (installation) => {
+      if (registeredInstallationsForAppId.indexOf(installation) < 0) {
+        unverifiedInstallations.push(installation);
 
-      await putInstallationImpl({
-        tableName: installationTableName,
-        appId: installation.appId,
-        nodeId: installation.nodeId,
-        installationId: installation.installationId,
-      });
-    }
-  }));
+        await putInstallationImpl({
+          tableName: installationTableName,
+          appId: installation.appId,
+          nodeId: installation.nodeId,
+          installationId: installation.installationId,
+        });
+      }
+    }),
+  );
 
   return unverifiedInstallations;
-}
+};
 
 // Miscallaneous environment variable checking functions.
 export type CheckEnvironment = () => {
@@ -186,6 +230,8 @@ export const checkEnvironmentImpl: CheckEnvironment = () => {
       `No value found in ${EnvironmentVariables.INSTALLATION_TABLE_NAME} environment variable.`,
     );
   }
-  return { appTableName: appTableName, installationTableName: installationTableName };
+  return {
+    appTableName: appTableName,
+    installationTableName: installationTableName,
+  };
 };
-
