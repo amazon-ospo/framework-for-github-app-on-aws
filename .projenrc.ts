@@ -11,6 +11,7 @@ const projectMetadata = {
   defaultReleaseBranch: "main",
   name: "@aws/framework-for-github-app-on-aws",
 };
+const NODE_VERSION = ">18.0.0";
 
 export const configureMarkDownLinting = (tsProject: TypeScriptAppProject) => {
   tsProject.addDevDeps(
@@ -84,7 +85,7 @@ const theAppFrameworkScripts = (
   subProject: awscdk.AwsCdkConstructLibrary | typescript.TypeScriptProject,
 ) => {
   subProject.addScripts({
-    cli: "ts-node ../../../src/packages/app-framework-ops-tools/src/app-framework-cli.ts",
+    cli: "ts-node ./src/app-framework-cli.ts",
   });
 };
 
@@ -154,7 +155,7 @@ project.addScripts({
 });
 project.addFields({
   engines: {
-    node: ">18.0.0",
+    node: NODE_VERSION,
   },
 });
 addTestTargets(project);
@@ -193,7 +194,7 @@ export const createPackage = (config: PackageConfig) => {
   configureMarkDownLinting(tsProject);
   tsProject.addFields({
     engines: {
-      node: ">18.0.0",
+      node: NODE_VERSION,
     },
   });
   return tsProject;
@@ -258,11 +259,11 @@ const theAppFrameworkOpsTools = new typescript.TypeScriptProject({
   },
 });
 theAppFrameworkOpsTools.package.addBin({
-  "app-framework": "lib/app-framework-cli.js",
+  "app-framework-for-github-apps-on-aws-ops-tools": "lib/app-framework-cli.js",
 });
 theAppFrameworkOpsTools.addFields({
   engines: {
-    node: ">18.0.0",
+    node: NODE_VERSION,
   },
 });
 theAppFrameworkScripts(theAppFrameworkOpsTools);
@@ -295,7 +296,7 @@ const theAppFrameworkTestApp = new awscdk.AwsCdkTypeScriptApp({
 });
 theAppFrameworkTestApp.addFields({
   engines: {
-    node: ">18.0.0",
+    node: NODE_VERSION,
   },
 });
 addTestTargets(theAppFrameworkTestApp);

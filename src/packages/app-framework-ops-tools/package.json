@@ -5,7 +5,7 @@
     "url": "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git"
   },
   "bin": {
-    "app-framework": "lib/app-framework-cli.js"
+    "app-framework-for-github-apps-on-aws-ops-tools": "lib/app-framework-cli.js"
   },
   "scripts": {
     "accept": "npx projen accept",
@@ -22,7 +22,7 @@
     "upgrade": "npx projen upgrade",
     "watch": "npx projen watch",
     "projen": "npx projen",
-    "cli": "ts-node ../../../src/packages/app-framework-ops-tools/src/app-framework-cli.ts"
+    "cli": "ts-node ./src/app-framework-cli.ts"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^2",

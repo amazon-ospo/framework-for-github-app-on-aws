@@ -69,13 +69,13 @@ Ensure AWS credentials have these required permissions:
 1. List available DynamoDB tables:
 
 ```sh
-  app-framework getTableName
+  app-framework-for-github-apps-on-aws-ops-tools get-table-name
 ```
 
 1. Set up PEM file path, GitHub App ID,
    and Table name as environment variables to pass the tests
 
-For `DYNAMODB_TABLE_NAME`, select an appropriate table name from `app-framework getTableName`.
+For `DYNAMODB_TABLE_NAME`, select an appropriate table name from `app-framework-for-github-apps-on-aws-ops-tools get-table-name`.
 
 ```sh
   export GITHUB_PEM_FILE_PATH=<path-to-your-private-key.pem>
