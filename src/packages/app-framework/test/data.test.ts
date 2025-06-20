@@ -208,7 +208,7 @@ describe('getInstallationId', () => {
 
   describe('PutInstallation', () => {
     it('should successfully write an installation into DynamoDB', async () => {
-      putInstallationImpl({
+      await putInstallationImpl({
         tableName: mockTableName,
         appId: mockAppId,
         installationId: mockInstallationId,

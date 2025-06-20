@@ -68,10 +68,10 @@ describe('scan', () => {
       Items: [{ item: { S: "Foo" } }]
     });
     
-    const result = await tableOperationsTest.scan();
+    const scanResult = await tableOperationsTest.scan();
     
-    expect(result.length).toBe(1);
-    expect(result[0]).toEqual({ item: "Foo"});
+    expect(scanResult.length).toBe(1);
+    expect(scanResult[0]).toEqual({ item: "Foo"});
 
     expect(mockDynamoDBClient.calls()).toHaveLength(1);
     const call = mockDynamoDBClient.calls()[0];
