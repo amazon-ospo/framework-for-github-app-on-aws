@@ -21,7 +21,21 @@ export class GitHubAPIService {
   getOctokitClient() {
     return new Octokit({
       auth: this.config.appToken,
-      userAgent: this.config.userAgent,
+      userAgent: this.config.userAgent || 'framework-for-github-app-on-aws',
+      request: {
+        timeout: 10000, // 10 seconds timeout
+      },
+      baseUrl: process.env.GITHUB_API_URL || 'https://api.github.com',
+      log: {
+        debug: () => {},
+        info: () => {},
+        warn: console.warn,
+        error: console.error,
+      },
+      retry: {
+        enabled: true,
+        retries: 3,
+      },
     });
   }
 
@@ -31,6 +45,7 @@ export class GitHubAPIService {
     ocktokitClient?: () => Octokit;
   }): Promise<AppInstallationsResponseType> {
     const octokit = ocktokitClient();
+
     const response = await octokit.rest.apps.listInstallations();
 
     if (response.status >= 400) {
@@ -44,12 +59,12 @@ export class GitHubAPIService {
 
   async getInstallationToken({
     installationId,
-    ocktokitClient = this.getOctokitClient.bind(this),
+    ocktokitClient: octokitClient = this.getOctokitClient.bind(this),
   }: {
     installationId: number;
     ocktokitClient?: () => Octokit;
   }): Promise<GetInstallationAccessTokenResponseType> {
-    const octokit = ocktokitClient();
+    const octokit = octokitClient();
     const response = await octokit.rest.apps.createInstallationAccessToken({
       installation_id: installationId,
     });
@@ -63,7 +78,6 @@ export class GitHubAPIService {
     if (!!response.data.token) {
       return response.data;
     }
-    console.error('GitHub Output:', JSON.stringify(response.data));
     throw new DataError(
       'GitHub API Error: No installation access token returned',
     );
@@ -75,16 +89,23 @@ export class GitHubAPIService {
     ocktokitClient?: () => Octokit;
   }): Promise<AppAuthenticationResponseType> {
     const octokit = ocktokitClient();
-    const response = await octokit.rest.apps.getAuthenticated();
-    if (response.status >= 400) {
-      throw new GitHubError(
-        `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
-      );
+    try {
+      const response = await octokit.rest.apps.getAuthenticated();
+
+      if (response.status >= 400) {
+        throw new GitHubError(
+          `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
+        );
+      }
+      if (!!response.data && !!response.data.id && !!response.data.name) {
+        return response.data;
+      }
+      console.error('GitHub Output:', JSON.stringify(response.data));
+    } catch (error) {
+      console.error(`Uncaught error calling octokit ${JSON.stringify(error)}`);
+      throw error;
     }
-    if (!!response.data && !!response.data.id && !!response.data.name) {
-      return response.data;
-    }
-    console.error('GitHub Output:', JSON.stringify(response.data));
+
     throw new DataError(
       'GitHub API Error: No name or id returned for authenticated app',
     );

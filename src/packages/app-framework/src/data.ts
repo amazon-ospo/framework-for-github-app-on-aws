@@ -1,3 +1,4 @@
+import { AttributeValue } from '@aws-sdk/client-dynamodb';
 import { DataError } from './error';
 import { TableOperations } from './tableOperations';
 
@@ -8,6 +9,17 @@ export type GetAppKeyArnById = ({
   appId: number;
   tableName: string;
 }) => Promise<string>;
+
+export type InstallationRecord = {
+  appId: number;
+  installationId: number;
+  nodeId: string;
+};
+
+type AppInstallations = {
+  [appId: number]: InstallationRecord[];
+};
+
 /**
  * Retrieves the AWS KMS Key ARN associated with a given GitHub App ID from DynamoDB.
  *
@@ -40,6 +52,115 @@ export const getAppKeyArnByIdImpl: GetAppKeyArnById = async ({
 };
 
 /**
+ * Fetches all AppIds from the Apps DynamoDB table.
+ * @param tableName the name of the App table.
+ * @returns all the numerical AppIds in the DynamoDB table.
+ */
+export type GetAppIds = ({
+  tableName,
+}: {
+  tableName: string;
+}) => Promise<number[]>;
+
+export const getAppIdsImpl: GetAppIds = async (
+  tableName,
+): Promise<number[]> => {
+  const tableOperations = new TableOperations({
+    TableName: tableName.tableName,
+  });
+
+  const items: Record<string, AttributeValue>[] = await tableOperations.scan();
+  const appIds: number[] = [];
+  items.map((element) => {
+    element;
+    if (!!element.AppId.N) {
+      appIds.push(parseInt(element.AppId.N));
+    }
+  });
+  return appIds;
+};
+
+/**
+ * Fetches all Installations from the DynamoDB installations table.
+ * @param tableName
+ * @returns the mapping of AppId to the nodeId and installationId of each installation.
+ */
+export type GetInstallations = ({
+  tableName,
+}: {
+  tableName: string;
+}) => Promise<AppInstallations>;
+
+export const getInstallationIdsImpl: GetInstallations = async (
+  tableName,
+): Promise<AppInstallations> => {
+  const tableOperations = new TableOperations({
+    TableName: tableName.tableName,
+  });
+
+  const items: Record<string, AttributeValue>[] = await tableOperations.scan();
+  const installationIds: AppInstallations = {};
+  items.map((element) => {
+    if (!!element.AppId.N && !!element.InstallationId.N) {
+      const appId = parseInt(element.AppId.N);
+      const installationId = parseInt(element.InstallationId.N);
+      const nodeId = element.NodeId.S;
+
+      const existingInstallationIds = installationIds[appId] ?? [];
+      existingInstallationIds.push({
+        installationId: installationId,
+        appId: appId,
+        nodeId: nodeId ?? '',
+      });
+
+      installationIds[appId] = existingInstallationIds;
+    }
+  });
+
+  return installationIds;
+};
+
+/**
+ * Writes an installation into the DynamoDB table.
+ * @param tableName the name of the installation table.
+ * @param appId the AppId of the app that has been installed.
+ * @param nodeId the NodeId showing where the installation was installed.
+ * @param installationId the ID of the installation.
+ */
+export type PutInstallation = ({
+  tableName,
+  appId,
+  nodeId,
+  installationId,
+}: {
+  tableName: string;
+  appId: number;
+  nodeId: string;
+  installationId: number;
+}) => Promise<void>;
+
+export const putInstallationImpl: PutInstallation = async ({
+  tableName,
+  appId,
+  nodeId,
+  installationId,
+}): Promise<void> => {
+  const tableOperations = new TableOperations({
+    TableName: tableName,
+  });
+
+  const item = {
+    AppId: { N: appId.toString() },
+    NodeId: { S: nodeId },
+    InstallationId: { N: installationId.toString() },
+  };
+
+  await tableOperations.putItem(item);
+
+  return;
+};
+
+/**
  * Retrieves the Installation ID associated with a given GitHub App ID and Node ID from DynamoDB.
  *
  ---
@@ -51,7 +172,6 @@ export const getAppKeyArnByIdImpl: GetAppKeyArnById = async ({
  @throws NotFound if the app ID or node ID does not exist in the table.
  @throws DataError if the record is missing the Installation ID field.
  */
-
 export type GetInstallationIdFromTable = ({
   appId,
   nodeId,

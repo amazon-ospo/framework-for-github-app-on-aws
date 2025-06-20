@@ -4,6 +4,7 @@ import { Effect, IGrantable, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 import { GitHubAppToken } from './get-app-token/appToken';
 import { InstallationAcessTokenGenerator } from './get-installation-access-token';
+import { InstallationTracker } from './installation-tracker';
 export interface CredentialManagerProps {}
 
 /**
@@ -97,6 +98,11 @@ export class CredentialManager extends NestedStack {
       getInstallationAccessTokenEndpoint.lambdaHandler.functionArn;
     this.installationAccessTokenEndpoint =
       getInstallationAccessTokenEndpoint.functionUrl.url;
+
+    new InstallationTracker(scope, 'InstallationTracker', {
+      AppTable: this.appTable,
+      InstallationTable: this.installationTable,
+    });
   }
 
   // Grants a caller permission to invoke the app token lambda Function URL.
