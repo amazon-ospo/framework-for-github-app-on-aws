@@ -164,18 +164,10 @@ const getMissingInstallations = async (
   registeredInstallationsForAppId: InstallationRecord[],
   gitHubInstallationsForAppId: InstallationRecord[],
 ): Promise<InstallationRecord[]> => {
-  const missingInstallations: InstallationRecord[] = [];
-
-  registeredInstallationsForAppId.forEach(async (installation) => {
-    if (
-      gitHubInstallationsForAppId &&
-      gitHubInstallationsForAppId.indexOf(installation) < 0
-    ) {
-      missingInstallations.push(installation);
-    }
-  });
-
-  return missingInstallations;
+  return leftJoinInstallationsForOneApp(
+    registeredInstallationsForAppId,
+    gitHubInstallationsForAppId,
+  );
 };
 
 /**
@@ -188,20 +180,19 @@ const getUnverifiedInstallations = async (
   gitHubInstallationsForAppId: InstallationRecord[],
   registeredInstallationsForAppId: InstallationRecord[],
 ): Promise<InstallationRecord[]> => {
-  const unverifiedInstallations: InstallationRecord[] = [];
   const installationTableName = checkEnvironmentImpl().installationTableName;
-  await Promise.all(
-    gitHubInstallationsForAppId.map(async (installation) => {
-      if (registeredInstallationsForAppId.indexOf(installation) < 0) {
-        unverifiedInstallations.push(installation);
 
-        await putInstallationImpl({
-          tableName: installationTableName,
-          appId: installation.appId,
-          nodeId: installation.nodeId,
-          installationId: installation.installationId,
-        });
-      }
+  const unverifiedInstallations = leftJoinInstallationsForOneApp(
+    gitHubInstallationsForAppId,
+    registeredInstallationsForAppId,
+  );
+
+  await Promise.all(
+    unverifiedInstallations.map(async (installation) => {
+      await putInstallationImpl({
+        tableName: installationTableName,
+        ...installation,
+      });
     }),
   );
 
