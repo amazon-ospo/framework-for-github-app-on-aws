@@ -211,10 +211,12 @@ export const leftJoinInstallationsForOneApp = (
 ): InstallationRecord[] => {
   // we know that all installations are for a single app id
   // we know that all installation ids are unique
-  const rightInstallationIds = right.map((installation) => installation.appId);
+  const rightInstallationIds = right.map(
+    (installation) => installation.installationId,
+  );
 
   return left.filter((installation) => {
-    return !rightInstallationIds.includes(installation.appId);
+    return !rightInstallationIds.includes(installation.installationId);
   });
 };
 

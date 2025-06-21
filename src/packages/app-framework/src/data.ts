@@ -97,9 +97,9 @@ export const getInstallationIdsImpl: GetInstallations = async (
   const items = await tableOperations.scan();
   const installationIds: AppInstallations = {};
   items.map((element) => {
-    const appId: number = element.appId;
-    const installationId: number = element.installationId;
-    const nodeId: string = element.nodeId ?? '';
+    const appId: number = element.AppId;
+    const installationId: number = element.InstallationId;
+    const nodeId: string = element.NodeId ?? '';
 
     const existingInstallationIds = installationIds[appId] ?? [];
     existingInstallationIds.push({

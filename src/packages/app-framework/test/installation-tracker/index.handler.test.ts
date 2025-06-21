@@ -1,11 +1,18 @@
-import { leftJoinInstallationsForOneApp } from '../../src/credential-manager/installation-tracker/index.handler';
+import { EnvironmentVariables } from '../../src/credential-manager/constants';
+import {
+  checkEnvironmentImpl,
+  leftJoinInstallationsForOneApp,
+} from '../../src/credential-manager/installation-tracker/index.handler';
 import { InstallationRecord } from '../../src/data';
+import { EnvironmentError } from '../../src/error';
 
 //TODO: Remove mock after Jest is able to build properly with Octokit
 
 const mockGetInstallations = jest.fn();
 const mockGetInstallationToken = jest.fn();
-
+const installationTableName = 'baz';
+const appTableName = 'foo';
+let environment: { [key: string]: string | undefined };
 jest.mock('../../src/gitHubService', () => {
   return {
     GitHubAPIService: jest.fn().mockImplementation(() => ({
@@ -15,7 +22,12 @@ jest.mock('../../src/gitHubService', () => {
   };
 });
 
-//\TODO
+beforeEach(() => {
+  environment = { ...process.env };
+  process.env[EnvironmentVariables.INSTALLATION_TABLE_NAME] =
+    installationTableName;
+  process.env[EnvironmentVariables.APP_TABLE_NAME] = appTableName;
+});
 
 describe('leftJoinInstallationsForOneApp', () => {
   it('returns nothing for equivalent arrays', () => {
@@ -52,5 +64,28 @@ describe('leftJoinInstallationsForOneApp', () => {
     const result = leftJoinInstallationsForOneApp(left, right);
     expect(result.length).toBe(1);
     expect(result).toEqual([{ appId: 1, installationId: 2, nodeId: 'foo' }]);
+  });
+});
+
+describe('checkEnvironmentImpl', () => {
+  afterEach(() => {
+    process.env = { ...environment };
+  });
+
+  it.each(Object.keys(EnvironmentVariables))(
+    'fails when %s environment variable is not set',
+    (value) => {
+      delete process.env[value];
+
+      expect(checkEnvironmentImpl).toThrow(EnvironmentError);
+    },
+  );
+
+  it('returns expected values if all are present', () => {
+    const response = checkEnvironmentImpl();
+    expect(response).toEqual({
+      installationTableName,
+      appTableName,
+    });
   });
 });
