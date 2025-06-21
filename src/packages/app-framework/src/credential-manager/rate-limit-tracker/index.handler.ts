@@ -8,10 +8,7 @@ import {
   MetricNameSpace,
   RateLimitMetricDimensions,
 } from './constants';
-import {
-  GetInstallationsFromTable,
-  getInstallationsFromTableImpl,
-} from '../../data';
+import { GetInstallations, getInstallationsImpl } from '../../data';
 import { EnvironmentError } from '../../error';
 import { GitHubAPIService } from '../../gitHubService';
 import { EnvironmentVariables, ServiceName } from '../constants';
@@ -35,12 +32,12 @@ export type Handler = ({
   getInstallationsFromTable,
 }: {
   checkEnvironment?: CheckEnvironment;
-  getInstallationsFromTable?: GetInstallationsFromTable;
+  getInstallationsFromTable?: GetInstallations;
 }) => Promise<void>;
 
 export const handlerImpl: Handler = async ({
   checkEnvironment = checkEnvironmentImpl,
-  getInstallationsFromTable = getInstallationsFromTableImpl,
+  getInstallationsFromTable = getInstallationsImpl,
 }) => {
   const context = checkEnvironment();
   const installations = await getInstallationsFromTable({
@@ -66,7 +63,7 @@ export const handlerImpl: Handler = async ({
             category: category,
             appId: installation.appId,
             nodeId: installation.nodeId,
-            installationId: installation.instllationId,
+            installationId: installation.installationId,
             calls: data.used,
             callsRemaining: data.remaining,
             rateLimit: data.limit,
@@ -78,7 +75,7 @@ export const handlerImpl: Handler = async ({
           [RateLimitMetricDimensions.category]: category,
           [RateLimitMetricDimensions.appId]: String(installation.appId),
           [RateLimitMetricDimensions.installationId]: String(
-            installation.instllationId,
+            installation.installationId,
           ),
         });
 

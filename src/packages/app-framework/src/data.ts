@@ -77,17 +77,17 @@ export const getAppIdsImpl: GetAppIds = async (
 };
 
 /**
- * Fetches all Installations from the DynamoDB installations table.
+ * Fetches all Installations mapped to AppID from the DynamoDB installations table.
  * @param tableName
- * @returns the mapping of AppId to the nodeId and installationId of each installation.
+ * @returns the mapping of AppId to their respective installations.
  */
-export type GetInstallations = ({
+export type GetMappedInstallations = ({
   tableName,
 }: {
   tableName: string;
 }) => Promise<AppInstallations>;
 
-export const getInstallationIdsImpl: GetInstallations = async (
+export const getMappedInstallationIdsImpl: GetMappedInstallations = async (
   tableName,
 ): Promise<AppInstallations> => {
   const tableOperations = new TableOperations({
@@ -229,28 +229,29 @@ export const getInstallationIdFromTableImpl: GetInstallationIdFromTable =
     }
   };
 
-export type GetInstallationsFromTable = ({
+export type GetInstallations = ({
   tableName,
 }: {
   tableName: string;
-}) => Promise<{ appId: number; nodeId: string; instllationId: number }[]>;
+}) => Promise<InstallationRecord[]>;
 
-export const getInstallationsFromTableImpl: GetInstallationsFromTable = async ({
-  tableName,
-}) => {
+/**
+ * Fetches all Installations from the DynamoDB installations table.
+ * @param tableName
+ * @returns a list of installations currently in the DynamoDB table.
+ */
+export const getInstallationsImpl: GetInstallations = async ({ tableName }) => {
   const getInstallations = new TableOperations({ TableName: tableName });
-  const result: { appId: number; nodeId: string; instllationId: number }[] = [];
+  const result: InstallationRecord[] = [];
   const itemList = await getInstallations.scan();
   itemList.map((item) => {
-    if (!item.AppId || !item.NodeId || !item.InstallationID) {
-      throw new DataError(
-        'Invalid data: Missing Installation ID, Node ID or App ID',
-      );
-    }
+    const appId: number = item.AppId;
+    const installationId: number = item.InstallationId;
+    const nodeId: string = item.NodeId ?? '';
     result.push({
-      appId: item.AppId as number,
-      nodeId: item.NodeId as string,
-      instllationId: item.InstallationID as number,
+      appId,
+      nodeId,
+      installationId,
     });
   });
   return result;

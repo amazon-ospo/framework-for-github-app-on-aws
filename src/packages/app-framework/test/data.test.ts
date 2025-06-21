@@ -3,8 +3,9 @@ import {
   getInstallationIdFromTableImpl,
   getAppIdsImpl,
   putInstallationImpl,
-  getInstallationIdsImpl,
+  getMappedInstallationIdsImpl,
   deleteInstallationImpl,
+  getInstallationsImpl,
 } from '../src/data';
 import { DataError, NotFound } from '../src/error';
 import { TableOperations } from '../src/tableOperations';
@@ -184,7 +185,7 @@ describe('getInstallationId', () => {
     });
   });
 
-  describe('GetInstallations', () => {
+  describe('GetMappedInstallations', () => {
     it('should successfully retrieve all AppIds from DynamoDB', async () => {
       mockTableOperations.prototype.scan.mockResolvedValue([
         {
@@ -193,7 +194,7 @@ describe('getInstallationId', () => {
           NodeId: mockNodeId,
         },
       ]);
-      const result = await getInstallationIdsImpl({
+      const result = await getMappedInstallationIdsImpl({
         tableName: mockTableName,
       });
       expect(Object.keys(result).length).toBe(1);
@@ -208,7 +209,7 @@ describe('getInstallationId', () => {
         throw new Error('DynamoDB service error');
       });
       await expect(
-        getAppIdsImpl({
+        getMappedInstallationIdsImpl({
           tableName: mockTableName,
         }),
       ).rejects.toThrow('DynamoDB service error');
@@ -275,6 +276,43 @@ describe('getInstallationId', () => {
           tableName: mockTableName,
           appId: mockAppId,
           nodeId: mockNodeId,
+        }),
+      ).rejects.toThrow('DynamoDB service error');
+    });
+  });
+
+  describe('GetInstallations', () => {
+    it('should successfully retrieve all AppIds from DynamoDB', async () => {
+      mockTableOperations.prototype.scan.mockResolvedValue([
+        {
+          AppId: mockAppId,
+          InstallationId: mockInstallationId,
+          NodeId: mockNodeId,
+        },
+      ]);
+      const result = await getInstallationsImpl({
+        tableName: mockTableName,
+      });
+      expect(result).toEqual([
+        {
+          appId: mockAppId,
+          nodeId: mockNodeId,
+          installationId: mockInstallationId,
+        },
+      ]);
+      expect(TableOperations).toHaveBeenCalledWith({
+        TableName: mockTableName,
+      });
+      expect(mockTableOperations.prototype.scan).toHaveBeenCalled();
+    });
+
+    it('should throw an exception if DynamoDB call fails', async () => {
+      mockTableOperations.prototype.scan.mockRejectedValue(() => {
+        throw new Error('DynamoDB service error');
+      });
+      await expect(
+        getInstallationsImpl({
+          tableName: mockTableName,
         }),
       ).rejects.toThrow('DynamoDB service error');
     });

@@ -2,10 +2,10 @@ import { APIGatewayProxyResultV2 } from 'aws-lambda';
 import {
   getAppIdsImpl,
   putInstallationImpl,
-  getInstallationIdsImpl,
+  getMappedInstallationIdsImpl,
   InstallationRecord,
   deleteInstallationImpl,
-  GetInstallations,
+  GetMappedInstallations,
   DeleteInstallation,
   PutInstallation,
   GetAppIds,
@@ -35,13 +35,13 @@ export const handler = async (): Promise<APIGatewayProxyResultV2> => {
 export type Handler = ({
   checkEnvironment,
   getAppIds,
-  getInstallationIds,
+  getMappedInstallationIds,
   getAppToken,
   calculateInstallationDifferences,
 }: {
   checkEnvironment?: CheckEnvironment;
   getAppIds?: GetAppIds;
-  getInstallationIds?: GetInstallations;
+  getMappedInstallationIds?: GetMappedInstallations;
   getAppToken?: GetAppToken;
   calculateInstallationDifferences?: CalculateInstallationDifferences;
 }) => Promise<APIGatewayProxyResultV2>;
@@ -56,7 +56,7 @@ export type Handler = ({
 export const handlerImpl: Handler = async ({
   checkEnvironment = checkEnvironmentImpl,
   getAppIds = getAppIdsImpl,
-  getInstallationIds = getInstallationIdsImpl,
+  getMappedInstallationIds = getMappedInstallationIdsImpl,
   getAppToken = getAppTokenImpl,
   calculateInstallationDifferences = calculateInstallationDifferencesImpl,
 }) => {
@@ -69,9 +69,10 @@ export const handlerImpl: Handler = async ({
 
   // Find all installations for this account, split by AppId.
   // Registered installations are known in DynamoDB.
-  const registeredInstallations: AppInstallations = await getInstallationIds({
-    tableName: installationTableName,
-  });
+  const registeredInstallations: AppInstallations =
+    await getMappedInstallationIds({
+      tableName: installationTableName,
+    });
   // GitHub installations are actual installations that GitHub has.
   const githubConfirmedInstallations: AppInstallations = {};
 
