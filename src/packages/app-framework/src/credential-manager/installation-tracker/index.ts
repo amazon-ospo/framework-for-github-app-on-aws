@@ -22,7 +22,6 @@ export class InstallationTracker {
 
     const installationTrackerFunction = new NodejsFunction(scope, 'handler', {
       ...LAMBDA_DEFAULTS,
-      functionName: 'InstallationTracker',
       bundling: {
         ...LAMBDA_DEFAULTS.bundling,
         nodeModules: ['re2-wasm'],

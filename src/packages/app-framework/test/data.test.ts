@@ -4,6 +4,7 @@ import {
   getAppIdsImpl,
   putInstallationImpl,
   getInstallationIdsImpl,
+  deleteInstallationImpl,
 } from '../src/data';
 import { DataError, NotFound } from '../src/error';
 import { TableOperations } from '../src/tableOperations';
@@ -242,6 +243,37 @@ describe('getInstallationId', () => {
           tableName: mockTableName,
           appId: mockAppId,
           installationId: mockInstallationId,
+          nodeId: mockNodeId,
+        }),
+      ).rejects.toThrow('DynamoDB service error');
+    });
+  });
+
+  describe('DeleteInstallation', () => {
+    it('should successfully delete an installation from DynamoDB', async () => {
+      await deleteInstallationImpl({
+        tableName: mockTableName,
+        appId: mockAppId,
+        nodeId: mockNodeId,
+      });
+
+      expect(TableOperations).toHaveBeenCalledWith({
+        TableName: mockTableName,
+      });
+      expect(mockTableOperations.prototype.deleteItem).toHaveBeenCalledWith({
+        AppId: { N: mockAppId.toString() },
+        NodeId: { S: mockNodeId },
+      });
+    });
+
+    it('should throw an exception if DynamoDB call fails', async () => {
+      mockTableOperations.prototype.deleteItem.mockRejectedValue(() => {
+        throw new Error('DynamoDB service error');
+      });
+      await expect(
+        deleteInstallationImpl({
+          tableName: mockTableName,
+          appId: mockAppId,
           nodeId: mockNodeId,
         }),
       ).rejects.toThrow('DynamoDB service error');

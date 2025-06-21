@@ -1,15 +1,20 @@
 import { EnvironmentVariables } from '../../src/credential-manager/constants';
 import {
+  calculateInstallationDifferencesImpl,
   checkEnvironmentImpl,
+  getMissingInstallationsImpl,
+  getUnverifiedInstallationsImpl,
+  handlerImpl,
   leftJoinInstallationsForOneApp,
 } from '../../src/credential-manager/installation-tracker/index.handler';
 import { InstallationRecord } from '../../src/data';
-import { EnvironmentError } from '../../src/error';
+import { EnvironmentError, GitHubError } from '../../src/error';
 
 //TODO: Remove mock after Jest is able to build properly with Octokit
 
 const mockGetInstallations = jest.fn();
 const mockGetInstallationToken = jest.fn();
+const mockGetAuthenticatedApp = jest.fn();
 const installationTableName = 'baz';
 const appTableName = 'foo';
 let environment: { [key: string]: string | undefined };
@@ -18,6 +23,7 @@ jest.mock('../../src/gitHubService', () => {
     GitHubAPIService: jest.fn().mockImplementation(() => ({
       getInstallations: mockGetInstallations,
       getInstallationToken: mockGetInstallationToken,
+      getAuthenticatedApp: mockGetAuthenticatedApp,
     })),
   };
 });
@@ -27,6 +33,228 @@ beforeEach(() => {
   process.env[EnvironmentVariables.INSTALLATION_TABLE_NAME] =
     installationTableName;
   process.env[EnvironmentVariables.APP_TABLE_NAME] = appTableName;
+});
+
+describe('handlerImpl', () => {
+  it('Returns unverified and missing installations list in API Gateway Proxy event when there are both missing and unverified installations', async () => {
+    const mockSuccessResponse = [
+      {
+        id: 3,
+        account: {
+          node_id: 'baz',
+        },
+        app_id: 21,
+      },
+    ];
+
+    mockGetInstallations.mockResolvedValue(mockSuccessResponse);
+    const result = await handlerImpl({
+      getAppIds: jest.fn().mockReturnValue([1, 3]),
+      getInstallationIds: jest.fn().mockReturnValue({
+        1: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
+      }),
+      getAppToken: jest.fn().mockReturnValue('some-token'),
+      calculateInstallationDifferences: jest.fn().mockReturnValue({
+        missingInstallations: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
+        unverifiedInstallations: [
+          { appId: 3, installationId: 21, nodeId: 'baz' },
+        ],
+      }),
+    });
+    expect(result).toEqual({
+      body: JSON.stringify({
+        unverifiedInstallations: [
+          { appId: 3, installationId: 21, nodeId: 'baz' },
+        ],
+        missingInstallations: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
+      }),
+      statusCode: 200,
+    });
+  });
+  it('Throws an error when running into errors', async () => {
+    mockGetInstallations.mockRejectedValue(
+      new GitHubError(
+        'GitHub API Error: status: 401, statusText: Unauthorized, error: Invalid token',
+      ),
+    );
+    await expect(
+      handlerImpl({
+        getAppIds: jest.fn().mockReturnValue([1, 3]),
+        getInstallationIds: jest.fn().mockReturnValue({
+          1: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
+        }),
+        getAppToken: jest.fn().mockReturnValue('some-token'),
+      }),
+    ).rejects.toThrow(GitHubError);
+  });
+});
+
+describe('calculateInstallationDifferencesImpl', () => {
+  it('Should return empty list when lists are empty', async () => {
+    const result = await calculateInstallationDifferencesImpl({
+      appIds: [],
+      githubConfirmedInstallations: {},
+      registeredInstallations: {},
+    });
+    expect(result).toEqual({
+      missingInstallations: [],
+      unverifiedInstallations: [],
+    });
+  });
+  it('Should return a list for unverified installations', async () => {
+    const result = await calculateInstallationDifferencesImpl({
+      appIds: [1],
+      githubConfirmedInstallations: {
+        1: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
+      },
+      registeredInstallations: [],
+      getMissingInstallations: jest.fn(),
+      getUnverifiedInstallations: jest
+        .fn()
+        .mockResolvedValue([{ appId: 1, installationId: 20, nodeId: 'foo' }]),
+    });
+    expect(result).toEqual({
+      missingInstallations: [],
+      unverifiedInstallations: [
+        { appId: 1, installationId: 20, nodeId: 'foo' },
+      ],
+    });
+  });
+  it('Should return a list for missing installations', async () => {
+    const result = await calculateInstallationDifferencesImpl({
+      appIds: [1],
+      githubConfirmedInstallations: {},
+      registeredInstallations: {
+        1: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
+      },
+      getMissingInstallations: jest
+        .fn()
+        .mockResolvedValue([{ appId: 1, installationId: 20, nodeId: 'foo' }]),
+      getUnverifiedInstallations: jest.fn(),
+    });
+    expect(result).toEqual({
+      missingInstallations: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
+      unverifiedInstallations: [],
+    });
+  });
+  it('Should return a list for both', async () => {
+    const result = await calculateInstallationDifferencesImpl({
+      appIds: [1, 3],
+      githubConfirmedInstallations: {
+        3: [{ appId: 3, installationId: 21, nodeId: 'baz' }],
+      },
+      registeredInstallations: {
+        1: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
+      },
+      getMissingInstallations: jest
+        .fn()
+        .mockResolvedValue([{ appId: 1, installationId: 20, nodeId: 'foo' }]),
+      getUnverifiedInstallations: jest
+        .fn()
+        .mockResolvedValue([{ appId: 3, installationId: 21, nodeId: 'baz' }]),
+    });
+    expect(result).toEqual({
+      missingInstallations: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
+      unverifiedInstallations: [
+        { appId: 3, installationId: 21, nodeId: 'baz' },
+      ],
+    });
+  });
+});
+describe('getUnverifiedInstallationsImpl', () => {
+  it('Should return empty list when both lists are empty', async () => {
+    const result = await getUnverifiedInstallationsImpl({
+      registeredInstallationsForAppId: [],
+      gitHubInstallationsForAppId: [],
+    });
+    expect(result).toEqual([]);
+  });
+  it('Should return empty list if github installations is empty', async () => {
+    const result = await getUnverifiedInstallationsImpl({
+      registeredInstallationsForAppId: [
+        { appId: 1, installationId: 20, nodeId: 'foo' },
+      ],
+      gitHubInstallationsForAppId: [],
+      putInstallation: jest.fn(),
+    });
+    expect(result).toEqual([]);
+  });
+  it('Should return github installations list if registered installations is empty', async () => {
+    const result = await getUnverifiedInstallationsImpl({
+      registeredInstallationsForAppId: [],
+      gitHubInstallationsForAppId: [
+        { appId: 1, installationId: 20, nodeId: 'foo' },
+      ],
+      putInstallation: jest.fn(),
+    });
+    expect(result).toEqual([{ appId: 1, installationId: 20, nodeId: 'foo' }]);
+  });
+  it('Should return github installations which are not present in registered installations', async () => {
+    const result = await getUnverifiedInstallationsImpl({
+      registeredInstallationsForAppId: [
+        { appId: 1, installationId: 20, nodeId: 'foo' },
+        { appId: 2, installationId: 21, nodeId: 'baz' },
+      ],
+      gitHubInstallationsForAppId: [
+        { appId: 1, installationId: 20, nodeId: 'foo' },
+        { appId: 3, installationId: 22, nodeId: 'bar' },
+        { appId: 4, installationId: 23, nodeId: 'random' },
+      ],
+      putInstallation: jest.fn(),
+    });
+    expect(result).toEqual([
+      { appId: 3, installationId: 22, nodeId: 'bar' },
+      { appId: 4, installationId: 23, nodeId: 'random' },
+    ]);
+  });
+});
+
+describe('getMissingInstallationsImpl', () => {
+  it('Should return empty list when both lists are empty', async () => {
+    const result = await getMissingInstallationsImpl({
+      registeredInstallationsForAppId: [],
+      gitHubInstallationsForAppId: [],
+    });
+    expect(result).toEqual([]);
+  });
+  it('Should return empty list if registered installations is empty', async () => {
+    const result = await getMissingInstallationsImpl({
+      registeredInstallationsForAppId: [],
+      gitHubInstallationsForAppId: [
+        { appId: 1, installationId: 20, nodeId: 'foo' },
+      ],
+      deleteInstallation: jest.fn(),
+    });
+    expect(result).toEqual([]);
+  });
+  it('Should return registered installations list if github installations is empty', async () => {
+    const result = await getMissingInstallationsImpl({
+      registeredInstallationsForAppId: [
+        { appId: 1, installationId: 20, nodeId: 'foo' },
+      ],
+      gitHubInstallationsForAppId: [],
+      deleteInstallation: jest.fn(),
+    });
+    expect(result).toEqual([{ appId: 1, installationId: 20, nodeId: 'foo' }]);
+  });
+  it('Should return registered installations which are not present in github installations', async () => {
+    const result = await getMissingInstallationsImpl({
+      registeredInstallationsForAppId: [
+        { appId: 1, installationId: 20, nodeId: 'foo' },
+        { appId: 3, installationId: 22, nodeId: 'bar' },
+        { appId: 4, installationId: 23, nodeId: 'random' },
+      ],
+      gitHubInstallationsForAppId: [
+        { appId: 1, installationId: 20, nodeId: 'foo' },
+        { appId: 2, installationId: 21, nodeId: 'baz' },
+      ],
+      deleteInstallation: jest.fn(),
+    });
+    expect(result).toEqual([
+      { appId: 3, installationId: 22, nodeId: 'bar' },
+      { appId: 4, installationId: 23, nodeId: 'random' },
+    ]);
+  });
 });
 
 describe('leftJoinInstallationsForOneApp', () => {
@@ -64,6 +292,18 @@ describe('leftJoinInstallationsForOneApp', () => {
     const result = leftJoinInstallationsForOneApp(left, right);
     expect(result.length).toBe(1);
     expect(result).toEqual([{ appId: 1, installationId: 2, nodeId: 'foo' }]);
+  });
+  it('returns entries with unique installation ID', () => {
+    const left: InstallationRecord[] = [
+      { appId: 1, installationId: 2, nodeId: 'bar' },
+      { appId: 1, installationId: 4, nodeId: 'bar' },
+    ];
+    const right: InstallationRecord[] = [
+      { appId: 1, installationId: 4, nodeId: 'bar' },
+    ];
+    const result = leftJoinInstallationsForOneApp(left, right);
+    expect(result.length).toBe(1);
+    expect(result).toEqual([{ appId: 1, installationId: 2, nodeId: 'bar' }]);
   });
 });
 
