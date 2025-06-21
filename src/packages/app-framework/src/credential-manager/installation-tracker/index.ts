@@ -41,7 +41,12 @@ export class InstallationTracker {
     installationTrackerFunction.addToRolePolicy(
       new PolicyStatement({
         effect: Effect.ALLOW,
-        actions: ['dynamodb:Scan', 'dynamodb:GetItem', 'dynamodb:PutItem'],
+        actions: [
+          'dynamodb:Scan',
+          'dynamodb:GetItem',
+          'dynamodb:PutItem',
+          'dynamodb:DeleteItem',
+        ],
         resources: [props.AppTable.tableArn, props.InstallationTable.tableArn],
       }),
     );

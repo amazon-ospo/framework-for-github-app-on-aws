@@ -4,6 +4,7 @@ import {
   putInstallationImpl,
   getInstallationIdsImpl,
   InstallationRecord,
+  deleteInstallationImpl,
 } from '../../data';
 import { EnvironmentError } from '../../error';
 import { GitHubAPIService } from '../../gitHubService';
@@ -164,10 +165,22 @@ const getMissingInstallations = async (
   registeredInstallationsForAppId: InstallationRecord[],
   gitHubInstallationsForAppId: InstallationRecord[],
 ): Promise<InstallationRecord[]> => {
-  return leftJoinInstallationsForOneApp(
+  const installationTableName = checkEnvironmentImpl().installationTableName;
+  const missingInstallations = leftJoinInstallationsForOneApp(
     registeredInstallationsForAppId,
     gitHubInstallationsForAppId,
   );
+  await Promise.all(
+    missingInstallations.map(async (installation) => {
+      await deleteInstallationImpl({
+        tableName: installationTableName,
+        nodeId: installation.nodeId,
+        appId: installation.appId,
+      });
+    }),
+  );
+
+  return missingInstallations;
 };
 
 /**

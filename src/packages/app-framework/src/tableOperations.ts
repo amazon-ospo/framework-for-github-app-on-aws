@@ -1,5 +1,6 @@
 import {
   AttributeValue,
+  DeleteItemCommand,
   GetItemCommand,
   GetItemCommandOutput,
   PutItemCommand,
@@ -83,6 +84,27 @@ export class TableOperations {
       console.error(`ERROR: ${error}`);
       throw new Error(
         `Error putting item in ${this.config.TableName}: ${error}`,
+      );
+    }
+  }
+
+  /**
+   * Deletes an item from DynamoDB.
+   * @param item the item to delete from this table.
+   */
+  async deleteItem(key: Record<string, AttributeValue>) {
+    const client = dynamodbClient();
+    try {
+      const command = new DeleteItemCommand({
+        TableName: this.config.TableName,
+        Key: key,
+      });
+
+      await client.send(command);
+    } catch (error) {
+      console.error(`ERROR: ${error}`);
+      throw new Error(
+        `Error deleting item in ${this.config.TableName}: ${error}`,
       );
     }
   }
