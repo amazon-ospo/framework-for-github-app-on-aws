@@ -12,9 +12,12 @@ import { GetInstallations, getInstallationsImpl } from '../../data';
 import { EnvironmentError } from '../../error';
 import { GitHubAPIService } from '../../gitHubService';
 import { EnvironmentVariables, ServiceName } from '../constants';
-import { getInstallationAccessTokenImpl } from '../get-installation-access-token/getInstallationAccessToken';
+import {
+  GetInstallationAccessToken,
+  getInstallationAccessTokenImpl,
+} from '../get-installation-access-token/getInstallationAccessToken';
 
-const metrics = new Metrics({
+export const metrics = new Metrics({
   namespace: MetricNameSpace,
   serviceName: ServiceName,
 });
@@ -28,15 +31,26 @@ export const handler = async (): Promise<void> => {
 };
 
 export type Handler = ({
+  metrics,
   checkEnvironment,
+  getInstallationAccessToken,
   getInstallationsFromTable,
 }: {
+  metrics?: Metrics;
   checkEnvironment?: CheckEnvironment;
+  getInstallationAccessToken?: GetInstallationAccessToken;
   getInstallationsFromTable?: GetInstallations;
 }) => Promise<void>;
 
+/**
+ * Handler function that generates metrics for GitHub App installation rate limits.
+ * @param checkEnvironment returns table names present in the environment variables
+ * @param getInstallationAccessToken retrieves installation access token based on App ID and Node ID
+ * @param getInstallationsFromTable retrieves all installations currently present in the installations table
+ */
 export const handlerImpl: Handler = async ({
   checkEnvironment = checkEnvironmentImpl,
+  getInstallationAccessToken = getInstallationAccessTokenImpl,
   getInstallationsFromTable = getInstallationsImpl,
 }) => {
   const context = checkEnvironment();
@@ -45,7 +59,7 @@ export const handlerImpl: Handler = async ({
   });
   await Promise.all(
     installations.map(async (installation) => {
-      const getinstallationAccessToken = await getInstallationAccessTokenImpl({
+      const getinstallationAccessToken = await getInstallationAccessToken({
         appId: installation.appId,
         nodeId: installation.nodeId,
         installationTable: context.installationTable,

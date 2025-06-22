@@ -130,7 +130,6 @@ export class CredentialManager extends NestedStack {
       AppTable: this.appTable,
       InstallationTable: this.installationTable,
     });
-    this.rateLimitDashboard({});
   }
 
   // Grants a caller permission to invoke the app token lambda Function URL.
@@ -164,6 +163,10 @@ export class CredentialManager extends NestedStack {
     );
   }
 
+  /**
+   * Dashboard to help track rate limits pf GitHub App API calls
+   * @param limit is the rate limit percent the dashboard will alarm on
+   */
   rateLimitDashboard: RateLimitDashboardProps = ({ limit = 20 }) => {
     const dashboard = new Dashboard(this, 'GitHubRateLimitTrackingDashboard', {
       dashboardName: 'GitHubRateLimitTrackingDashboard',
