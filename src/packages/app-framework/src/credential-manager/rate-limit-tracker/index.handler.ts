@@ -17,11 +17,6 @@ import {
   getInstallationAccessTokenImpl,
 } from '../get-installation-access-token/getInstallationAccessToken';
 
-export const metrics = new Metrics({
-  namespace: MetricNameSpace,
-  serviceName: ServiceName,
-});
-
 /**
  * Lambda entry point.
  */
@@ -31,12 +26,10 @@ export const handler = async (): Promise<void> => {
 };
 
 export type Handler = ({
-  metrics,
   checkEnvironment,
   getInstallationAccessToken,
   getInstallationsFromTable,
 }: {
-  metrics?: Metrics;
   checkEnvironment?: CheckEnvironment;
   getInstallationAccessToken?: GetInstallationAccessToken;
   getInstallationsFromTable?: GetInstallations;
@@ -56,6 +49,10 @@ export const handlerImpl: Handler = async ({
   const context = checkEnvironment();
   const installations = await getInstallationsFromTable({
     tableName: context.installationTable,
+  });
+  const metrics = new Metrics({
+    namespace: MetricNameSpace,
+    serviceName: ServiceName,
   });
   await Promise.all(
     installations.map(async (installation) => {

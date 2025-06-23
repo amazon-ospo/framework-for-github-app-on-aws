@@ -1,8 +1,8 @@
+import { Metrics } from '@aws-lambda-powertools/metrics';
 import { EnvironmentVariables } from '../../src/credential-manager/constants';
 import {
   checkEnvironmentImpl,
   handlerImpl,
-  metrics,
 } from '../../src/credential-manager/rate-limit-tracker/index.handler';
 import { EnvironmentError, GitHubError } from '../../src/error';
 
@@ -33,9 +33,12 @@ beforeEach(() => {
 });
 
 describe('handlerImpl', () => {
-  const addDimensionSpy = jest.spyOn(metrics, 'addDimension');
-  const addMetricSpy = jest.spyOn(metrics, 'addMetric');
-  const publishStoredMetricsSpy = jest.spyOn(metrics, 'publishStoredMetrics');
+  const addDimensionSpy = jest.spyOn(Metrics.prototype, 'addDimension');
+  const addMetricSpy = jest.spyOn(Metrics.prototype, 'addMetric');
+  const publishStoredMetricsSpy = jest.spyOn(
+    Metrics.prototype,
+    'publishStoredMetrics',
+  );
   it('Publish metrics three times due to three different rate limits present in GitHub output', async () => {
     const rate_limit_response = {
       resources: {
