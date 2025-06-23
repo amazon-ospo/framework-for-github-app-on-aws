@@ -1,13 +1,13 @@
 import {
-  convertEvent,
-  convertVersion1Response,
-} from '@aws-smithy/server-apigateway';
-import {
   getGetAppTokenHandler,
   GetAppTokenInput,
   GetAppTokenOutput,
   ServerSideError,
-} from '@framework.api/app-framework-ssdk';
+} from '@aws/app-framework-ssdk';
+import {
+  convertEvent,
+  convertVersion1Response,
+} from '@aws-smithy/server-apigateway';
 import {
   APIGatewayEventRequestContextIAMAuthorizer,
   APIGatewayEventRequestContextV2WithAuthorizer,

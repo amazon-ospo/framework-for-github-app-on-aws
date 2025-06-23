@@ -1,7 +1,4 @@
-import {
-  GetAppTokenOutput,
-  ServerSideError,
-} from '@framework.api/app-framework-ssdk';
+import { GetAppTokenOutput, ServerSideError } from '@aws/app-framework-ssdk';
 import { APIGatewayProxyResultV2 } from 'aws-lambda';
 import { EnvironmentVariables } from '../../src/credential-manager/constants';
 import {

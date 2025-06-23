@@ -10,7 +10,7 @@
     },
     "plugins": {
         "typescript-ssdk-codegen": {
-            "package": "@framework.api/app-framework-ssdk",
+            "package": "@aws/app-framework-ssdk",
             "packageVersion": "0.0.1"
         },
         "typescript-client-codegen": {

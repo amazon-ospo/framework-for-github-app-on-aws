@@ -1,10 +1,10 @@
-import { Operation } from '@aws-smithy/server-common';
 import {
   ClientSideError,
   GetAppTokenInput,
   GetAppTokenOutput,
   ServerSideError,
-} from '@framework.api/app-framework-ssdk';
+} from '@aws/app-framework-ssdk';
+import { Operation } from '@aws-smithy/server-common';
 import { getAppTokenImpl } from './getAppToken';
 import { VisibleError } from '../../error';
 
