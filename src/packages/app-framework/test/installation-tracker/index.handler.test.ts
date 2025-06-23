@@ -162,6 +162,7 @@ describe('calculateInstallationDifferencesImpl', () => {
   });
 });
 describe('getUnverifiedInstallationsImpl', () => {
+  const putInstallation = jest.fn();
   it('Should return empty list when both lists are empty', async () => {
     const result = await getUnverifiedInstallationsImpl({
       registeredInstallationsForAppId: [],
@@ -175,9 +176,10 @@ describe('getUnverifiedInstallationsImpl', () => {
         { appId: 1, installationId: 20, nodeId: 'foo' },
       ],
       gitHubInstallationsForAppId: [],
-      putInstallation: jest.fn(),
+      putInstallation,
     });
     expect(result).toEqual([]);
+    expect(putInstallation).not.toHaveBeenCalled();
   });
   it('Should return github installations list if registered installations is empty', async () => {
     const result = await getUnverifiedInstallationsImpl({
@@ -185,9 +187,10 @@ describe('getUnverifiedInstallationsImpl', () => {
       gitHubInstallationsForAppId: [
         { appId: 1, installationId: 20, nodeId: 'foo' },
       ],
-      putInstallation: jest.fn(),
+      putInstallation,
     });
     expect(result).toEqual([{ appId: 1, installationId: 20, nodeId: 'foo' }]);
+    expect(putInstallation).toHaveBeenCalledTimes(1);
   });
   it('Should return github installations which are not present in registered installations', async () => {
     const result = await getUnverifiedInstallationsImpl({
@@ -200,16 +203,18 @@ describe('getUnverifiedInstallationsImpl', () => {
         { appId: 3, installationId: 22, nodeId: 'bar' },
         { appId: 4, installationId: 23, nodeId: 'random' },
       ],
-      putInstallation: jest.fn(),
+      putInstallation,
     });
     expect(result).toEqual([
       { appId: 3, installationId: 22, nodeId: 'bar' },
       { appId: 4, installationId: 23, nodeId: 'random' },
     ]);
+    expect(putInstallation).toHaveBeenCalledTimes(2);
   });
 });
 
 describe('getMissingInstallationsImpl', () => {
+  const deleteInstallation = jest.fn();
   it('Should return empty list when both lists are empty', async () => {
     const result = await getMissingInstallationsImpl({
       registeredInstallationsForAppId: [],
@@ -223,9 +228,10 @@ describe('getMissingInstallationsImpl', () => {
       gitHubInstallationsForAppId: [
         { appId: 1, installationId: 20, nodeId: 'foo' },
       ],
-      deleteInstallation: jest.fn(),
+      deleteInstallation,
     });
     expect(result).toEqual([]);
+    expect(deleteInstallation).not.toHaveBeenCalled();
   });
   it('Should return registered installations list if github installations is empty', async () => {
     const result = await getMissingInstallationsImpl({
@@ -233,9 +239,10 @@ describe('getMissingInstallationsImpl', () => {
         { appId: 1, installationId: 20, nodeId: 'foo' },
       ],
       gitHubInstallationsForAppId: [],
-      deleteInstallation: jest.fn(),
+      deleteInstallation,
     });
     expect(result).toEqual([{ appId: 1, installationId: 20, nodeId: 'foo' }]);
+    expect(deleteInstallation).toHaveBeenCalledTimes(1);
   });
   it('Should return registered installations which are not present in github installations', async () => {
     const result = await getMissingInstallationsImpl({
@@ -248,12 +255,13 @@ describe('getMissingInstallationsImpl', () => {
         { appId: 1, installationId: 20, nodeId: 'foo' },
         { appId: 2, installationId: 21, nodeId: 'baz' },
       ],
-      deleteInstallation: jest.fn(),
+      deleteInstallation,
     });
     expect(result).toEqual([
       { appId: 3, installationId: 22, nodeId: 'bar' },
       { appId: 4, installationId: 23, nodeId: 'random' },
     ]);
+    expect(deleteInstallation).toHaveBeenCalledTimes(2);
   });
 });
 
