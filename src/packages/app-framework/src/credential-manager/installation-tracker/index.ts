@@ -22,7 +22,6 @@ export class InstallationTracker {
 
     const installationTrackerFunction = new NodejsFunction(scope, 'handler', {
       ...LAMBDA_DEFAULTS,
-      functionName: 'InstallationTracker',
       bundling: {
         ...LAMBDA_DEFAULTS.bundling,
         nodeModules: ['re2-wasm'],
@@ -41,7 +40,12 @@ export class InstallationTracker {
     installationTrackerFunction.addToRolePolicy(
       new PolicyStatement({
         effect: Effect.ALLOW,
-        actions: ['dynamodb:Scan', 'dynamodb:GetItem', 'dynamodb:PutItem'],
+        actions: [
+          'dynamodb:Scan',
+          'dynamodb:GetItem',
+          'dynamodb:PutItem',
+          'dynamodb:DeleteItem',
+        ],
         resources: [props.AppTable.tableArn, props.InstallationTable.tableArn],
       }),
     );

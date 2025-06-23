@@ -1,4 +1,5 @@
 import {
+  DeleteItemCommand,
   DynamoDBClient,
   GetItemCommand,
   PutItemCommand,
@@ -66,6 +67,26 @@ describe('putItem', () => {
       tableOperationsTest.putItem({ item: { S: 'Foo' } }),
     ).rejects.toThrow(
       'Error putting item in Test: Error: DynamoDB service error',
+    );
+  });
+});
+
+describe('deleteItem', () => {
+  it('should successfully call DynamoDB', async () => {
+    await tableOperationsTest.deleteItem({ Key: { S: 'Foo' } });
+
+    expect(mockDynamoDBClient.commandCalls(DeleteItemCommand)).toHaveLength(1);
+  });
+
+  it('should throw an error if DynamoDB throws an error', async () => {
+    mockDynamoDBClient
+      .on(DeleteItemCommand)
+      .rejects(new Error('DynamoDB service error'));
+
+    await expect(
+      tableOperationsTest.deleteItem({ Key: { S: 'Foo' } }),
+    ).rejects.toThrow(
+      'Error deleting item in Test: Error: DynamoDB service error',
     );
   });
 });

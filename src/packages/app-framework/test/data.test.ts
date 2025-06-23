@@ -4,6 +4,7 @@ import {
   getAppIdsImpl,
   putInstallationImpl,
   getInstallationIdsImpl,
+  deleteInstallationImpl,
 } from '../src/data';
 import { DataError, NotFound } from '../src/error';
 import { TableOperations } from '../src/tableOperations';
@@ -157,8 +158,8 @@ describe('getInstallationId', () => {
   describe('getAppIds', () => {
     it('should successfully retrieve all AppIds from DynamoDB', async () => {
       mockTableOperations.prototype.scan.mockResolvedValue([
-        { AppId: { N: mockAppId.toString() } },
-        { AppId: { N: (mockAppId + 1).toString() } },
+        { AppId: mockAppId },
+        { AppId: mockAppId + 1 },
       ]);
       const result = await getAppIdsImpl({
         tableName: mockTableName,
@@ -187,9 +188,9 @@ describe('getInstallationId', () => {
     it('should successfully retrieve all AppIds from DynamoDB', async () => {
       mockTableOperations.prototype.scan.mockResolvedValue([
         {
-          AppId: { N: mockAppId.toString() },
-          InstallationId: { N: mockInstallationId.toString() },
-          NodeId: { S: mockNodeId },
+          AppId: mockAppId,
+          InstallationId: mockInstallationId,
+          NodeId: mockNodeId,
         },
       ]);
       const result = await getInstallationIdsImpl({
@@ -242,6 +243,37 @@ describe('getInstallationId', () => {
           tableName: mockTableName,
           appId: mockAppId,
           installationId: mockInstallationId,
+          nodeId: mockNodeId,
+        }),
+      ).rejects.toThrow('DynamoDB service error');
+    });
+  });
+
+  describe('DeleteInstallation', () => {
+    it('should successfully delete an installation from DynamoDB', async () => {
+      await deleteInstallationImpl({
+        tableName: mockTableName,
+        appId: mockAppId,
+        nodeId: mockNodeId,
+      });
+
+      expect(TableOperations).toHaveBeenCalledWith({
+        TableName: mockTableName,
+      });
+      expect(mockTableOperations.prototype.deleteItem).toHaveBeenCalledWith({
+        AppId: { N: mockAppId.toString() },
+        NodeId: { S: mockNodeId },
+      });
+    });
+
+    it('should throw an exception if DynamoDB call fails', async () => {
+      mockTableOperations.prototype.deleteItem.mockRejectedValue(() => {
+        throw new Error('DynamoDB service error');
+      });
+      await expect(
+        deleteInstallationImpl({
+          tableName: mockTableName,
+          appId: mockAppId,
           nodeId: mockNodeId,
         }),
       ).rejects.toThrow('DynamoDB service error');
