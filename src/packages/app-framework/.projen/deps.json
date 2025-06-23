@@ -108,7 +108,7 @@
       "type": "bundled"
     },
     {
-      "name": "@framework.api/app-framework-ssdk",
+      "name": "@aws/app-framework-ssdk",
       "type": "bundled"
     },
     {
@@ -162,7 +162,7 @@
       "type": "runtime"
     },
     {
-      "name": "@framework.api/app-framework-ssdk",
+      "name": "@aws/app-framework-ssdk",
       "type": "runtime"
     },
     {
