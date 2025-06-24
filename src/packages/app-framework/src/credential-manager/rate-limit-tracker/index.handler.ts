@@ -1,17 +1,17 @@
 import { MetricUnit, Metrics } from '@aws-lambda-powertools/metrics';
 import {
-  GitHubAPICalls,
-  GitHubAPICallsRemaining,
-  GitHubAPICallsRemainingPercent,
-  GitHubAPIRateLimit,
+  GITHUB_API_CALLS,
+  GITHUB_API_CALLS_REMAINING,
+  GITHUB_API_CALLS_REMAINING_PERCENT,
+  GITHUB_API_RATE_LIMIT,
   GitHubRateLimitTimeToReset,
-  MetricNameSpace,
+  METRIC_NAMESPACE,
   RateLimitMetricDimensions,
 } from './constants';
 import { GetInstallations, getInstallationsImpl } from '../../data';
 import { EnvironmentError } from '../../error';
 import { GitHubAPIService } from '../../gitHubService';
-import { EnvironmentVariables, ServiceName } from '../constants';
+import { EnvironmentVariables, SERVICE_NAME } from '../constants';
 import {
   GetInstallationAccessToken,
   getInstallationAccessTokenImpl,
@@ -51,8 +51,8 @@ export const handlerImpl: Handler = async ({
     tableName: context.installationTable,
   });
   const metrics = new Metrics({
-    namespace: MetricNameSpace,
-    serviceName: ServiceName,
+    namespace: METRIC_NAMESPACE,
+    serviceName: SERVICE_NAME,
   });
   await Promise.all(
     installations.map(async (installation) => {
@@ -90,18 +90,18 @@ export const handlerImpl: Handler = async ({
           ),
         });
 
-        metrics.addMetric(GitHubAPICalls, MetricUnit.Count, data.used);
+        metrics.addMetric(GITHUB_API_CALLS, MetricUnit.Count, data.used);
         metrics.addMetric(
-          GitHubAPICallsRemaining,
+          GITHUB_API_CALLS_REMAINING,
           MetricUnit.Count,
           data.remaining,
         );
         metrics.addMetric(
-          GitHubAPICallsRemainingPercent,
+          GITHUB_API_CALLS_REMAINING_PERCENT,
           MetricUnit.Percent,
           percentUsed,
         );
-        metrics.addMetric(GitHubAPIRateLimit, MetricUnit.Count, data.limit);
+        metrics.addMetric(GITHUB_API_RATE_LIMIT, MetricUnit.Count, data.limit);
         metrics.addMetric(
           GitHubRateLimitTimeToReset,
           MetricUnit.Count,

@@ -1,10 +1,12 @@
-export const MetricNameSpace = 'AppFrameworkGitHubAPICallMetrics';
-export const GitHubAPICalls = 'GitHubAPICalls';
-export const GitHubAPICallsRemaining = 'GitHubAPICallsRemaining';
-export const GitHubAPICallsRemainingPercent = 'GitHubAPICallsRemainingPercent';
-export const GitHubAPIRateLimit = 'GitHubAPIRateLimit';
+export const METRIC_NAMESPACE = 'AppFrameworkGitHubAPICallMetrics';
+export const GITHUB_API_CALLS = 'GitHubAPICalls';
+export const GITHUB_API_CALLS_REMAINING = 'GitHubAPICallsRemaining';
+export const GITHUB_API_CALLS_REMAINING_PERCENT =
+  'GitHubAPICallsRemainingPercent';
+export const GITHUB_API_RATE_LIMIT = 'GitHubAPIRateLimit';
 export const GitHubRateLimitTimeToReset = 'GitHubRateLimitTimeToReset';
-export const NearingRateLimitThresholdError = 'NearingRateLimitThresholdError';
+export const NEARING_RATELIMIT_THRESHOLD_ERROR =
+  'NearingRateLimitThresholdError';
 export const RateLimitMetricDimensions = {
   category: 'Category',
   appId: 'AppID',

@@ -14,15 +14,15 @@ import {
 import { AttributeType, Table, BillingMode } from 'aws-cdk-lib/aws-dynamodb';
 import { Effect, IGrantable, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
-import { ServiceName } from './constants';
+import { SERVICE_NAME } from './constants';
 import { GitHubAppToken } from './get-app-token/appToken';
 import { InstallationAcessTokenGenerator } from './get-installation-access-token';
 import { InstallationTracker } from './installation-tracker';
 import { RateLimitTracker } from './rate-limit-tracker';
 import {
-  GitHubAPICallsRemainingPercent,
-  MetricNameSpace,
-  NearingRateLimitThresholdError,
+  GITHUB_API_CALLS_REMAINING_PERCENT,
+  METRIC_NAMESPACE,
+  NEARING_RATELIMIT_THRESHOLD_ERROR,
 } from './rate-limit-tracker/constants';
 export interface CredentialManagerProps {}
 
@@ -174,18 +174,17 @@ export class CredentialManager extends NestedStack {
 
     const horizontalAnnotation: HorizontalAnnotation = {
       value: limit,
-      color: '#ff0000',
       fill: Shading.NONE,
       visible: true,
     };
 
     const alarmWidget = new AlarmWidget({
       alarm: new Alarm(this, 'NearingRateLimitAlarm', {
-        alarmName: `${MetricNameSpace}${NearingRateLimitThresholdError}`,
+        alarmName: `${METRIC_NAMESPACE}${NEARING_RATELIMIT_THRESHOLD_ERROR}`,
         alarmDescription:
           'Alarm triggers if any GitHub calls are approaching rate limit',
         metric: new MathExpression({
-          expression: `SELECT MIN(${GitHubAPICallsRemainingPercent}) FROM "${MetricNameSpace}" WHERE service = '${ServiceName}'`,
+          expression: `SELECT MIN(${GITHUB_API_CALLS_REMAINING_PERCENT}) FROM "${METRIC_NAMESPACE}" WHERE service = '${SERVICE_NAME}'`,
           label: 'Minimum API Calls Remaining (%)',
           period: Duration.minutes(5),
         }),
@@ -208,7 +207,7 @@ export class CredentialManager extends NestedStack {
       stacked: false,
       left: [
         new MathExpression({
-          expression: `SEARCH('{${MetricNameSpace},Category,AppID,InstallationID,service} MetricName="${GitHubAPICallsRemainingPercent}"', 'Average')`,
+          expression: `SEARCH('{${METRIC_NAMESPACE},Category,AppID,InstallationID,service} MetricName="${GITHUB_API_CALLS_REMAINING_PERCENT}"', 'Average')`,
           label: 'APICallsRemaining',
           period: Duration.minutes(5),
         }),

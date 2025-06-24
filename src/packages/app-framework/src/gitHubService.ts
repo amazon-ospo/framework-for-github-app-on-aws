@@ -128,7 +128,7 @@ export class GitHubAPIService {
     if (!!response.data) {
       return response.data;
     }
-    console.error('GitHub Output:', JSON.stringify(response.data));
+    console.error('GitHub Output: ', JSON.stringify(response.data));
     throw new DataError(
       'GitHub API Error: No name or id returned for authenticated app',
     );
