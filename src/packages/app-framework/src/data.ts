@@ -90,23 +90,13 @@ export type GetMappedInstallations = ({
 export const getMappedInstallationIdsImpl: GetMappedInstallations = async (
   tableName,
 ): Promise<AppInstallations> => {
-  const tableOperations = new TableOperations({
-    TableName: tableName.tableName,
-  });
-
-  const items = await tableOperations.scan();
+  const items = await getInstallationsImpl(tableName);
   const installationIds: AppInstallations = {};
-  items.map((element) => {
-    const appId: number = element.AppId;
-    const installationId: number = element.InstallationId;
-    const nodeId: string = element.NodeId ?? '';
+  items.map((installation) => {
+    const appId: number = installation.appId;
 
     const existingInstallationIds = installationIds[appId] ?? [];
-    existingInstallationIds.push({
-      installationId,
-      appId,
-      nodeId,
-    });
+    existingInstallationIds.push(installation);
     installationIds[appId] = existingInstallationIds;
   });
 
