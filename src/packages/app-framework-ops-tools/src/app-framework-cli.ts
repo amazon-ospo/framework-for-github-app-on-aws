@@ -8,17 +8,21 @@ import { importPrivateKey } from './importPrivateKey';
 const program = new Command();
 /**
  * CLI tool for Importing GitHub App private key into AWS KMS
- * Main command - 'app-framework'
+ * Main command - 'app-framework-for-github-apps-on-aws-ops-tools'
  */
 program
-  .name('app-framework')
+  .name('app-framework-for-github-apps-on-aws-ops-tools')
   .description(
     'CLI tool to get name of the App table with FrameworkForGitHubAppOnAwsManaged tag and to import GitHub App private key into AWS KMS',
   )
-  .version(version);
-// subcommand - getTableName
+  .version(version)
+  .showHelpAfterError()
+  .action(() => {
+    program.help();
+  });
+// subcommand - get-table-name
 program
-  .command('getTableName')
+  .command('get-table-name')
   .description('Displays App tables with FrameworkForGitHubAppOnAwsManaged tag')
   .action(async () => {
     try {
@@ -28,9 +32,9 @@ program
       process.exit(1);
     }
   });
-// subcommand - importPrivateKey
+// subcommand - import-private-key
 program
-  .command('importPrivateKey')
+  .command('import-private-key')
   .description('Import GitHub App private key into AWS KMS')
   .argument('<pemFilePath>', 'Path to the private key PEM file')
   .argument('<appId>', 'GitHub App ID')
@@ -39,7 +43,7 @@ program
     'after',
     `
     Example:
-      $ app-framework importPrivateKey private-key.pem 123456 my-table-name
+      $ app-framework-for-github-apps-on-aws-ops-tools import-private-key private-key.pem 123456 my-table-name
   `,
   )
   .action(

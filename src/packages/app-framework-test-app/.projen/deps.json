@@ -95,11 +95,11 @@
       "type": "runtime"
     },
     {
-      "name": "@aws/app-framework-client",
+      "name": "@aws/app-framework-for-github-apps-on-aws",
       "type": "runtime"
     },
     {
-      "name": "@aws/framework-for-github-app-on-aws",
+      "name": "@aws/app-framework-for-github-apps-on-aws-client",
       "type": "runtime"
     },
     {

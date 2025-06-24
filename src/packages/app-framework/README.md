@@ -86,7 +86,7 @@ These tokens are obtained by invoking the generated Function URLs
 using Smithy clients in your business logic.
 
 ```text
-import { CredentialManager } from '@aws/framework-for-github-app-on-aws';
+import { CredentialManager } from '@aws/app-framework-for-github-apps-on-aws';
 
 class MyStack extends Stack {
     constructor(scope: App, id: string) {
@@ -136,7 +136,7 @@ for both App Token and Installation Access Token APIs.
 #### Initialize Client
 
 ```text
-import { AppFrameworkClient } from '@aws/app-framework-client';
+import { AppFrameworkClient } from '@aws/app-framework-for-github-apps-on-aws-client';
 
 const client = new AppFrameworkClient({
   endpoint: '<your deployed Lambda Function URL>',
@@ -149,7 +149,7 @@ const client = new AppFrameworkClient({
 #### Example: Get Installation Access Token
 
 ```text
-import { GetInstallationTokenCommand } from '@aws/app-framework-client';
+import { GetInstallationTokenCommand } from '@aws/app-framework-for-github-apps-on-aws-client';
 
 const command = new GetInstallationTokenCommand({
   appId: '<your App ID>',
@@ -163,7 +163,7 @@ const token = response.installationToken;
 #### Example: Get App Token
 
 ```text
-import { GetAppTokenCommand } from '@aws/app-framework-client';
+import { GetAppTokenCommand } from '@aws/app-framework-for-github-apps-on-aws-client';
 
 const command = new GetAppTokenCommand({
   appId: '<your App ID>',

@@ -9,8 +9,9 @@ const projectMetadata = {
   cdkVersion: "2.189.1",
   constructsVersion: "10.4.2",
   defaultReleaseBranch: "main",
-  name: "framework-for-github-app-on-aws",
+  name: "@aws/app-framework-for-github-apps-on-aws",
 };
+const NODE_VERSION = ">18.0.0";
 
 export const configureMarkDownLinting = (tsProject: TypeScriptAppProject) => {
   tsProject.addDevDeps(
@@ -80,15 +81,11 @@ export const addTestTargets = (subProject: Project) => {
   });
 };
 
-// TODO: Publish these ops tools as a CLI
 const theAppFrameworkScripts = (
   subProject: awscdk.AwsCdkConstructLibrary | typescript.TypeScriptProject,
 ) => {
   subProject.addScripts({
-    "import-private-key":
-      "ts-node ../../../src/packages/app-framework-ops-tools/src/importPrivateKey.ts",
-    "get-table-name":
-      "ts-node ../../../src/packages/app-framework-ops-tools/src/getTableName.ts",
+    cli: "ts-node ./src/app-framework-cli.ts",
   });
 };
 
@@ -154,12 +151,13 @@ project.package.file.addOverride("workspaces", [
 // waits for each package to complete before showing its logs.
 project.preCompileTask.exec("npx lerna run build --concurrency=1 --no-stream");
 project.addScripts({
-  "import-private-key":
-    "ts-node src/packages/app-framework-ops-tools/src/importPrivateKey.ts",
-  "get-table-name":
-    "ts-node src/packages/app-framework-ops-tools/src/getTableName.ts",
+  cli: "ts-node src/packages/app-framework-ops-tools/src/app-framework-cli.ts",
 });
-
+project.addFields({
+  engines: {
+    node: NODE_VERSION,
+  },
+});
 addTestTargets(project);
 configureMarkDownLinting(project);
 
@@ -194,11 +192,16 @@ export const createPackage = (config: PackageConfig) => {
   addTestTargets(tsProject);
   addPrettierConfig(tsProject);
   configureMarkDownLinting(tsProject);
+  tsProject.addFields({
+    engines: {
+      node: NODE_VERSION,
+    },
+  });
   return tsProject;
 };
 
 createPackage({
-  name: "@aws/framework-for-github-app-on-aws",
+  name: "@aws/app-framework-for-github-apps-on-aws",
   outdir: "src/packages/app-framework",
   deps: [
     "@aws-sdk/client-dynamodb",
@@ -208,7 +211,7 @@ createPackage({
     "@aws-smithy/server-common",
     "aws-lambda",
     "@aws-smithy/server-apigateway",
-    "@aws/app-framework-ssdk",
+    "@aws/app-framework-for-github-apps-on-aws-ssdk",
     "re2-wasm",
     "@octokit/rest",
     "@octokit/types",
@@ -223,7 +226,7 @@ createPackage({
     "aws-lambda",
     "re2-wasm",
     "@aws-smithy/server-apigateway",
-    "@aws/app-framework-ssdk",
+    "@aws/app-framework-for-github-apps-on-aws-ssdk",
     "@octokit/rest",
     "@octokit/types",
   ],
@@ -231,7 +234,7 @@ createPackage({
 
 const theAppFrameworkOpsTools = new typescript.TypeScriptProject({
   ...projectMetadata,
-  name: "app-framework-ops-tools",
+  name: "@aws/app-framework-for-github-apps-on-aws-ops-tools",
   outdir: "src/packages/app-framework-ops-tools",
   parent: project,
   projenrcTs: false,
@@ -256,7 +259,12 @@ const theAppFrameworkOpsTools = new typescript.TypeScriptProject({
   },
 });
 theAppFrameworkOpsTools.package.addBin({
-  "app-framework": "lib/app-framework-cli.js",
+  "app-framework-for-github-apps-on-aws-ops-tools": "lib/app-framework-cli.js",
+});
+theAppFrameworkOpsTools.addFields({
+  engines: {
+    node: NODE_VERSION,
+  },
 });
 theAppFrameworkScripts(theAppFrameworkOpsTools);
 addTestTargets(theAppFrameworkOpsTools);
@@ -265,7 +273,7 @@ configureMarkDownLinting(theAppFrameworkOpsTools);
 
 const theAppFrameworkTestApp = new awscdk.AwsCdkTypeScriptApp({
   ...projectMetadata,
-  name: "app-framework-test-app",
+  name: "@aws/app-framework-test-app",
   outdir: "src/packages/app-framework-test-app",
   parent: project,
   projenrcTs: false,
@@ -273,8 +281,8 @@ const theAppFrameworkTestApp = new awscdk.AwsCdkTypeScriptApp({
   cdkVersion: "2.184.1",
   deps: [
     "@aws-sdk/hash-node",
-    "@aws/framework-for-github-app-on-aws",
-    "@aws/app-framework-client",
+    "@aws/app-framework-for-github-apps-on-aws",
+    "@aws/app-framework-for-github-apps-on-aws-client",
     "@aws-crypto/sha256-js",
     "@aws-sdk/credential-provider-node",
   ],
@@ -284,6 +292,11 @@ const theAppFrameworkTestApp = new awscdk.AwsCdkTypeScriptApp({
       runner: "groups",
       verbose: true,
     },
+  },
+});
+theAppFrameworkTestApp.addFields({
+  engines: {
+    node: NODE_VERSION,
   },
 });
 addTestTargets(theAppFrameworkTestApp);

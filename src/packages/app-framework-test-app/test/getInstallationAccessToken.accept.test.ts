@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import {
   AppFrameworkClient,
   GetInstallationTokenCommand,
-} from '@aws/app-framework-client';
+} from '@aws/app-framework-for-github-apps-on-aws-client';
 import { Sha256 } from '@aws-crypto/sha256-js';
 import { defaultProvider } from '@aws-sdk/credential-provider-node';
 /**
@@ -17,12 +17,12 @@ describe('Smithy client for installation access token API', () => {
     const outputPath = './cdk-output.json';
     if (!fs.existsSync(outputPath)) {
       throw new Error(`
-            Can not find cdk-output.json file. 
-            To run acceptance tests, 
+            Can not find cdk-output.json file.
+            To run acceptance tests,
             please get the Installation Access Token endpoint from deployed Credential Manager Component:
-      
+
             Run 'npx projen deploy --outputs-file ./cdk-output.json'
-      
+
             Then run the tests again with:
             npm run accept
       `);
@@ -40,7 +40,7 @@ describe('Smithy client for installation access token API', () => {
       throw new Error(`
             Missing required environment variables.
             To run acceptance tests, please set the following environment variables:
-            
+
             export GITHUB_APPID=<your-github-app-id>
             export GITHUB_NODEID=<your-github-node-id>
 

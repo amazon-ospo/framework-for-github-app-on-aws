@@ -10,11 +10,11 @@
     },
     "plugins": {
         "typescript-ssdk-codegen": {
-            "package": "@aws/app-framework-ssdk",
+            "package": "@aws/app-framework-for-github-apps-on-aws-ssdk",
             "packageVersion": "0.0.1"
         },
         "typescript-client-codegen": {
-            "package": "@aws/app-framework-client",
+            "package": "@aws/app-framework-for-github-apps-on-aws-client",
             "packageVersion": "0.0.1"
         }
     }

@@ -1,6 +1,6 @@
 {
-    "name": "@aws/app-framework-ssdk",
-    "description": "@aws/app-framework-ssdk server",
+    "name": "@aws/app-framework-for-github-apps-on-aws-ssdk",
+    "description": "@aws/app-framework-for-github-apps-on-aws-ssdk server",
     "version": "0.0.1",
     "scripts": {
         "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",

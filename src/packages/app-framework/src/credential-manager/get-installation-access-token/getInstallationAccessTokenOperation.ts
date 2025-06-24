@@ -3,7 +3,7 @@ import {
   GetInstallationTokenInput,
   GetInstallationTokenOutput,
   ServerSideError,
-} from '@aws/app-framework-ssdk';
+} from '@aws/app-framework-for-github-apps-on-aws-ssdk';
 import { Operation } from '@aws-smithy/server-common';
 import { getInstallationAccessTokenImpl } from './getInstallationAccessToken';
 import { VisibleError } from '../../error';

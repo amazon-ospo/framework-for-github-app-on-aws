@@ -770,36 +770,3 @@ export const pemSignImpl: PemSign = async ({ pemFile, message }) => {
     key: privateKey,
   });
 };
-
-export async function main(): Promise<void> {
-  const [, , pemFilePath, appIdAsString, tableName] = process.argv;
-  if (!pemFilePath || !appIdAsString || !tableName) {
-    const errorMessage = [
-      'Please provide GitHub App PEM file path, GitHub AppId and the table name to store the AppId and Key ARN',
-      'Usage: npm run import-private-key <path-to-private-key.pem> <GitHubAppId> <TableName>',
-      'NOTE: For TableName, `npm run get-table-name` should list the available tables',
-      '',
-    ].join('\n\n');
-
-    console.error(errorMessage);
-    process.exit(1);
-  }
-  const appId = Number(appIdAsString);
-  if (isNaN(appId)) {
-    console.error('Error: GitHub AppId must be a valid number');
-    process.exit(1);
-  }
-  try {
-    await importPrivateKey({ pemFilePath, appId, tableName });
-  } catch (error) {
-    console.error('Error in main:', error);
-    process.exit(1);
-  }
-}
-
-if (require.main === module) {
-  main().catch((error) => {
-    console.error('Unexpected error:', error);
-    process.exit(1);
-  });
-}

@@ -1,4 +1,4 @@
-import { GetInstallationTokenOutput } from '@aws/app-framework-ssdk';
+import { GetInstallationTokenOutput } from '@aws/app-framework-for-github-apps-on-aws-ssdk';
 import {
   GetInstallationIdFromTable,
   getInstallationIdFromTableImpl,

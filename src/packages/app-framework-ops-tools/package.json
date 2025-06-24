@@ -1,11 +1,11 @@
 {
-  "name": "app-framework-ops-tools",
+  "name": "@aws/app-framework-for-github-apps-on-aws-ops-tools",
   "repository": {
     "type": "git",
     "url": "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git"
   },
   "bin": {
-    "app-framework": "lib/app-framework-cli.js"
+    "app-framework-for-github-apps-on-aws-ops-tools": "lib/app-framework-cli.js"
   },
   "scripts": {
     "accept": "npx projen accept",
@@ -22,8 +22,7 @@
     "upgrade": "npx projen upgrade",
     "watch": "npx projen watch",
     "projen": "npx projen",
-    "import-private-key": "ts-node ../../../src/packages/app-framework-ops-tools/src/importPrivateKey.ts",
-    "get-table-name": "ts-node ../../../src/packages/app-framework-ops-tools/src/getTableName.ts"
+    "cli": "ts-node ./src/app-framework-cli.ts"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^2",
@@ -52,11 +51,11 @@
     "@aws-sdk/client-resource-groups-tagging-api": "^3.777.0",
     "commander": "^11.0.0"
   },
+  "engines": {
+    "node": ">18.0.0"
+  },
   "main": "lib/index.js",
   "license": "Apache-2.0",
-  "publishConfig": {
-    "access": "public"
-  },
   "version": "0.0.0",
   "jest": {
     "coverageProvider": "v8",

@@ -71,7 +71,7 @@ Key advantages of using this tool as part of the app framework:
 
 ### 1. Install Node.js
 
-Node.js version **16 or higher** is recommended.
+Node.js version **18 or higher** is recommended.
 
 1. Visit [nodejs.org](https://nodejs.org/)
 1. Download and install the recommended version
@@ -146,14 +146,52 @@ Ensure AWS credentials have these required permissions:
 - `dynamodb:PutItem` - Stores KMS key ARN mappings
 - `dynamodb:GetItem` - Retrieve existing key mappings for validation
 
-## Running Scripts
+## CLI Tool Installation for Ops-Tools Scripts
+
+The app-framework CLI tool is built using Node.js and TypeScript. To use it:
+
+1. Install the package globally:
+
+```sh
+npm install -g app-framework-for-github-apps-on-aws-ops-tools
+```
+
+1. The CLI tool will be available through:
+
+- `app-framework-for-github-apps-on-aws-ops-tools` command
+
+### CLI Commands
+
+The app-framework-for-github-apps-on-aws-ops-tools CLI provides two sub commands
+
+1. `get-table-name` - List the available DynamoDB tables
+1. `import-private-key` - To import GitHub App private key into AWS KMS.
+
+Running `app-framework-for-github-apps-on-aws-ops-tools` command displays
+the available subcommands and options:
+
+```sh
+Usage: app-framework-for-github-apps-on-aws-ops-tools [options] [command]
+
+CLI tool to get name of the App table with FrameworkForGitHubAppOnAwsManaged 
+tag and to import GitHub App private key into AWS KMS
+
+Options:
+  -V, --version                                       output the version number
+  -h, --help                                          display help for command
+
+Commands:
+  get-table-name                                        Displays App tables with FrameworkForGitHubAppOnAwsManaged tag
+  import-private-key <pemFilePath> <appId> <tableName>  Import GitHub App private key into AWS KMS
+  help [command]                                      display help for command
+```
 
 ### Step 1: List Available Tables
 
-First, run the table listing script to identify your target DynamoDB table:
+First, run the table listing command to identify your target DynamoDB table:
 
 ```sh
-npm run get-table-name
+app-framework-for-github-apps-on-aws-ops-tools get-table-name
 ```
 
 Example Output:
@@ -170,16 +208,16 @@ Total tables found: 1
 
 Use the downloaded pem file path, GitHub App ID and
 the table name chosen
-as the arguments to the `npm run import-private-key` command.
+as the arguments to the `app-framework-for-github-apps-on-aws-ops-tools import-private-key` command.
 
 ```sh
-npm run import-private-key <path-to-private-key.pem> <GitHubAppId> <tableName>
+app-framework-for-github-apps-on-aws-ops-tools import-private-key <path-to-private-key.pem> <GitHubAppId> <tableName>
 ```
 
 Example Usage:
 
 ```sh
-npm run import-private-key ~/Downloads/private-key.pem 12345 GithubAppStack-GitHubAppNestedStack-AppTable-1A2B3C4D5E6FS
+app-framework-for-github-apps-on-aws-ops-tools import-private-key ~/Downloads/private-key.pem 12345 GithubAppStack-GitHubAppNestedStack-AppTable-1A2B3C4D5E6FS
 ```
 
 ### Step 3: Cleanup Incomplete or Failed Imports

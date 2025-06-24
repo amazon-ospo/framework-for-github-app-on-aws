@@ -190,13 +190,13 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@types/jest,@types/node,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,eslint-plugin-md,eslint-plugin-prettier,jest,jest-runner-groups,markdown-eslint-parser,ts-jest,ts-node,typescript,@aws-crypto/sha256-js,@aws-sdk/credential-provider-node,@aws-sdk/hash-node,@aws/app-framework-client,@aws/framework-for-github-app-on-aws"
+          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --no-deprecated --dep=dev,peer,prod,optional --filter=@types/jest,@types/node,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,eslint-plugin-md,eslint-plugin-prettier,jest,jest-runner-groups,markdown-eslint-parser,ts-jest,ts-node,typescript,@aws-crypto/sha256-js,@aws-sdk/credential-provider-node,@aws-sdk/hash-node,@aws/app-framework-for-github-apps-on-aws,@aws/app-framework-for-github-apps-on-aws-client"
         },
         {
           "exec": "yarn install --check-files"
         },
         {
-          "exec": "yarn upgrade @stylistic/eslint-plugin @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk esbuild eslint-import-resolver-typescript eslint-plugin-import eslint-plugin-md eslint-plugin-prettier eslint jest jest-junit jest-runner-groups markdown-eslint-parser ts-jest ts-node typescript @aws-crypto/sha256-js @aws-sdk/credential-provider-node @aws-sdk/hash-node @aws/app-framework-client @aws/framework-for-github-app-on-aws aws-cdk-lib constructs"
+          "exec": "yarn upgrade @stylistic/eslint-plugin @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk esbuild eslint-import-resolver-typescript eslint-plugin-import eslint-plugin-md eslint-plugin-prettier eslint jest jest-junit jest-runner-groups markdown-eslint-parser ts-jest ts-node typescript @aws-crypto/sha256-js @aws-sdk/credential-provider-node @aws-sdk/hash-node @aws/app-framework-for-github-apps-on-aws @aws/app-framework-for-github-apps-on-aws-client aws-cdk-lib constructs"
         },
         {
           "exec": "npx projen"

@@ -46,8 +46,8 @@ describe('app-framework CLI Acceptance tests', () => {
       expect(code).toBe(0);
       expect(stdout).toContain('Usage: app-framework');
       expect(stdout).toContain('Commands:');
-      expect(stdout).toContain('getTableName');
-      expect(stdout).toContain('importPrivateKey');
+      expect(stdout).toContain('get-table-name');
+      expect(stdout).toContain('import-private-key');
       expect(stderr).toBe('');
     });
 
@@ -59,9 +59,11 @@ describe('app-framework CLI Acceptance tests', () => {
     });
 
     it('should show error for unknown command', async () => {
-      const { code, stderr } = await execCLI(['unknown-command']);
-      expect(code).not.toBe(0);
-      expect(stderr).toContain('unknown command');
+      const { code, stdout } = await execCLI(['unknown-command']);
+      expect(code).toBe(0);
+      expect(stdout).toContain(
+        'Usage: app-framework-for-github-apps-on-aws-ops-tools [options] [command]',
+      );
     });
 
     it('should show error for invalid option', async () => {
@@ -71,9 +73,9 @@ describe('app-framework CLI Acceptance tests', () => {
     });
   });
 
-  describe('getTableName subcommand', () => {
+  describe('get-table-name subcommand', () => {
     it('displays available tables or shows "no tables found" message', async () => {
-      const { code, stdout, stderr } = await execCLI(['getTableName']);
+      const { code, stdout, stderr } = await execCLI(['get-table-name']);
       expect(code).toBe(0);
       expect(stdout).toContain('Available tables:');
       expect(stdout).toContain('Total tables found:');
@@ -81,13 +83,13 @@ describe('app-framework CLI Acceptance tests', () => {
     });
   });
 
-  describe('importPrivateKey subcommand', () => {
+  describe('import-private-key subcommand', () => {
     it.each([
-      ['pemFilePath', 'importPrivateKey'],
-      ['appId', 'importPrivateKey private-key.pem'],
-      ['tableName', 'importPrivateKey private-key.pem 12345'],
+      ['pemFilePath', 'import-private-key'],
+      ['appId', 'import-private-key private-key.pem'],
+      ['tableName', 'import-private-key private-key.pem 12345'],
     ])(
-      'importPrivateKey command should fail when <%s> argument is missing',
+      'import-private-key command should fail when <%s> argument is missing',
       async (missingArg, command) => {
         const { code, stderr } = await execCLI(command.split(' '));
         expect(code).toBe(1);
@@ -99,7 +101,7 @@ describe('app-framework CLI Acceptance tests', () => {
 
     it('fails when AppId is not a number', async () => {
       const { code, stderr } = await execCLI([
-        'importPrivateKey',
+        'import-private-key',
         'key.pem',
         'not-a-number',
         'table-name',
