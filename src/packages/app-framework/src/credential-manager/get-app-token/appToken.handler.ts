@@ -3,7 +3,7 @@ import {
   GetAppTokenInput,
   GetAppTokenOutput,
   ServerSideError,
-} from '@aws/app-framework-ssdk';
+} from '@aws/app-framework-for-github-apps-on-aws-ssdk';
 import {
   convertEvent,
   convertVersion1Response,

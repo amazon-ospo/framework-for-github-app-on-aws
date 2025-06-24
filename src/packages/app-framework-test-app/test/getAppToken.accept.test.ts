@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import {
   AppFrameworkClient,
   GetAppTokenCommand,
-} from '@aws/app-framework-client';
+} from '@aws/app-framework-for-github-apps-on-aws-client';
 import { Sha256 } from '@aws-crypto/sha256-js';
 import { defaultProvider } from '@aws-sdk/credential-provider-node';
 /**

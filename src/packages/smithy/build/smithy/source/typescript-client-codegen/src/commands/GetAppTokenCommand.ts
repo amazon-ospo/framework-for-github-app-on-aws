@@ -41,8 +41,8 @@ export interface GetAppTokenCommandOutput extends GetAppTokenOutput, __MetadataB
  * @example
  * Use a bare-bones client and the command you need to make an API call.
  * ```javascript
- * import { AppFrameworkClient, GetAppTokenCommand } from "@aws/app-framework-client"; // ES Modules import
- * // const { AppFrameworkClient, GetAppTokenCommand } = require("@aws/app-framework-client"); // CommonJS import
+ * import { AppFrameworkClient, GetAppTokenCommand } from "@aws/app-framework-for-github-apps-on-aws-client"; // ES Modules import
+ * // const { AppFrameworkClient, GetAppTokenCommand } = require("@aws/app-framework-for-github-apps-on-aws-client"); // CommonJS import
  * const client = new AppFrameworkClient(config);
  * const input = { // GetAppTokenInput
  *   appId: Number("int"), // required

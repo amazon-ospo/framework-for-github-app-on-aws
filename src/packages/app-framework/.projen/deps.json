@@ -108,7 +108,7 @@
       "type": "bundled"
     },
     {
-      "name": "@aws/app-framework-ssdk",
+      "name": "@aws/app-framework-for-github-apps-on-aws-ssdk",
       "type": "bundled"
     },
     {
@@ -162,7 +162,7 @@
       "type": "runtime"
     },
     {
-      "name": "@aws/app-framework-ssdk",
+      "name": "@aws/app-framework-for-github-apps-on-aws-ssdk",
       "type": "runtime"
     },
     {

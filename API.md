@@ -4,12 +4,12 @@
 
 ## Classes <a name="Classes" id="Classes"></a>
 
-### Hello <a name="Hello" id="@aws/framework-for-github-app-on-aws.Hello"></a>
+### Hello <a name="Hello" id="@aws/app-framework-for-github-apps-on-aws.Hello"></a>
 
-#### Initializers <a name="Initializers" id="@aws/framework-for-github-app-on-aws.Hello.Initializer"></a>
+#### Initializers <a name="Initializers" id="@aws/app-framework-for-github-apps-on-aws.Hello.Initializer"></a>
 
 ```typescript
-import { Hello } from '@aws/framework-for-github-app-on-aws'
+import { Hello } from '@aws/app-framework-for-github-apps-on-aws'
 
 new Hello()
 ```
@@ -23,11 +23,11 @@ new Hello()
 
 | **Name** | **Description** |
 | --- | --- |
-| <code><a href="#@aws/framework-for-github-app-on-aws.Hello.sayHello">sayHello</a></code> | *No description.* |
+| <code><a href="#@aws/app-framework-for-github-apps-on-aws.Hello.sayHello">sayHello</a></code> | *No description.* |
 
 ---
 
-##### `sayHello` <a name="sayHello" id="@aws/framework-for-github-app-on-aws.Hello.sayHello"></a>
+##### `sayHello` <a name="sayHello" id="@aws/app-framework-for-github-apps-on-aws.Hello.sayHello"></a>
 
 ```typescript
 public sayHello(): string

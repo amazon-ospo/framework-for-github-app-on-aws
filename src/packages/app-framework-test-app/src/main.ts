@@ -1,8 +1,8 @@
-import { CredentialManager } from '@aws/framework-for-github-app-on-aws';
+import { CredentialManager } from '@aws/app-framework-for-github-apps-on-aws';
 import { App, Stack, StackProps, CfnOutput, Aws } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-// CDK App entry for @aws/framework-for-github-app-on-aws acceptance test.
-// This stack is intended for testing @aws/framework-for-github-app-on-aws library.
+// CDK App entry for @aws/app-framework-for-github-apps-on-aws acceptance test.
+// This stack is intended for testing @aws/app-framework-for-github-apps-on-aws library.
 // In a real use case, it should be a stack defined by customer.
 export class TheAppFrameworkTestStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps = {}) {

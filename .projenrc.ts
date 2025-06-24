@@ -9,7 +9,7 @@ const projectMetadata = {
   cdkVersion: "2.189.1",
   constructsVersion: "10.4.2",
   defaultReleaseBranch: "main",
-  name: "@aws/framework-for-github-app-on-aws",
+  name: "@aws/app-framework-for-github-apps-on-aws",
 };
 const NODE_VERSION = ">18.0.0";
 
@@ -201,7 +201,7 @@ export const createPackage = (config: PackageConfig) => {
 };
 
 createPackage({
-  name: "@aws/framework-for-github-app-on-aws",
+  name: "@aws/app-framework-for-github-apps-on-aws",
   outdir: "src/packages/app-framework",
   deps: [
     "@aws-sdk/client-dynamodb",
@@ -211,7 +211,7 @@ createPackage({
     "@aws-smithy/server-common",
     "aws-lambda",
     "@aws-smithy/server-apigateway",
-    "@aws/app-framework-ssdk",
+    "@aws/app-framework-for-github-apps-on-aws-ssdk",
     "re2-wasm",
     "@octokit/rest",
     "@octokit/types",
@@ -226,7 +226,7 @@ createPackage({
     "aws-lambda",
     "re2-wasm",
     "@aws-smithy/server-apigateway",
-    "@aws/app-framework-ssdk",
+    "@aws/app-framework-for-github-apps-on-aws-ssdk",
     "@octokit/rest",
     "@octokit/types",
   ],
@@ -234,7 +234,7 @@ createPackage({
 
 const theAppFrameworkOpsTools = new typescript.TypeScriptProject({
   ...projectMetadata,
-  name: "@aws/app-framework-ops-tools",
+  name: "@aws/app-framework-for-github-apps-on-aws-ops-tools",
   outdir: "src/packages/app-framework-ops-tools",
   parent: project,
   projenrcTs: false,
@@ -281,8 +281,8 @@ const theAppFrameworkTestApp = new awscdk.AwsCdkTypeScriptApp({
   cdkVersion: "2.184.1",
   deps: [
     "@aws-sdk/hash-node",
-    "@aws/framework-for-github-app-on-aws",
-    "@aws/app-framework-client",
+    "@aws/app-framework-for-github-apps-on-aws",
+    "@aws/app-framework-for-github-apps-on-aws-client",
     "@aws-crypto/sha256-js",
     "@aws-sdk/credential-provider-node",
   ],
