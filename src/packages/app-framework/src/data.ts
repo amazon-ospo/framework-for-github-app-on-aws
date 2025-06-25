@@ -77,36 +77,26 @@ export const getAppIdsImpl: GetAppIds = async (
 };
 
 /**
- * Fetches all Installations from the DynamoDB installations table.
+ * Fetches all Installations mapped to AppID from the DynamoDB installations table.
  * @param tableName
- * @returns the mapping of AppId to the nodeId and installationId of each installation.
+ * @returns the mapping of AppId to their respective installations.
  */
-export type GetInstallations = ({
+export type GetMappedInstallations = ({
   tableName,
 }: {
   tableName: string;
 }) => Promise<AppInstallations>;
 
-export const getInstallationIdsImpl: GetInstallations = async (
+export const getMappedInstallationIdsImpl: GetMappedInstallations = async (
   tableName,
 ): Promise<AppInstallations> => {
-  const tableOperations = new TableOperations({
-    TableName: tableName.tableName,
-  });
-
-  const items = await tableOperations.scan();
+  const items = await getInstallationsImpl(tableName);
   const installationIds: AppInstallations = {};
-  items.map((element) => {
-    const appId: number = element.AppId;
-    const installationId: number = element.InstallationId;
-    const nodeId: string = element.NodeId ?? '';
+  items.map((installation) => {
+    const appId: number = installation.appId;
 
     const existingInstallationIds = installationIds[appId] ?? [];
-    existingInstallationIds.push({
-      installationId,
-      appId,
-      nodeId,
-    });
+    existingInstallationIds.push(installation);
     installationIds[appId] = existingInstallationIds;
   });
 
@@ -228,3 +218,31 @@ export const getInstallationIdFromTableImpl: GetInstallationIdFromTable =
       throw error;
     }
   };
+
+export type GetInstallations = ({
+  tableName,
+}: {
+  tableName: string;
+}) => Promise<InstallationRecord[]>;
+
+/**
+ * Fetches all Installations from the DynamoDB installations table.
+ * @param tableName
+ * @returns a list of installations currently in the DynamoDB table.
+ */
+export const getInstallationsImpl: GetInstallations = async ({ tableName }) => {
+  const getInstallations = new TableOperations({ TableName: tableName });
+  const result: InstallationRecord[] = [];
+  const itemList = await getInstallations.scan();
+  itemList.map((item) => {
+    const appId: number = item.AppId;
+    const installationId: number = item.InstallationId;
+    const nodeId: string = item.NodeId ?? '';
+    result.push({
+      appId,
+      nodeId,
+      installationId,
+    });
+  });
+  return result;
+};

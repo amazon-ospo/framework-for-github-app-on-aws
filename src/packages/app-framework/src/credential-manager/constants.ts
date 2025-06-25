@@ -1,5 +1,6 @@
 import { name, version } from '../../package.json';
 
+export const SERVICE_NAME = 'Credential Manager';
 export const USER_AGENT = `${name}/${version}`;
 export const TAG_KEYS = {
   FRAMEWORK_FOR_GITHUB_APP_ON_AWS_MANAGED: 'FrameworkForGitHubAppOnAwsManaged',

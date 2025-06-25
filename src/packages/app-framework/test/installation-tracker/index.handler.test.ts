@@ -50,7 +50,7 @@ describe('handlerImpl', () => {
     mockGetInstallations.mockResolvedValue(mockSuccessResponse);
     const result = await handlerImpl({
       getAppIds: jest.fn().mockReturnValue([1, 3]),
-      getInstallationIds: jest.fn().mockReturnValue({
+      getMappedInstallationIds: jest.fn().mockReturnValue({
         1: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
       }),
       getAppToken: jest.fn().mockReturnValue('some-token'),
@@ -80,7 +80,7 @@ describe('handlerImpl', () => {
     await expect(
       handlerImpl({
         getAppIds: jest.fn().mockReturnValue([1, 3]),
-        getInstallationIds: jest.fn().mockReturnValue({
+        getMappedInstallationIds: jest.fn().mockReturnValue({
           1: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
         }),
         getAppToken: jest.fn().mockReturnValue('some-token'),

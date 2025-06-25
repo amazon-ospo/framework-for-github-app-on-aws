@@ -20,3 +20,8 @@ export type AppAuthenticationResponseType =
   GetResponseDataTypeFromEndpointMethod<
     typeof octokit.rest.apps.getAuthenticated
   >;
+
+// Output response of /rateLimit API
+export type GetRateLimitResponseType = GetResponseDataTypeFromEndpointMethod<
+  typeof octokit.rest.rateLimit.get
+>;
