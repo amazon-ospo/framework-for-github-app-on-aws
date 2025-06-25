@@ -199,6 +199,9 @@ export const createPackage = (config: PackageConfig) => {
       node: NODE_VERSION,
     },
   });
+  tsProject.package.addField("publishConfig", {
+    access: "public",
+  });
   return tsProject;
 };
 
@@ -271,6 +274,9 @@ theAppFrameworkOpsTools.addFields({
   engines: {
     node: NODE_VERSION,
   },
+});
+theAppFrameworkOpsTools.package.addField("publishConfig", {
+  access: "public",
 });
 theAppFrameworkScripts(theAppFrameworkOpsTools);
 addTestTargets(theAppFrameworkOpsTools);
