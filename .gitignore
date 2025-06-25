@@ -50,4 +50,6 @@ junit.xml
 tsconfig.json
 !/API.md
 !/lerna.json
+!/.github/workflows/release_aws-app-framework-for-github-apps-on-aws.yml
+!/.github/workflows/release_aws-app-framework-for-github-apps-on-aws-ops-tools.yml
 !/.projenrc.ts
