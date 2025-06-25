@@ -4,9 +4,9 @@ import {
   GITHUB_API_CALLS_REMAINING,
   GITHUB_API_CALLS_REMAINING_PERCENT,
   GITHUB_API_RATE_LIMIT,
-  GitHubRateLimitTimeToReset,
+  GITHUB_RATE_LIMIT_TIME_TO_RESET,
   METRIC_NAMESPACE,
-  RateLimitMetricDimensions,
+  RATE_LIMIT_METRIC_DIMENSIONS,
 } from './constants';
 import { GetInstallations, getInstallationsImpl } from '../../data';
 import { EnvironmentError } from '../../error';
@@ -83,9 +83,9 @@ export const handlerImpl: Handler = async ({
         );
         const percentUsed = 100 * ((data.limit - data.used) / data.limit);
         metrics.addDimensions({
-          [RateLimitMetricDimensions.category]: category,
-          [RateLimitMetricDimensions.appId]: String(installation.appId),
-          [RateLimitMetricDimensions.installationId]: String(
+          [RATE_LIMIT_METRIC_DIMENSIONS.category]: category,
+          [RATE_LIMIT_METRIC_DIMENSIONS.appId]: String(installation.appId),
+          [RATE_LIMIT_METRIC_DIMENSIONS.installationId]: String(
             installation.installationId,
           ),
         });
@@ -103,7 +103,7 @@ export const handlerImpl: Handler = async ({
         );
         metrics.addMetric(GITHUB_API_RATE_LIMIT, MetricUnit.Count, data.limit);
         metrics.addMetric(
-          GitHubRateLimitTimeToReset,
+          GITHUB_RATE_LIMIT_TIME_TO_RESET,
           MetricUnit.Count,
           resetTimeSeconds,
         );
