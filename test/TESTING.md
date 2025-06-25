@@ -53,7 +53,6 @@ Repeated test runs may accumulate inactive KMS keys.
    It will also create a Nested stack with the name begin with
    `the-app-framework-test-stack-CredentialManagerNestedStack`.
    Under this stack, it will create:
-
    - Two DynamoDb table
    - Three lambda Function with two lambda Function URL
    - One EventBridge Scheduler

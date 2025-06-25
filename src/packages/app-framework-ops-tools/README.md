@@ -52,7 +52,6 @@ The tool performs these key actions:
 - Stores KMS key ARN in DynamoDB
 
 - Manages key rotation:
-
   - Supports importing new private keys
   - Tags old keys as Inactive
 
@@ -94,7 +93,6 @@ Configure your AWS credentials using your preferred method described in the
 ### Get the GitHub App ID
 
 1. Go to GitHub App Settings
-
    - Open [GitHub Developer Settings](https://github.com/settings/apps)
    - Select "GitHub Apps"
    - Click on your GitHub application
@@ -108,7 +106,6 @@ Configure your AWS credentials using your preferred method described in the
 A private key is required to authenticate as your GitHub App.
 
 1. In the same GitHub App settings page:
-
    - Scroll to "Private Keys" section
    - Click `Generate a private key`
    - A `.pem` file will automatically download
@@ -282,7 +279,6 @@ with the new key before removing the old keys.
 After confirming that all your processes are successfully using the new key:
 
 1. Remove the old private key:
-
    - Go to your GitHub App settings page
    - Navigate to the "Private Keys" section
    - Locate and delete the old private key
@@ -297,12 +293,10 @@ After confirming that all your processes are successfully using the new key:
 ## FAQs
 
 1. Missing GitHub App ID?
-
    - Go to GitHub App Settings
    - Find your App ID at the top of you app's page
 
 1. Lost Private Key?
-
    - If you lost the `.pem` file, you need to generate a
      new one in the GitHub App settings and perform the import process again.
 

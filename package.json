@@ -65,6 +65,9 @@
     "aws-cdk-lib": "^2.189.1",
     "constructs": "^10.4.2"
   },
+  "resolutions": {
+    "trim": "0.0.3"
+  },
   "keywords": [
     "cdk"
   ],

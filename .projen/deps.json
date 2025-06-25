@@ -108,6 +108,11 @@
       "type": "build"
     },
     {
+      "name": "trim",
+      "version": "0.0.3",
+      "type": "override"
+    },
+    {
       "name": "aws-cdk-lib",
       "version": "^2.189.1",
       "type": "peer"

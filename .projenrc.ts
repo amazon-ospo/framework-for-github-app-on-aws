@@ -158,6 +158,10 @@ project.addFields({
     node: NODE_VERSION,
   },
 });
+// project.package.addField("resolutions", {
+//   trim: ">=0.0.3",
+// });
+project.package.addPackageResolutions("trim@0.0.3");
 addTestTargets(project);
 configureMarkDownLinting(project);
 

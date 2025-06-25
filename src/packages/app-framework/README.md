@@ -182,11 +182,9 @@ const token = response.appToken;
 Stores GitHub App IDs and their corresponding private key ARNs
 
 - Schema:
-
   - Partition Key: `AppId` (NUMBER)
 
 - Configuration:
-
   - Billing Mode: PAY_PER_REQUEST
   - Point-in-Time Recovery: Enabled
   - Removal Policy: RETAIN
@@ -196,14 +194,11 @@ Stores GitHub App IDs and their corresponding private key ARNs
 Tracks GitHub App installations with node_id, installation_id, and app_id
 
 - Schema:
-
   - Partition Key: `AppId` (NUMBER)
   - Sort Key: `NodeId` (STRING)
 
 - Global Secondary Indexes:
-
   - `NodeID`:
-
     - Partition Key: `NodeId` (STRING)
     - Sort Key: `AppId` (NUMBER)
 
@@ -212,7 +207,6 @@ Tracks GitHub App installations with node_id, installation_id, and app_id
     - Sort Key: `AppId` (NUMBER)
 
 - Configuration:
-
   - Billing Mode: PAY_PER_REQUEST
   - Point-in-Time Recovery: Enabled
 
@@ -227,7 +221,6 @@ and performs RSA signing operations through KMS.
 Access is restricted to IAM principals explicitly granted through `grantGetAppToken`.
 
 - Permissions:
-
   - KMS:Sign for GitHub App private keys
   - DynamoDB Read access to App table
 
@@ -240,7 +233,6 @@ It is exposed through a Function URL with IAM authentication,
 and access is controlled via `grantGetInstallationAccessToken`.
 
 - Permissions:
-
   - KMS:Sign for GitHub App private keys
   - DynamoDB Read access to both tables
 
@@ -287,19 +279,16 @@ to enforce fine-grained permissions.
 These AWS resources incur usage-based charges:
 
 1. **DynamoDB**
-
    - Pay-per-request billing for both tables
    - Point-in-Time Recovery costs
    - Storage costs for table data
 
 1. **Lambda**
-
    - Function invocation charges
    - Memory usage
    - Function URL requests
 
 1. **KMS**
-
    - Key storage fees
    - Signing operation charges
 
