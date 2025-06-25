@@ -187,6 +187,8 @@ export const createPackage = (config: PackageConfig) => {
     devDeps: config.devDeps,
     bundledDeps: config.bundledDeps,
     docgen: false,
+    release: true,
+    releaseToNpm: true,
   });
   theAppFrameworkScripts(tsProject);
   addTestTargets(tsProject);
@@ -240,6 +242,8 @@ const theAppFrameworkOpsTools = new typescript.TypeScriptProject({
   outdir: "src/packages/app-framework-ops-tools",
   parent: project,
   projenrcTs: false,
+  release: true,
+  releaseToNpm: true,
   repository: projectMetadata.repositoryUrl,
   deps: [
     "@aws-sdk/client-resource-groups-tagging-api",

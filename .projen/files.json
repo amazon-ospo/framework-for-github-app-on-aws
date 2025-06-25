@@ -5,6 +5,8 @@
     ".github/pull_request_template.md",
     ".github/workflows/build.yml",
     ".github/workflows/pull-request-lint.yml",
+    ".github/workflows/release_aws-app-framework-for-github-apps-on-aws-ops-tools.yml",
+    ".github/workflows/release_aws-app-framework-for-github-apps-on-aws.yml",
     ".github/workflows/upgrade.yml",
     ".gitignore",
     ".projen/deps.json",
