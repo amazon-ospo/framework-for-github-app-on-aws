@@ -62,5 +62,13 @@
     },
     "files": [
         "dist-*/**"
-    ]
+    ],
+    "author": {
+        "name": "Amazon OSPO"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git"
+    },
+    "license": "Apache-2.0"
 }
