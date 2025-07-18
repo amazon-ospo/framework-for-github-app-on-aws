@@ -1,4 +1,3 @@
-// @ts-nocheck
 // smithy-typescript generated code
 import { defaultAppFrameworkHttpAuthSchemeProvider } from "./auth/httpAuthSchemeProvider";
 import { SigV4Signer } from "@smithy/experimental-identity-and-auth";

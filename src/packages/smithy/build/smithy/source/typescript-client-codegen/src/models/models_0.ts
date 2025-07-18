@@ -1,4 +1,3 @@
-// @ts-nocheck
 // smithy-typescript generated code
 import { AppFrameworkServiceException as __BaseException } from "./AppFrameworkServiceException";
 import { ExceptionOptionType as __ExceptionOptionType } from "@smithy/smithy-client";

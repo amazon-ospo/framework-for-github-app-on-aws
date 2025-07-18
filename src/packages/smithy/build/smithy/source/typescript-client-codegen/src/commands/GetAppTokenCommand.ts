@@ -1,4 +1,3 @@
-// @ts-nocheck
 // smithy-typescript generated code
 import {
   AppFrameworkClientResolvedConfig,

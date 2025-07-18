@@ -1,4 +1,3 @@
-// @ts-nocheck
 // smithy-typescript generated code
 import { Sha256 } from "@aws-crypto/sha256-js";
 import { AppFrameworkClientConfig } from "./AppFrameworkClient";

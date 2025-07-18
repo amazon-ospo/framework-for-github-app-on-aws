@@ -52,6 +52,33 @@ structure GetAppTokenOutput {
     expirationTime: Timestamp
 }
 
+structure RefreshCachedDataInput {}
+
+structure RefreshCachedDataOutput {
+    message: String
+    @timestampFormat("date-time")
+    refreshedDate: Timestamp
+}
+
+structure GetInstallationDataInput {
+    @length(min: 1, max:256)
+    @required
+    nodeId: String
+}
+
+structure InstallationData {
+    nodeId: String
+    appId: Integer
+    installationId: Integer
+}
+
+list InstallationDataList {
+    member: InstallationData
+}
+structure GetInstallationDataOutput {
+    installations: InstallationDataList
+}
+
 @httpError(500)
 @error("server")
 structure ServerSideError {
