@@ -13,14 +13,15 @@ export interface InstallationTrackerProps {
   readonly InstallationTable: ITable;
 }
 
-export class InstallationTracker {
-  constructor(scope: Construct, _id: string, props: InstallationTrackerProps) {
-    const rule = new Rule(scope, 'installationTrackerRule', {
+export class InstallationTracker extends Construct {
+  constructor(scope: Construct, id: string, props: InstallationTrackerProps) {
+    super(scope, id);
+    const rule = new Rule(this, 'installationTrackerRule', {
       schedule: Schedule.rate(Duration.minutes(30)),
       enabled: true,
     });
 
-    const installationTrackerFunction = new NodejsFunction(scope, 'handler', {
+    const installationTrackerFunction = new NodejsFunction(this, 'handler', {
       ...LAMBDA_DEFAULTS,
       bundling: {
         ...LAMBDA_DEFAULTS.bundling,
@@ -55,7 +56,7 @@ export class InstallationTracker {
         effect: Effect.ALLOW,
         actions: ['kms:Sign'],
         resources: [
-          `arn:aws:kms:${Stack.of(scope).region}:${Stack.of(scope).account}:key/*`,
+          `arn:aws:kms:${Stack.of(this).region}:${Stack.of(this).account}:key/*`,
         ],
         conditions: {
           StringEquals: {

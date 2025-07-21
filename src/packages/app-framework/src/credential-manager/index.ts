@@ -122,7 +122,7 @@ export class CredentialManager extends NestedStack {
     this.installationAccessTokenEndpoint =
       getInstallationAccessTokenEndpoint.functionUrl.url;
 
-    new InstallationTracker(scope, 'InstallationTracker', {
+    new InstallationTracker(this, 'InstallationTracker', {
       AppTable: this.appTable,
       InstallationTable: this.installationTable,
     });
