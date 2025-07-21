@@ -1889,7 +1889,13 @@
                     "target": "framework.api#GetAppToken"
                 },
                 {
+                    "target": "framework.api#GetInstallationData"
+                },
+                {
                     "target": "framework.api#GetInstallationToken"
+                },
+                {
+                    "target": "framework.api#RefreshCachedData"
                 }
             ]
         },
@@ -1944,6 +1950,52 @@
                     "traits": {
                         "smithy.api#timestampFormat": "date-time"
                     }
+                }
+            }
+        },
+        "framework.api#GetInstallationData": {
+            "type": "operation",
+            "input": {
+                "target": "framework.api#GetInstallationDataInput"
+            },
+            "output": {
+                "target": "framework.api#GetInstallationDataOutput"
+            },
+            "errors": [
+                {
+                    "target": "framework.api#ClientSideError"
+                },
+                {
+                    "target": "framework.api#ServerSideError"
+                }
+            ],
+            "traits": {
+                "smithy.api#http": {
+                    "method": "POST",
+                    "uri": "/installations/info"
+                }
+            }
+        },
+        "framework.api#GetInstallationDataInput": {
+            "type": "structure",
+            "members": {
+                "nodeId": {
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#length": {
+                            "min": 1,
+                            "max": 256
+                        },
+                        "smithy.api#required": {}
+                    }
+                }
+            }
+        },
+        "framework.api#GetInstallationDataOutput": {
+            "type": "structure",
+            "members": {
+                "installations": {
+                    "target": "framework.api#InstallationDataList"
                 }
             }
         },
@@ -2007,6 +2059,67 @@
                     "target": "smithy.api#Integer"
                 },
                 "expirationTime": {
+                    "target": "smithy.api#Timestamp",
+                    "traits": {
+                        "smithy.api#timestampFormat": "date-time"
+                    }
+                }
+            }
+        },
+        "framework.api#InstallationData": {
+            "type": "structure",
+            "members": {
+                "nodeId": {
+                    "target": "smithy.api#String"
+                },
+                "appId": {
+                    "target": "smithy.api#Integer"
+                },
+                "installationId": {
+                    "target": "smithy.api#Integer"
+                }
+            }
+        },
+        "framework.api#InstallationDataList": {
+            "type": "list",
+            "member": {
+                "target": "framework.api#InstallationData"
+            }
+        },
+        "framework.api#RefreshCachedData": {
+            "type": "operation",
+            "input": {
+                "target": "framework.api#RefreshCachedDataInput"
+            },
+            "output": {
+                "target": "framework.api#RefreshCachedDataOutput"
+            },
+            "errors": [
+                {
+                    "target": "framework.api#ClientSideError"
+                },
+                {
+                    "target": "framework.api#ServerSideError"
+                }
+            ],
+            "traits": {
+                "smithy.api#http": {
+                    "method": "POST",
+                    "uri": "/installations/refresh"
+                }
+            }
+        },
+        "framework.api#RefreshCachedDataInput": {
+            "type": "structure",
+            "members": {}
+        },
+        "framework.api#RefreshCachedDataOutput": {
+            "type": "structure",
+            "members": {
+                "message": {
+                    "target": "smithy.api#String"
+                },
+                "refreshedDate": {
                     "target": "smithy.api#Timestamp",
                     "traits": {
                         "smithy.api#timestampFormat": "date-time"

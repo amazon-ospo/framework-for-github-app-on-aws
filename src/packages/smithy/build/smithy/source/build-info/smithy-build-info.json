@@ -2,7 +2,9 @@
     "metadata": {},
     "operationShapeIds": [
         "framework.api#GetAppToken",
-        "framework.api#GetInstallationToken"
+        "framework.api#GetInstallationData",
+        "framework.api#GetInstallationToken",
+        "framework.api#RefreshCachedData"
     ],
     "projection": {
         "abstract": false,
