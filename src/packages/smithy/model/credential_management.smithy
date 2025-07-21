@@ -2,7 +2,7 @@ $version: "2.0"
 namespace framework.api
 
 resource CredentialManagementService{
-    operations: [GetInstallationToken, GetAppToken]
+    operations: [GetInstallationToken, GetAppToken, RefreshCachedData, GetInstallationData]
 }
 
 // Placeholder API endpoints
@@ -19,6 +19,20 @@ operation GetAppToken {
     input: GetAppTokenInput,
     output: GetAppTokenOutput
     errors:[ServerSideError, ClientSideError]
+}
+
+@http(method: "POST", uri: "/installations/refresh")
+operation RefreshCachedData {
+    input: RefreshCachedDataInput,
+    output: RefreshCachedDataOutput,
+    errors: [ServerSideError, ClientSideError]
+}
+
+@http(method: "POST", uri: "/installations/info")
+operation GetInstallationData {
+    input: GetInstallationDataInput,
+    output: GetInstallationDataOutput,
+    errors: [ServerSideError, ClientSideError]
 }
 
 structure GetInstallationTokenInput {
@@ -50,6 +64,33 @@ structure GetAppTokenOutput {
     appId: Integer
     @timestampFormat("date-time")
     expirationTime: Timestamp
+}
+
+structure RefreshCachedDataInput {}
+
+structure RefreshCachedDataOutput {
+    message: String
+    @timestampFormat("date-time")
+    refreshedDate: Timestamp
+}
+
+structure GetInstallationDataInput {
+    @length(min: 1, max:256)
+    @required
+    nodeId: String
+}
+
+structure InstallationData {
+    nodeId: String
+    appId: Integer
+    installationId: Integer
+}
+
+list InstallationDataList {
+    member: InstallationData
+}
+structure GetInstallationDataOutput {
+    installations: InstallationDataList
 }
 
 @httpError(500)

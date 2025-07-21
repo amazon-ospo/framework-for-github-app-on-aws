@@ -2,6 +2,8 @@
 // smithy-typescript generated code
 import {
   ServiceException as __BaseException,
+  CompositeCollectionValidator as __CompositeCollectionValidator,
+  CompositeStructureValidator as __CompositeStructureValidator,
   CompositeValidator as __CompositeValidator,
   LengthValidator as __LengthValidator,
   MultiConstraintValidator as __MultiConstraintValidator,
@@ -208,6 +210,125 @@ export class ValidationException extends __BaseException {
 /**
  * @public
  */
+export interface GetInstallationDataInput {
+  nodeId: string | undefined;
+}
+
+export namespace GetInstallationDataInput {
+  const memberValidators : {
+    nodeId?: __MultiConstraintValidator<string>,
+  } = {};
+  /**
+   * @internal
+   */
+  export const validate = (obj: GetInstallationDataInput, path: string = ""): __ValidationFailure[] => {
+    function getMemberValidator<T extends keyof typeof memberValidators>(member: T): NonNullable<typeof memberValidators[T]> {
+      if (memberValidators[member] === undefined) {
+        switch (member) {
+          case "nodeId": {
+            memberValidators["nodeId"] = new __CompositeValidator<string>([
+              new __RequiredValidator(),
+              new __LengthValidator(1, 256),
+            ]);
+            break;
+          }
+        }
+      }
+      return memberValidators[member]!!;
+    }
+    return [
+      ...getMemberValidator("nodeId").validate(obj.nodeId, `${path}/nodeId`),
+    ];
+  }
+}
+
+/**
+ * @public
+ */
+export interface InstallationData {
+  nodeId?: string | undefined;
+  appId?: number | undefined;
+  installationId?: number | undefined;
+}
+
+export namespace InstallationData {
+  const memberValidators : {
+    nodeId?: __MultiConstraintValidator<string>,
+    appId?: __MultiConstraintValidator<number>,
+    installationId?: __MultiConstraintValidator<number>,
+  } = {};
+  /**
+   * @internal
+   */
+  export const validate = (obj: InstallationData, path: string = ""): __ValidationFailure[] => {
+    function getMemberValidator<T extends keyof typeof memberValidators>(member: T): NonNullable<typeof memberValidators[T]> {
+      if (memberValidators[member] === undefined) {
+        switch (member) {
+          case "nodeId": {
+            memberValidators["nodeId"] = new __NoOpValidator();
+            break;
+          }
+          case "appId": {
+            memberValidators["appId"] = new __NoOpValidator();
+            break;
+          }
+          case "installationId": {
+            memberValidators["installationId"] = new __NoOpValidator();
+            break;
+          }
+        }
+      }
+      return memberValidators[member]!!;
+    }
+    return [
+      ...getMemberValidator("nodeId").validate(obj.nodeId, `${path}/nodeId`),
+      ...getMemberValidator("appId").validate(obj.appId, `${path}/appId`),
+      ...getMemberValidator("installationId").validate(obj.installationId, `${path}/installationId`),
+    ];
+  }
+}
+
+/**
+ * @public
+ */
+export interface GetInstallationDataOutput {
+  installations?: (InstallationData)[] | undefined;
+}
+
+export namespace GetInstallationDataOutput {
+  const memberValidators : {
+    installations?: __MultiConstraintValidator<Iterable<InstallationData>>,
+  } = {};
+  /**
+   * @internal
+   */
+  export const validate = (obj: GetInstallationDataOutput, path: string = ""): __ValidationFailure[] => {
+    function getMemberValidator<T extends keyof typeof memberValidators>(member: T): NonNullable<typeof memberValidators[T]> {
+      if (memberValidators[member] === undefined) {
+        switch (member) {
+          case "installations": {
+            memberValidators["installations"] = new __CompositeCollectionValidator<InstallationData>(
+              new __NoOpValidator(),
+              new __CompositeStructureValidator<InstallationData>(
+                new __NoOpValidator(),
+                InstallationData.validate
+              )
+            );
+            break;
+          }
+        }
+      }
+      return memberValidators[member]!!;
+    }
+    return [
+      ...getMemberValidator("installations").validate(obj.installations, `${path}/installations`),
+    ];
+  }
+}
+
+/**
+ * @public
+ */
 export interface GetInstallationTokenInput {
   appId: number | undefined;
   nodeId: string | undefined;
@@ -299,6 +420,70 @@ export namespace GetInstallationTokenOutput {
       ...getMemberValidator("nodeId").validate(obj.nodeId, `${path}/nodeId`),
       ...getMemberValidator("appId").validate(obj.appId, `${path}/appId`),
       ...getMemberValidator("expirationTime").validate(obj.expirationTime, `${path}/expirationTime`),
+    ];
+  }
+}
+
+/**
+ * @public
+ */
+export interface RefreshCachedDataInput {
+}
+
+export namespace RefreshCachedDataInput {
+  const memberValidators : {
+  } = {};
+  /**
+   * @internal
+   */
+  export const validate = (obj: RefreshCachedDataInput, path: string = ""): __ValidationFailure[] => {
+    function getMemberValidator<T extends keyof typeof memberValidators>(member: T): NonNullable<typeof memberValidators[T]> {
+      if (memberValidators[member] === undefined) {
+        switch (member) {
+        }
+      }
+      return memberValidators[member]!!;
+    }
+    return [
+    ];
+  }
+}
+
+/**
+ * @public
+ */
+export interface RefreshCachedDataOutput {
+  message?: string | undefined;
+  refreshedDate?: Date | undefined;
+}
+
+export namespace RefreshCachedDataOutput {
+  const memberValidators : {
+    message?: __MultiConstraintValidator<string>,
+    refreshedDate?: __MultiConstraintValidator<Date>,
+  } = {};
+  /**
+   * @internal
+   */
+  export const validate = (obj: RefreshCachedDataOutput, path: string = ""): __ValidationFailure[] => {
+    function getMemberValidator<T extends keyof typeof memberValidators>(member: T): NonNullable<typeof memberValidators[T]> {
+      if (memberValidators[member] === undefined) {
+        switch (member) {
+          case "message": {
+            memberValidators["message"] = new __NoOpValidator();
+            break;
+          }
+          case "refreshedDate": {
+            memberValidators["refreshedDate"] = new __NoOpValidator();
+            break;
+          }
+        }
+      }
+      return memberValidators[member]!!;
+    }
+    return [
+      ...getMemberValidator("message").validate(obj.message, `${path}/message`),
+      ...getMemberValidator("refreshedDate").validate(obj.refreshedDate, `${path}/refreshedDate`),
     ];
   }
 }

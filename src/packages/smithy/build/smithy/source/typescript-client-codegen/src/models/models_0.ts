@@ -108,6 +108,29 @@ export class ValidationException extends __BaseException {
 /**
  * @public
  */
+export interface GetInstallationDataInput {
+  nodeId: string | undefined;
+}
+
+/**
+ * @public
+ */
+export interface InstallationData {
+  nodeId?: string | undefined;
+  appId?: number | undefined;
+  installationId?: number | undefined;
+}
+
+/**
+ * @public
+ */
+export interface GetInstallationDataOutput {
+  installations?: (InstallationData)[] | undefined;
+}
+
+/**
+ * @public
+ */
 export interface GetInstallationTokenInput {
   appId: number | undefined;
   nodeId: string | undefined;
@@ -121,4 +144,18 @@ export interface GetInstallationTokenOutput {
   nodeId?: string | undefined;
   appId?: number | undefined;
   expirationTime?: Date | undefined;
+}
+
+/**
+ * @public
+ */
+export interface RefreshCachedDataInput {
+}
+
+/**
+ * @public
+ */
+export interface RefreshCachedDataOutput {
+  message?: string | undefined;
+  refreshedDate?: Date | undefined;
 }

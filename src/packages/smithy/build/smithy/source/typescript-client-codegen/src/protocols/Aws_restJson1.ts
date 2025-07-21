@@ -5,9 +5,17 @@ import {
   GetAppTokenCommandOutput,
 } from "../commands/GetAppTokenCommand";
 import {
+  GetInstallationDataCommandInput,
+  GetInstallationDataCommandOutput,
+} from "../commands/GetInstallationDataCommand";
+import {
   GetInstallationTokenCommandInput,
   GetInstallationTokenCommandOutput,
 } from "../commands/GetInstallationTokenCommand";
+import {
+  RefreshCachedDataCommandInput,
+  RefreshCachedDataCommandOutput,
+} from "../commands/RefreshCachedDataCommand";
 import { AppFrameworkServiceException as __BaseException } from "../models/AppFrameworkServiceException";
 import {
   ClientSideError,
@@ -66,6 +74,28 @@ export const se_GetAppTokenCommand = async(
 }
 
 /**
+ * serializeAws_restJson1GetInstallationDataCommand
+ */
+export const se_GetInstallationDataCommand = async(
+  input: GetInstallationDataCommandInput,
+  context: __SerdeContext
+): Promise<__HttpRequest> => {
+  const b = rb(input, context);
+  const headers: any = {
+    'content-type': 'application/json',
+  };
+  b.bp("/installations/info");
+  let body: any;
+  body = JSON.stringify(take(input, {
+    'nodeId': [],
+  }));
+  b.m("POST")
+  .h(headers)
+  .b(body);
+  return b.build();
+}
+
+/**
  * serializeAws_restJson1GetInstallationTokenCommand
  */
 export const se_GetInstallationTokenCommand = async(
@@ -82,6 +112,24 @@ export const se_GetInstallationTokenCommand = async(
     'appId': [],
     'nodeId': [],
   }));
+  b.m("POST")
+  .h(headers)
+  .b(body);
+  return b.build();
+}
+
+/**
+ * serializeAws_restJson1RefreshCachedDataCommand
+ */
+export const se_RefreshCachedDataCommand = async(
+  input: RefreshCachedDataCommandInput,
+  context: __SerdeContext
+): Promise<__HttpRequest> => {
+  const b = rb(input, context);
+  const headers: any = {
+  };
+  b.bp("/installations/refresh");
+  let body: any;
   b.m("POST")
   .h(headers)
   .b(body);
@@ -112,6 +160,27 @@ export const de_GetAppTokenCommand = async(
 }
 
 /**
+ * deserializeAws_restJson1GetInstallationDataCommand
+ */
+export const de_GetInstallationDataCommand = async(
+  output: __HttpResponse,
+  context: __SerdeContext
+): Promise<GetInstallationDataCommandOutput> => {
+  if (output.statusCode !== 200 && output.statusCode >= 300) {
+    return de_CommandError(output, context);
+  }
+  const contents: any = map({
+    $metadata: deserializeMetadata(output),
+  });
+  const data: Record<string, any> = __expectNonNull((__expectObject(await parseBody(output.body, context))), "body");
+  const doc = take(data, {
+    'installations': _json,
+  });
+  Object.assign(contents, doc);
+  return contents;
+}
+
+/**
  * deserializeAws_restJson1GetInstallationTokenCommand
  */
 export const de_GetInstallationTokenCommand = async(
@@ -130,6 +199,28 @@ export const de_GetInstallationTokenCommand = async(
     'expirationTime': _ => __expectNonNull(__parseRfc3339DateTimeWithOffset(_)),
     'installationToken': __expectString,
     'nodeId': __expectString,
+  });
+  Object.assign(contents, doc);
+  return contents;
+}
+
+/**
+ * deserializeAws_restJson1RefreshCachedDataCommand
+ */
+export const de_RefreshCachedDataCommand = async(
+  output: __HttpResponse,
+  context: __SerdeContext
+): Promise<RefreshCachedDataCommandOutput> => {
+  if (output.statusCode !== 200 && output.statusCode >= 300) {
+    return de_CommandError(output, context);
+  }
+  const contents: any = map({
+    $metadata: deserializeMetadata(output),
+  });
+  const data: Record<string, any> = __expectNonNull((__expectObject(await parseBody(output.body, context))), "body");
+  const doc = take(data, {
+    'message': __expectString,
+    'refreshedDate': _ => __expectNonNull(__parseRfc3339DateTimeWithOffset(_)),
   });
   Object.assign(contents, doc);
   return contents;
@@ -231,6 +322,10 @@ const de_CommandError = async(
     });
     return __decorateServiceException(exception, parsedOutput.body);
   };
+
+  // de_InstallationData omitted.
+
+  // de_InstallationDataList omitted.
 
   // de_ValidationExceptionField omitted.
 

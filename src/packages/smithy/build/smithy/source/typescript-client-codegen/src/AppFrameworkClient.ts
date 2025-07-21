@@ -11,9 +11,17 @@ import {
   GetAppTokenCommandOutput,
 } from "./commands/GetAppTokenCommand";
 import {
+  GetInstallationDataCommandInput,
+  GetInstallationDataCommandOutput,
+} from "./commands/GetInstallationDataCommand";
+import {
   GetInstallationTokenCommandInput,
   GetInstallationTokenCommandOutput,
 } from "./commands/GetInstallationTokenCommand";
+import {
+  RefreshCachedDataCommandInput,
+  RefreshCachedDataCommandOutput,
+} from "./commands/RefreshCachedDataCommand";
 import { getRuntimeConfig as __getRuntimeConfig } from "./runtimeConfig";
 import {
   RuntimeExtension,
@@ -84,14 +92,18 @@ export { __Client }
  */
 export type ServiceInputTypes =
   | GetAppTokenCommandInput
-  | GetInstallationTokenCommandInput;
+  | GetInstallationDataCommandInput
+  | GetInstallationTokenCommandInput
+  | RefreshCachedDataCommandInput;
 
 /**
  * @public
  */
 export type ServiceOutputTypes =
   | GetAppTokenCommandOutput
-  | GetInstallationTokenCommandOutput;
+  | GetInstallationDataCommandOutput
+  | GetInstallationTokenCommandOutput
+  | RefreshCachedDataCommandOutput;
 
 /**
  * @public

@@ -7,10 +7,20 @@ import {
   GetAppTokenServerInput,
 } from "./operations/GetAppToken";
 import {
+  GetInstallationData,
+  GetInstallationDataSerializer,
+  GetInstallationDataServerInput,
+} from "./operations/GetInstallationData";
+import {
   GetInstallationToken,
   GetInstallationTokenSerializer,
   GetInstallationTokenServerInput,
 } from "./operations/GetInstallationToken";
+import {
+  RefreshCachedData,
+  RefreshCachedDataSerializer,
+  RefreshCachedDataServerInput,
+} from "./operations/RefreshCachedData";
 import {
   InternalFailureException as __InternalFailureException,
   Mux as __Mux,
@@ -48,10 +58,12 @@ import {
   toUtf8,
 } from "@smithy/util-utf8";
 
-export type AppFrameworkServiceOperations = "GetAppToken" | "GetInstallationToken";
+export type AppFrameworkServiceOperations = "GetAppToken" | "GetInstallationData" | "GetInstallationToken" | "RefreshCachedData";
 export interface AppFrameworkService<Context> {
   GetAppToken: GetAppToken<Context>
+  GetInstallationData: GetInstallationData<Context>
   GetInstallationToken: GetInstallationToken<Context>
+  RefreshCachedData: RefreshCachedData<Context>
 }
 const serdeContextBase = {
   base64Encoder: toBase64,
@@ -138,8 +150,14 @@ export class AppFrameworkServiceHandler<Context> implements __ServiceHandler<Con
       case "GetAppToken" : {
         return handle(request, context, "GetAppToken", this.serializerFactory("GetAppToken"), this.service.GetAppToken, this.serializeFrameworkException, GetAppTokenServerInput.validate, this.validationCustomizer);
       }
+      case "GetInstallationData" : {
+        return handle(request, context, "GetInstallationData", this.serializerFactory("GetInstallationData"), this.service.GetInstallationData, this.serializeFrameworkException, GetInstallationDataServerInput.validate, this.validationCustomizer);
+      }
       case "GetInstallationToken" : {
         return handle(request, context, "GetInstallationToken", this.serializerFactory("GetInstallationToken"), this.service.GetInstallationToken, this.serializeFrameworkException, GetInstallationTokenServerInput.validate, this.validationCustomizer);
+      }
+      case "RefreshCachedData" : {
+        return handle(request, context, "RefreshCachedData", this.serializerFactory("RefreshCachedData"), this.service.RefreshCachedData, this.serializeFrameworkException, RefreshCachedDataServerInput.validate, this.validationCustomizer);
       }
     }
   }
@@ -156,6 +174,15 @@ export const getAppFrameworkServiceHandler = <Context>(service: AppFrameworkServ
       [
       ],
       { service: "AppFramework", operation: "GetAppToken" }),
+    new httpbinding.UriSpec<"AppFramework", "GetInstallationData">(
+      'POST',
+      [
+        { type: 'path_literal', value: "installations" },
+        { type: 'path_literal', value: "info" },
+      ],
+      [
+      ],
+      { service: "AppFramework", operation: "GetInstallationData" }),
     new httpbinding.UriSpec<"AppFramework", "GetInstallationToken">(
       'POST',
       [
@@ -165,11 +192,22 @@ export const getAppFrameworkServiceHandler = <Context>(service: AppFrameworkServ
       [
       ],
       { service: "AppFramework", operation: "GetInstallationToken" }),
+    new httpbinding.UriSpec<"AppFramework", "RefreshCachedData">(
+      'POST',
+      [
+        { type: 'path_literal', value: "installations" },
+        { type: 'path_literal', value: "refresh" },
+      ],
+      [
+      ],
+      { service: "AppFramework", operation: "RefreshCachedData" }),
   ]);
   const serFn: (op: AppFrameworkServiceOperations) => __OperationSerializer<AppFrameworkService<Context>, AppFrameworkServiceOperations, __ServiceException> = (op) => {
     switch (op) {
       case "GetAppToken": return new GetAppTokenSerializer();
+      case "GetInstallationData": return new GetInstallationDataSerializer();
       case "GetInstallationToken": return new GetInstallationTokenSerializer();
+      case "RefreshCachedData": return new RefreshCachedDataSerializer();
     }
   };
   const customizer: __ValidationCustomizer<AppFrameworkServiceOperations> = (ctx, failures) => {
