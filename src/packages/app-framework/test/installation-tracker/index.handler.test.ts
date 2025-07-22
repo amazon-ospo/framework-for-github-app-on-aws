@@ -37,6 +37,7 @@ beforeEach(() => {
 
 describe('handlerImpl', () => {
   it('Returns unverified and missing installations list in API Gateway Proxy event when there are both missing and unverified installations', async () => {
+    const putInstallationMock = jest.fn().mockResolvedValue(undefined);
     const mockSuccessResponse = [
       {
         id: 3,
@@ -60,6 +61,7 @@ describe('handlerImpl', () => {
           { appId: 3, installationId: 21, nodeId: 'baz' },
         ],
       }),
+      putInstallation: putInstallationMock,
     });
     expect(result).toEqual({
       body: JSON.stringify({
@@ -70,6 +72,15 @@ describe('handlerImpl', () => {
       }),
       statusCode: 200,
     });
+    expect(putInstallationMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        appId: 3,
+        installationId: 3,
+        nodeId: 'baz',
+        tableName: expect.any(String),
+        lastRefreshed: expect.any(String),
+      }),
+    );
   });
   it('Throws an error when running into errors', async () => {
     mockGetInstallations.mockRejectedValue(
