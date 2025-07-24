@@ -1,4 +1,4 @@
-import { DataError } from './error';
+import { DataError, NotFound } from './error';
 import { TableOperations } from './tableOperations';
 
 export type GetAppKeyArnById = ({
@@ -248,5 +248,38 @@ export const getInstallationsImpl: GetInstallations = async ({ tableName }) => {
       installationId,
     });
   });
+  return result;
+};
+
+export type GetInstallationsByNodeId = ({
+  nodeId,
+  tableName,
+}: {
+  nodeId: string;
+  tableName: string;
+}) => Promise<InstallationRecord[]>;
+
+export const getInstallationsDataByNodeId: GetInstallationsByNodeId = async ({
+  nodeId,
+  tableName,
+}) => {
+  const getInstallations = new TableOperations({ TableName: tableName });
+  const result: InstallationRecord[] = [];
+  const itemList = await getInstallations.scan();
+  itemList.map((item) => {
+    const appId: number = item.AppId;
+    const installationId: number = item.InstallationId;
+    const itemNodeId: string = item.NodeId ?? '';
+    if (nodeId === itemNodeId) {
+      result.push({
+        appId,
+        nodeId,
+        installationId,
+      });
+    }
+  });
+  if (result.length === 0) {
+    throw new NotFound(`No installations found for node: ${nodeId}`);
+  }
   return result;
 };

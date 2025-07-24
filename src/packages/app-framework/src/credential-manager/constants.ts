@@ -12,6 +12,7 @@ export const TAG_VALUES = {
   ACTIVE: 'Active',
   APP_TOKEN_ENDPOINT: 'AppTokenEndpoint',
   INSTALLATION_ACCESS_TOKEN_ENDPOINT: 'InstallationAccessTokenEndpoint',
+  INSTALLATION_CACHED_DATA_ENDPOINT: 'InstallationCachedDataEndpoint',
   REFRESH_CACHED_DATA_ENDPOINT: 'RefreshCachedDataEndpoint',
 };
 
