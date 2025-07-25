@@ -64,10 +64,10 @@ export const handlerImpl: Handler = async ({
   checkEnvironment = checkEnvironmentImpl,
   refreshCachedDataOperation = refreshCachedDataOperationImpl,
 }) => {
-  console.log('Event received', event);
+  console.debug('Event received', event);
   const context = checkEnvironment();
   const httpRequest = convertEvent(event);
-  console.log('Smithy event:', httpRequest);
+  console.log('Converted Http Request:', JSON.stringify(httpRequest));
   const refreshCachedDataHandler = getRefreshCachedDataHandler(
     refreshCachedDataOperation,
   );
