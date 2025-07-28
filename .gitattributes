@@ -5,10 +5,10 @@
 /.eslintrc.json linguist-generated
 /.gitattributes linguist-generated
 /.github/pull_request_template.md linguist-generated
+/.github/workflows/build-package-artifact.yml linguist-generated
 /.github/workflows/build.yml linguist-generated
+/.github/workflows/centralized-release.yml linguist-generated
 /.github/workflows/pull-request-lint.yml linguist-generated
-/.github/workflows/release_aws-app-framework-for-github-apps-on-aws-ops-tools.yml linguist-generated
-/.github/workflows/release_aws-app-framework-for-github-apps-on-aws.yml linguist-generated
 /.github/workflows/upgrade.yml linguist-generated
 /.gitignore linguist-generated
 /.npmignore linguist-generated
