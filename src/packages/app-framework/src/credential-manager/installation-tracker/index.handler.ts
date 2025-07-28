@@ -38,12 +38,14 @@ export type Handler = ({
   getMappedInstallationIds,
   getAppToken,
   calculateInstallationDifferences,
+  putInstallation,
 }: {
   checkEnvironment?: CheckEnvironment;
   getAppIds?: GetAppIds;
   getMappedInstallationIds?: GetMappedInstallations;
   getAppToken?: GetAppToken;
   calculateInstallationDifferences?: CalculateInstallationDifferences;
+  putInstallation?: PutInstallation;
 }) => Promise<APIGatewayProxyResultV2>;
 /**
  * Implementation of handler to calculate differences between installation instances.
@@ -59,6 +61,7 @@ export const handlerImpl: Handler = async ({
   getMappedInstallationIds = getMappedInstallationIdsImpl,
   getAppToken = getAppTokenImpl,
   calculateInstallationDifferences = calculateInstallationDifferencesImpl,
+  putInstallation = putInstallationImpl,
 }) => {
   const envVars = checkEnvironment();
   const appTableName: string = envVars.appTableName;
@@ -105,10 +108,20 @@ export const handlerImpl: Handler = async ({
       );
 
       githubConfirmedInstallations[appId] = gitHubInstallations;
+      // Update last refreshed timestamp to all items.
+      await Promise.all(
+        gitHubInstallations.map(async (installation) => {
+          await putInstallation({
+            tableName: installationTableName,
+            ...installation,
+            lastRefreshed: new Date().toISOString(),
+          });
+        }),
+      );
     }),
   );
 
-  // Calculate where GitHub has more installations than we have registed,
+  // Calculate where GitHub has more installations than we have registered,
   // or where Dynamo has installations GitHub doesn't know about.
   const {
     unverifiedInstallations,
@@ -256,11 +269,13 @@ export type GetUnverifiedInstallations = ({
   gitHubInstallationsForAppId,
   checkEnvironment,
   putInstallation,
+  lastRefreshed,
 }: {
   registeredInstallationsForAppId: InstallationRecord[];
   gitHubInstallationsForAppId: InstallationRecord[];
   checkEnvironment?: CheckEnvironment;
   putInstallation?: PutInstallation;
+  lastRefreshed?: string;
 }) => Promise<InstallationRecord[]>;
 export const getUnverifiedInstallationsImpl: GetUnverifiedInstallations =
   async ({
@@ -281,6 +296,7 @@ export const getUnverifiedInstallationsImpl: GetUnverifiedInstallations =
         await putInstallation({
           tableName: installationTableName,
           ...installation,
+          lastRefreshed: new Date().toISOString(),
         });
       }),
     );

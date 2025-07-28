@@ -24,6 +24,8 @@ import {
   METRIC_NAMESPACE,
   NEARING_RATELIMIT_THRESHOLD_ERROR,
 } from './rate-limit-tracker/constants';
+import { InstallationRefresher } from './refresh';
+
 export interface CredentialManagerProps {}
 
 export interface RateLimitDashboardProps {
@@ -40,6 +42,8 @@ export class CredentialManager extends NestedStack {
   readonly installationAccessTokenEndpoint: string;
   readonly installationAccessLambdaArn: string;
   readonly installationTable: Table;
+  readonly refreshCachedDataEndpoint: string;
+  readonly refreshCachedDataLambdaArn: string;
 
   constructor(scope: Construct, id: string, props?: CredentialManagerProps) {
     super(scope, id, props);
@@ -130,6 +134,18 @@ export class CredentialManager extends NestedStack {
       AppTable: this.appTable,
       InstallationTable: this.installationTable,
     });
+    const refreshCache = new InstallationRefresher(
+      this,
+      'InstallationRefresher',
+      {
+        AppTable: this.appTable,
+        InstallationTable: this.installationTable,
+      },
+    );
+    this.appTable.grantReadData(refreshCache.lambdaHandler);
+    this.installationTable.grantReadWriteData(refreshCache.lambdaHandler);
+    this.refreshCachedDataEndpoint = refreshCache.functionUrl.url;
+    this.refreshCachedDataLambdaArn = refreshCache.lambdaHandler.functionArn;
   }
 
   // Grants a caller permission to invoke the app token lambda Function URL.
@@ -154,6 +170,21 @@ export class CredentialManager extends NestedStack {
         actions: ['lambda:InvokeFunctionUrl'],
         effect: Effect.ALLOW,
         resources: [this.installationAccessLambdaArn],
+        conditions: {
+          StringEquals: {
+            'lambda:FunctionUrlAuthType': 'AWS_IAM',
+          },
+        },
+      }),
+    );
+  }
+
+  grantRefreshCachedData(grantee: IGrantable) {
+    grantee.grantPrincipal.addToPrincipalPolicy(
+      new PolicyStatement({
+        actions: ['lambda:InvokeFunctionUrl'],
+        effect: Effect.ALLOW,
+        resources: [this.refreshCachedDataLambdaArn],
         conditions: {
           StringEquals: {
             'lambda:FunctionUrlAuthType': 'AWS_IAM',

@@ -991,10 +991,10 @@
     "@smithy/util-utf8" "^4.0.0"
     tslib "^2.6.2"
 
-"@aws/app-framework-for-github-apps-on-aws-ssdk@^0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@aws/app-framework-for-github-apps-on-aws-ssdk/-/app-framework-for-github-apps-on-aws-ssdk-0.0.1.tgz#4346bf1edcd972433736ec1d4fefac73ee716c92"
-  integrity sha512-tOgNmXBtp7PemkMktOJCacSVqQGb1k3hX2+staVPdXWm0ZuDcKV1Tf1L0/89u5zekpyav37g45xW2xm7X3E5Rg==
+"@aws/app-framework-for-github-apps-on-aws-ssdk@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@aws/app-framework-for-github-apps-on-aws-ssdk/-/app-framework-for-github-apps-on-aws-ssdk-0.0.2.tgz#59c55bab1056af21debad50af3aba1e1bf4ae869"
+  integrity sha512-Lrh/UNB36MzNFuqfkY4+buLQmysPYZck845FXKcGFmXf6xK4be8bx/AjQcFju+pTh4AiAd9rqzSr+VPCKlG9cQ==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"

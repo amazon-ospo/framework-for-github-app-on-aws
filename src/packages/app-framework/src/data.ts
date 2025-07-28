@@ -115,11 +115,13 @@ export type PutInstallation = ({
   appId,
   nodeId,
   installationId,
+  lastRefreshed,
 }: {
   tableName: string;
   appId: number;
   nodeId: string;
   installationId: number;
+  lastRefreshed?: string;
 }) => Promise<void>;
 
 export const putInstallationImpl: PutInstallation = async ({
@@ -127,6 +129,7 @@ export const putInstallationImpl: PutInstallation = async ({
   appId,
   nodeId,
   installationId,
+  lastRefreshed,
 }): Promise<void> => {
   const tableOperations = new TableOperations({
     TableName: tableName,
@@ -136,6 +139,7 @@ export const putInstallationImpl: PutInstallation = async ({
     AppId: { N: appId.toString() },
     NodeId: { S: nodeId },
     InstallationId: { N: installationId.toString() },
+    LastRefreshed: { S: lastRefreshed || '' },
   };
 
   await tableOperations.putItem(item);

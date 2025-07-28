@@ -231,6 +231,7 @@ describe('getInstallationId', () => {
       expect(mockTableOperations.prototype.putItem).toHaveBeenCalledWith({
         AppId: { N: mockAppId.toString() },
         InstallationId: { N: mockInstallationId.toString() },
+        LastRefreshed: { S: '' },
         NodeId: { S: mockNodeId },
       });
     });
@@ -243,6 +244,7 @@ describe('getInstallationId', () => {
         putInstallationImpl({
           tableName: mockTableName,
           appId: mockAppId,
+          lastRefreshed: '',
           installationId: mockInstallationId,
           nodeId: mockNodeId,
         }),
