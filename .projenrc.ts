@@ -89,14 +89,6 @@ export const addTestTargets = (subProject: Project) => {
   });
 };
 
-const theAppFrameworkScripts = (
-  subProject: awscdk.AwsCdkConstructLibrary | typescript.TypeScriptProject,
-) => {
-  subProject.addScripts({
-    cli: "ts-node ./src/app-framework-cli.ts",
-  });
-};
-
 // Main Project Configuration
 export const project = new awscdk.AwsCdkConstructLibrary({
   ...projectMetadata,
@@ -145,13 +137,16 @@ if (project.github) {
 // Add Lerna configuration file (lerna.json)
 new JsonFile(project, "lerna.json", {
   obj: {
-    packages: ["src/packages/*"],
+    packages: ["src/packages/*", "src/packages/smithy/build/smithy/source/*"],
     version: "0.0.0",
     npmClient: "yarn",
   },
 });
 project.package.file.addOverride("private", true);
-project.package.file.addOverride("workspaces", ["src/packages/*"]);
+project.package.file.addOverride("workspaces", [
+  "src/packages/*",
+  "src/packages/smithy/build/smithy/source/*",
+]);
 // Run Lerna build one package at a time and,
 // waits for each package to complete before showing its logs.
 project.preCompileTask.exec("npx lerna run build --concurrency=1 --no-stream");
@@ -195,7 +190,6 @@ export const createPackage = (config: PackageConfig) => {
     release: false,
     releaseToNpm: false,
   });
-  theAppFrameworkScripts(tsProject);
   addTestTargets(tsProject);
   addPrettierConfig(tsProject);
   configureMarkDownLinting(tsProject);
@@ -283,7 +277,9 @@ theAppFrameworkOpsTools.addFields({
 theAppFrameworkOpsTools.package.addField("publishConfig", {
   access: "public",
 });
-theAppFrameworkScripts(theAppFrameworkOpsTools);
+theAppFrameworkOpsTools.addScripts({
+  cli: "ts-node ./src/app-framework-cli.ts",
+});
 addTestTargets(theAppFrameworkOpsTools);
 addPrettierConfig(theAppFrameworkOpsTools);
 configureMarkDownLinting(theAppFrameworkOpsTools);
