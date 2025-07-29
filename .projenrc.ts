@@ -89,14 +89,6 @@ export const addTestTargets = (subProject: Project) => {
   });
 };
 
-const theAppFrameworkScripts = (
-  subProject: awscdk.AwsCdkConstructLibrary | typescript.TypeScriptProject,
-) => {
-  subProject.addScripts({
-    cli: "ts-node ./src/app-framework-cli.ts",
-  });
-};
-
 // Main Project Configuration
 export const project = new awscdk.AwsCdkConstructLibrary({
   ...projectMetadata,
@@ -195,7 +187,6 @@ export const createPackage = (config: PackageConfig) => {
     release: false,
     releaseToNpm: false,
   });
-  theAppFrameworkScripts(tsProject);
   addTestTargets(tsProject);
   addPrettierConfig(tsProject);
   configureMarkDownLinting(tsProject);
@@ -283,7 +274,9 @@ theAppFrameworkOpsTools.addFields({
 theAppFrameworkOpsTools.package.addField("publishConfig", {
   access: "public",
 });
-theAppFrameworkScripts(theAppFrameworkOpsTools);
+theAppFrameworkOpsTools.addScripts({
+  cli: "ts-node ./src/app-framework-cli.ts",
+});
 addTestTargets(theAppFrameworkOpsTools);
 addPrettierConfig(theAppFrameworkOpsTools);
 configureMarkDownLinting(theAppFrameworkOpsTools);
