@@ -21,8 +21,7 @@
     "test:watch": "npx projen test:watch",
     "upgrade": "npx projen upgrade",
     "watch": "npx projen watch",
-    "projen": "npx projen",
-    "cli": "ts-node ./src/app-framework-cli.ts"
+    "projen": "npx projen"
   },
   "author": {
     "name": "Amazon OSPO",
