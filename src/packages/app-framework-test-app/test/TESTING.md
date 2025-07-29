@@ -102,7 +102,6 @@ Execute acceptance tests:
   security.
 
 - To clean up test resources and avoid ongoing costs:
-
   1. Go to your GitHub App settings and delete the generated private keys
 
   1. Go to AWS KMS console and schedule the KMS keys for deletion with
@@ -110,7 +109,6 @@ Execute acceptance tests:
 
   1. Go to AWS console to delete test and nested stack,
      clean the resources created during the acceptance tests, which include:
-
      - Two DynamoDb tables
      - Three lambda Functions with two lambda Function URLs
      - One EventBridge scheduler
