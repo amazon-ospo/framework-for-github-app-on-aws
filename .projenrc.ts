@@ -1,4 +1,5 @@
 import { awscdk, JsonFile, Project, typescript } from "projen";
+import { JobPermission } from "projen/lib/github/workflows-model";
 import { TypeScriptAppProject } from "projen/lib/typescript";
 
 const projectMetadata = {
@@ -12,6 +13,13 @@ const projectMetadata = {
   name: "@aws/app-framework-for-github-apps-on-aws",
 };
 const NODE_VERSION = ">18.0.0";
+
+const RELEASE_PACKAGES = [
+  "@aws/app-framework-for-github-apps-on-aws-ops-tools",
+  "@aws/app-framework-for-github-apps-on-aws-client",
+  "@aws/app-framework-for-github-apps-on-aws-ssdk",
+  "@aws/app-framework-for-github-apps-on-aws",
+];
 
 export const configureMarkDownLinting = (tsProject: TypeScriptAppProject) => {
   tsProject.addDevDeps(
@@ -184,8 +192,8 @@ export const createPackage = (config: PackageConfig) => {
     devDeps: config.devDeps,
     bundledDeps: config.bundledDeps,
     docgen: false,
-    release: true,
-    releaseToNpm: true,
+    release: false,
+    releaseToNpm: false,
   });
   theAppFrameworkScripts(tsProject);
   addTestTargets(tsProject);
@@ -242,8 +250,8 @@ const theAppFrameworkOpsTools = new typescript.TypeScriptProject({
   outdir: "src/packages/app-framework-ops-tools",
   parent: project,
   projenrcTs: false,
-  release: true,
-  releaseToNpm: true,
+  release: false,
+  releaseToNpm: false,
   repository: projectMetadata.repositoryUrl,
   deps: [
     "@aws-sdk/client-resource-groups-tagging-api",
@@ -311,4 +319,410 @@ theAppFrameworkTestApp.addFields({
 addTestTargets(theAppFrameworkTestApp);
 addPrettierConfig(theAppFrameworkTestApp);
 configureMarkDownLinting(theAppFrameworkTestApp);
+
+// Centralized Release Workflow - Coordinates automatic release of all packages
+const centralizedRelease = project.github?.addWorkflow("centralized-release");
+if (centralizedRelease) {
+  centralizedRelease.on({
+    push: { branches: ["main"] },
+  });
+
+  centralizedRelease.addJobs({
+    // Step 1: Calculate next version and validate release conditions
+    setup_release: {
+      runsOn: ["ubuntu-latest"],
+      permissions: {
+        contents: JobPermission.READ,
+      },
+      outputs: {
+        version: {
+          stepId: "next_version",
+          outputName: "version",
+        },
+        tag_exists: {
+          stepId: "next_version",
+          outputName: "tag_exists",
+        },
+        latest_commit: {
+          stepId: "git_remote",
+          outputName: "latest_commit",
+        },
+      },
+      steps: [
+        {
+          name: "Checkout",
+          uses: "actions/checkout@v4",
+          with: { "fetch-depth": 0 },
+        },
+        {
+          name: "Set Git Identity",
+          run: [
+            'git config --global user.email "github-actions@github.com"',
+            'git config --global user.name "GitHub Actions"',
+          ].join("\n"),
+        },
+        {
+          // Query NPM registry for current versions of all packages
+          name: "Fetch current NPM package versions",
+          id: "npm_versions",
+          run: [
+            'get_version() { npm view "$1" version 2>/dev/null || echo "0.0.0"; }',
+            `PACKAGES="${RELEASE_PACKAGES.join(" ")}"`,
+            "VERSIONS=()",
+            'echo "Found NPM versions:"',
+            "for pkg in $PACKAGES; do",
+            '  version=$(get_version "$pkg")',
+            '  echo "$pkg: $version"',
+            '  VERSIONS+=("$version")',
+            "done",
+            'LATEST_NPM=$(printf "%s\\n" "${VERSIONS[@]}" | sort -V | tail -n1)',
+            'echo "Latest NPM version: $LATEST_NPM"',
+            'echo "latest_npm=$LATEST_NPM" >> $GITHUB_OUTPUT',
+          ].join("\n"),
+        },
+        {
+          // Find next version that doesn't conflict with existing Git tags
+          // Handles failed release recovery by skipping existing tags
+          name: "Find Next Available Version",
+          id: "next_version",
+          run: [
+            'LATEST_NPM="${{ steps.npm_versions.outputs.latest_npm }}"',
+            'IFS="." read -r major minor patch <<< "$LATEST_NPM"',
+            'CANDIDATE_VERSION="$major.$minor.$((patch + 1))"',
+            'echo "Starting with candidate version: $CANDIDATE_VERSION"',
+            'while git ls-remote --tags origin "refs/tags/v$CANDIDATE_VERSION" | grep -q "v$CANDIDATE_VERSION"; do',
+            '  echo "Tag v$CANDIDATE_VERSION already exists, trying next version"',
+            "  patch=$((patch + 1))",
+            '  CANDIDATE_VERSION="$major.$minor.$patch"',
+            "done",
+            'echo "Next available version: $CANDIDATE_VERSION"',
+            'echo "version=$CANDIDATE_VERSION" >> $GITHUB_OUTPUT',
+            'echo "tag_exists=false" >> $GITHUB_OUTPUT',
+          ].join("\n"),
+        },
+        {
+          name: "Check for new commits",
+          id: "git_remote",
+          run: [
+            'echo "latest_commit=$(git ls-remote origin -h ${{ github.ref }} | cut -f1)" >> $GITHUB_OUTPUT',
+          ].join("\n"),
+        },
+      ],
+    },
+
+    // Step 2: Build all packages in parallel with determined version
+    // Each job creates a build artifact for later publishing
+    app_framework_for_github_apps_on_aws_ops_tools: {
+      if: "needs.setup_release.outputs.tag_exists != 'true' && needs.setup_release.outputs.latest_commit == github.sha",
+      needs: ["setup_release"],
+      permissions: {
+        contents: JobPermission.READ,
+        idToken: JobPermission.WRITE,
+      },
+      uses: "./.github/workflows/build-package-artifact.yml",
+      with: {
+        version: "${{ needs.setup_release.outputs.version }}",
+        package_name: "app-framework-for-github-apps-on-aws-ops-tools",
+        package_path: "src/packages/app-framework-ops-tools",
+      },
+      secrets: "inherit",
+    },
+
+    app_framework_for_github_apps_on_aws_client: {
+      if: "needs.setup_release.outputs.tag_exists != 'true' && needs.setup_release.outputs.latest_commit == github.sha",
+      needs: ["setup_release"],
+      permissions: {
+        contents: JobPermission.READ,
+        idToken: JobPermission.WRITE,
+      },
+      uses: "./.github/workflows/build-package-artifact.yml",
+      with: {
+        version: "${{ needs.setup_release.outputs.version }}",
+        package_name: "app-framework-for-github-apps-on-aws-client",
+        package_path:
+          "src/packages/smithy/build/smithy/source/typescript-client-codegen",
+      },
+      secrets: "inherit",
+    },
+
+    app_framework_for_github_apps_on_aws_ssdk: {
+      if: "needs.setup_release.outputs.tag_exists != 'true' && needs.setup_release.outputs.latest_commit == github.sha",
+      needs: ["setup_release"],
+      permissions: {
+        contents: JobPermission.READ,
+        idToken: JobPermission.WRITE,
+      },
+      uses: "./.github/workflows/build-package-artifact.yml",
+      with: {
+        version: "${{ needs.setup_release.outputs.version }}",
+        package_name: "app-framework-for-github-apps-on-aws-ssdk",
+        package_path:
+          "src/packages/smithy/build/smithy/source/typescript-ssdk-codegen",
+      },
+      secrets: "inherit",
+    },
+
+    app_framework_for_github_apps_on_aws: {
+      if: "needs.setup_release.outputs.tag_exists != 'true' && needs.setup_release.outputs.latest_commit == github.sha",
+      needs: ["setup_release"],
+      permissions: {
+        contents: JobPermission.READ,
+        idToken: JobPermission.WRITE,
+      },
+      uses: "./.github/workflows/build-package-artifact.yml",
+      with: {
+        version: "${{ needs.setup_release.outputs.version }}",
+        package_name: "app-framework-for-github-apps-on-aws",
+        package_path: "src/packages/app-framework",
+      },
+      secrets: "inherit",
+    },
+
+    // Step 3: Publish all packages atomically after successful builds
+    npm_publish: {
+      needs: [
+        "setup_release",
+        "app_framework_for_github_apps_on_aws_ops_tools",
+        "app_framework_for_github_apps_on_aws_client",
+        "app_framework_for_github_apps_on_aws_ssdk",
+        "app_framework_for_github_apps_on_aws",
+      ],
+      runsOn: ["ubuntu-latest"],
+      permissions: {
+        contents: JobPermission.WRITE,
+        idToken: JobPermission.WRITE,
+      },
+      env: {
+        CI: "true",
+      },
+      if: "needs.setup_release.outputs.tag_exists != 'true' && needs.setup_release.outputs.latest_commit == github.sha",
+      steps: [
+        {
+          name: "Checkout",
+          uses: "actions/checkout@v4",
+          with: { "fetch-depth": 0 },
+        },
+        {
+          name: "Set Git Identity",
+          run: [
+            'git config --global user.email "github-actions@github.com"',
+            'git config --global user.name "GitHub Actions"',
+          ].join("\n"),
+        },
+        {
+          name: "Set package list",
+          run: `echo "PACKAGES=${RELEASE_PACKAGES.join(" ")}" >> $GITHUB_ENV`,
+        },
+        {
+          name: "Setup Node.js",
+          uses: "actions/setup-node@v4",
+          with: {
+            "node-version": "lts/*",
+            "registry-url": "https://registry.npmjs.org",
+          },
+        },
+        {
+          name: "Download artifacts",
+          uses: "actions/download-artifact@v4",
+          with: {
+            "merge-multiple": true,
+          },
+        },
+        {
+          name: "Extract package artifacts for publishing",
+          run: [
+            "for pkg in $PACKAGES; do",
+            '  echo "Extracting $pkg..."',
+            "  # Extract just the package name (remove scope)",
+            '  dir_name=$(echo "$pkg" | sed "s|.*/||")',
+            "  # Use the same package name that was passed to build workflow",
+            '  safe_name="$dir_name"',
+            '  mkdir -p "$dir_name"',
+            '  tar -xzf "${safe_name}.tgz" -C "$dir_name" --strip-components=1',
+            "done",
+          ].join("\n"),
+        },
+        {
+          name: "Patch version and Remove prepack in each package",
+          run: [
+            'version="${{ needs.setup_release.outputs.version }}"',
+            "for pkg in $PACKAGES; do",
+            '  dir_name=$(echo "$pkg" | sed "s|.*/||")',
+            '  echo "Patching version in $dir_name/package.json"',
+            '  cd "$dir_name"',
+            "  jq --arg ver \"$version\" '.version = $ver' package.json > tmp.json && mv tmp.json package.json",
+            "  jq 'del(.scripts.prepack)' package.json > tmp.json && mv tmp.json package.json",
+            "  cd ..",
+            "done",
+          ].join("\n"),
+        },
+        {
+          name: "Publish all packages to NPM registry",
+          id: "publish",
+          env: {
+            NODE_AUTH_TOKEN: "${{ secrets.TOKEN }}",
+          },
+          run: [
+            "version='${{ needs.setup_release.outputs.version }}'",
+            "for pkg in $PACKAGES; do",
+            '  dir_name=$(echo "$pkg" | sed "s|.*/||")',
+            '  echo "Publishing $pkg@$version"',
+            '  cd "$dir_name"',
+            "  npm publish --access public",
+            '  echo "Successfully published $pkg@$version"',
+            "  cd ..",
+            "done",
+            'echo "All packages published successfully"',
+            'echo "publishing_failed=false" >> $GITHUB_OUTPUT',
+          ].join("\n"),
+        },
+        {
+          // Create Git tag only after successful NPM publishing
+          // This ensures tags only exist for successfully released versions
+          name: "Create Git Tag",
+          workingDirectory: "${{ github.workspace }}",
+          run: [
+            'TAG="v${{ needs.setup_release.outputs.version }}"',
+            'git tag "$TAG"',
+            'git push origin "$TAG"',
+            'echo "Created and pushed tag: $TAG"',
+          ].join("\n"),
+        },
+      ],
+    },
+    // Step 4: Create GitHub release with all package artifacts
+    github_release: {
+      if: "needs.setup_release.outputs.tag_exists != 'true' && needs.setup_release.outputs.latest_commit == github.sha",
+      needs: ["npm_publish", "setup_release"],
+      runsOn: ["ubuntu-latest"],
+      permissions: {
+        contents: JobPermission.WRITE,
+      },
+      env: {
+        CI: "true",
+      },
+      steps: [
+        {
+          name: "Checkout",
+          uses: "actions/checkout@v4",
+        },
+        {
+          name: "Download all artifacts",
+          uses: "actions/download-artifact@v4",
+          with: {
+            "merge-multiple": true,
+          },
+        },
+        {
+          name: "Create GitHub Release",
+          env: {
+            GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}",
+          },
+          run: [
+            'gh release create "v${{ needs.setup_release.outputs.version }}"',
+            '--title "v${{ needs.setup_release.outputs.version }}"',
+            '--notes "Automated release for all packages"',
+            "--target $(git rev-parse HEAD)",
+            "*.tgz",
+          ].join(" "),
+        },
+      ],
+    },
+  });
+}
+
+// Prevent concurrent releases to avoid version conflicts
+// cancel-in-progress: false ensures running releases complete
+if (centralizedRelease) {
+  centralizedRelease.file?.addOverride("concurrency", {
+    group: "release",
+    "cancel-in-progress": false,
+  });
+}
+
+// Reusable workflow for building individual package artifacts
+// Called by each package job in the centralized release
+const buildArtifactWorkflow = project.github?.addWorkflow(
+  "build-package-artifact",
+);
+
+if (buildArtifactWorkflow) {
+  buildArtifactWorkflow.on({
+    workflowCall: {
+      inputs: {
+        version: { required: true, type: "string" },
+        package_name: { required: true, type: "string" },
+        package_path: { required: true, type: "string" },
+      },
+    },
+  });
+
+  buildArtifactWorkflow.addJobs({
+    build_artifacts: {
+      runsOn: ["ubuntu-latest"],
+      permissions: {
+        contents: JobPermission.READ,
+        idToken: JobPermission.WRITE,
+      },
+      env: {
+        CI: "true",
+      },
+      steps: [
+        {
+          name: "Checkout",
+          uses: "actions/checkout@v4",
+          with: { "fetch-depth": 0 },
+        },
+        {
+          name: "Setup Node.js",
+          uses: "actions/setup-node@v4",
+          with: {
+            "node-version": "lts/*",
+            "registry-url": "https://registry.npmjs.org",
+          },
+        },
+        {
+          name: "Install dependencies",
+          run: "yarn install --check-files --frozen-lockfile",
+        },
+        {
+          name: "Build package",
+          run: "yarn build",
+          workingDirectory: "${{ inputs.package_path }}",
+        },
+        {
+          name: "Pack artifact",
+          run: 'yarn pack --filename "${{ inputs.package_name }}.tgz"',
+          workingDirectory: "${{ inputs.package_path }}",
+        },
+        {
+          name: "Backup artifact permissions",
+          workingDirectory: "${{ inputs.package_path }}",
+          run: [
+            "mkdir -p dist",
+            'cp "${{ inputs.package_name }}.tgz" dist/',
+            "cd dist && getfacl -R . > permissions-backup.acl",
+          ].join(" && "),
+        },
+        {
+          name: "Prepare for publishing",
+          run: [
+            "cd dist",
+            'tar -xzf "${{ inputs.package_name }}.tgz" --strip-components=1',
+          ].join(" && "),
+          workingDirectory: "${{ inputs.package_path }}",
+        },
+        {
+          name: "Upload artifact",
+          uses: "actions/upload-artifact@v4.4.0",
+          with: {
+            name: "${{ inputs.package_name }}",
+            path: "${{ inputs.package_path }}/dist",
+            overwrite: true,
+          },
+        },
+      ],
+    },
+  });
+}
 project.synth();
