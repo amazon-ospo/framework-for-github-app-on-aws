@@ -2043,6 +2043,9 @@
                         },
                         "smithy.api#required": {}
                     }
+                },
+                "scopeDown": {
+                    "target": "framework.api#ScopeDown"
                 }
             }
         },
@@ -2086,6 +2089,15 @@
                 "target": "framework.api#InstallationData"
             }
         },
+        "framework.api#Permissions": {
+            "type": "map",
+            "key": {
+                "target": "smithy.api#String"
+            },
+            "value": {
+                "target": "smithy.api#String"
+            }
+        },
         "framework.api#RefreshCachedData": {
             "type": "operation",
             "input": {
@@ -2124,6 +2136,32 @@
                     "traits": {
                         "smithy.api#timestampFormat": "date-time"
                     }
+                }
+            }
+        },
+        "framework.api#RepositoryIds": {
+            "type": "list",
+            "member": {
+                "target": "smithy.api#Integer"
+            }
+        },
+        "framework.api#RepositoryNames": {
+            "type": "list",
+            "member": {
+                "target": "smithy.api#String"
+            }
+        },
+        "framework.api#ScopeDown": {
+            "type": "structure",
+            "members": {
+                "repositoryIds": {
+                    "target": "framework.api#RepositoryIds"
+                },
+                "repositoryNames": {
+                    "target": "framework.api#RepositoryNames"
+                },
+                "permissions": {
+                    "target": "framework.api#Permissions"
                 }
             }
         },

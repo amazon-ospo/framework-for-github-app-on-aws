@@ -3,6 +3,7 @@
 import {
   ServiceException as __BaseException,
   CompositeCollectionValidator as __CompositeCollectionValidator,
+  CompositeMapValidator as __CompositeMapValidator,
   CompositeStructureValidator as __CompositeStructureValidator,
   CompositeValidator as __CompositeValidator,
   LengthValidator as __LengthValidator,
@@ -329,15 +330,73 @@ export namespace GetInstallationDataOutput {
 /**
  * @public
  */
+export interface ScopeDown {
+  repositoryIds?: (number)[] | undefined;
+  repositoryNames?: (string)[] | undefined;
+  permissions?: Record<string, string> | undefined;
+}
+
+export namespace ScopeDown {
+  const memberValidators : {
+    repositoryIds?: __MultiConstraintValidator<Iterable<number>>,
+    repositoryNames?: __MultiConstraintValidator<Iterable<string>>,
+    permissions?: __MultiConstraintValidator<Record<string, string>>,
+  } = {};
+  /**
+   * @internal
+   */
+  export const validate = (obj: ScopeDown, path: string = ""): __ValidationFailure[] => {
+    function getMemberValidator<T extends keyof typeof memberValidators>(member: T): NonNullable<typeof memberValidators[T]> {
+      if (memberValidators[member] === undefined) {
+        switch (member) {
+          case "repositoryIds": {
+            memberValidators["repositoryIds"] = new __CompositeCollectionValidator<number>(
+              new __NoOpValidator(),
+              new __NoOpValidator()
+            );
+            break;
+          }
+          case "repositoryNames": {
+            memberValidators["repositoryNames"] = new __CompositeCollectionValidator<string>(
+              new __NoOpValidator(),
+              new __NoOpValidator()
+            );
+            break;
+          }
+          case "permissions": {
+            memberValidators["permissions"] = new __CompositeMapValidator<string>(
+              new __NoOpValidator(),
+              new __NoOpValidator(),
+              new __NoOpValidator()
+            );
+            break;
+          }
+        }
+      }
+      return memberValidators[member]!!;
+    }
+    return [
+      ...getMemberValidator("repositoryIds").validate(obj.repositoryIds, `${path}/repositoryIds`),
+      ...getMemberValidator("repositoryNames").validate(obj.repositoryNames, `${path}/repositoryNames`),
+      ...getMemberValidator("permissions").validate(obj.permissions, `${path}/permissions`),
+    ];
+  }
+}
+
+/**
+ * @public
+ */
 export interface GetInstallationTokenInput {
   appId: number | undefined;
   nodeId: string | undefined;
+  scopeDown?: ScopeDown | undefined;
 }
 
 export namespace GetInstallationTokenInput {
   const memberValidators : {
     appId?: __MultiConstraintValidator<number>,
     nodeId?: __MultiConstraintValidator<string>,
+    scopeDown?: __MultiConstraintValidator<ScopeDown>,
   } = {};
   /**
    * @internal
@@ -360,6 +419,13 @@ export namespace GetInstallationTokenInput {
             ]);
             break;
           }
+          case "scopeDown": {
+            memberValidators["scopeDown"] = new __CompositeStructureValidator<ScopeDown>(
+              new __NoOpValidator(),
+              ScopeDown.validate
+            );
+            break;
+          }
         }
       }
       return memberValidators[member]!!;
@@ -367,6 +433,7 @@ export namespace GetInstallationTokenInput {
     return [
       ...getMemberValidator("appId").validate(obj.appId, `${path}/appId`),
       ...getMemberValidator("nodeId").validate(obj.nodeId, `${path}/nodeId`),
+      ...getMemberValidator("scopeDown").validate(obj.scopeDown, `${path}/scopeDown`),
     ];
   }
 }

@@ -35,6 +35,25 @@ operation GetInstallationData {
     errors: [ServerSideError, ClientSideError]
 }
 
+list RepositoryIds {
+    member: Integer
+}
+
+list RepositoryNames {
+    member: String
+}
+
+map Permissions {
+    key: String
+    value: String
+}
+
+structure ScopeDown {
+    repositoryIds: RepositoryIds,
+    repositoryNames: RepositoryNames,
+    permissions: Permissions,
+}
+
 structure GetInstallationTokenInput {
     @range(min: 1)
     @required
@@ -43,6 +62,7 @@ structure GetInstallationTokenInput {
     @length(min: 1, max:256)
     @required
     nodeId: String
+    scopeDown: ScopeDown
 }
 
 structure GetInstallationTokenOutput {
