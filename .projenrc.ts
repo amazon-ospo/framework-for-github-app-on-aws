@@ -556,7 +556,7 @@ if (centralizedRelease) {
           name: "Publish all packages to NPM registry",
           id: "publish",
           env: {
-            NODE_AUTH_TOKEN: "${{ secrets.TOKEN }}",
+            NODE_AUTH_TOKEN: "${{ secrets.NPM_TOKEN }}",
           },
           run: [
             "version='${{ needs.setup_release.outputs.version }}'",
@@ -687,8 +687,16 @@ if (buildArtifactWorkflow) {
           workingDirectory: "${{ inputs.package_path }}",
         },
         {
+          name: "Ensure bundled dependencies are installed",
+          run: [
+            "rm -rf node_modules package-lock.json",
+            "npm install --legacy-peer-deps --no-workspaces",
+          ].join(" && "),
+          workingDirectory: "${{ inputs.package_path }}",
+        },
+        {
           name: "Pack artifact",
-          run: 'yarn pack --filename "${{ inputs.package_name }}.tgz"',
+          run: 'npm pack --pack-destination . && mv *.tgz "${{ inputs.package_name }}.tgz"',
           workingDirectory: "${{ inputs.package_path }}",
         },
         {
