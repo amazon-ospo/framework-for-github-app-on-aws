@@ -153,7 +153,7 @@ The app-framework CLI tool is built using Node.js and TypeScript. To use it:
 1. Install the package:
 
 ```sh
-npm install @aws/app-framework-for-github-apps-on-aws-ops-tools
+npm install -g @aws/app-framework-for-github-apps-on-aws-ops-tools
 ```
 
 1. The CLI tool will be available through:
