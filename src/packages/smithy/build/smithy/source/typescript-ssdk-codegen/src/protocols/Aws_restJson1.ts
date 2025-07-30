@@ -3,6 +3,7 @@
 import {
   ClientSideError,
   InstallationData,
+  ScopeDown,
   ServerSideError,
   ValidationException,
   ValidationExceptionField,
@@ -139,6 +140,7 @@ export const deserializeGetInstallationTokenRequest = async(
   const doc = take(data, {
     'appId': __expectInt32,
     'nodeId': __expectString,
+    'scopeDown': _ => de_ScopeDown(_, context),
   });
   Object.assign(contents, doc);
   return contents;
@@ -526,6 +528,68 @@ const se_ValidationExceptionFieldList = (
   return input.filter((e: any) => e != null).map(entry => {
     return se_ValidationExceptionField(entry, context);
   });
+}
+
+/**
+ * deserializeAws_restJson1Permissions
+ */
+const de_Permissions = (
+  output: any,
+  context: __SerdeContext
+): Record<string, string> => {
+  return Object.entries(output).reduce((acc: Record<string, string>, [key, value]: [string, any]) => {
+    if (value === null) {
+      return acc;
+    }
+    acc[key as string] = __expectString(value) as any;
+    return acc;
+
+  }, {} as Record<string, string>);}
+
+/**
+ * deserializeAws_restJson1RepositoryIds
+ */
+const de_RepositoryIds = (
+  output: any,
+  context: __SerdeContext
+): (number)[] => {
+  const retVal = (output || []).map((entry: any) => {
+    if (entry === null) {
+      throw new TypeError('All elements of the non-sparse list "framework.api#RepositoryIds" must be non-null.');
+    }
+    return __expectInt32(entry) as any;
+  });
+  return retVal;
+}
+
+/**
+ * deserializeAws_restJson1RepositoryNames
+ */
+const de_RepositoryNames = (
+  output: any,
+  context: __SerdeContext
+): (string)[] => {
+  const retVal = (output || []).map((entry: any) => {
+    if (entry === null) {
+      throw new TypeError('All elements of the non-sparse list "framework.api#RepositoryNames" must be non-null.');
+    }
+    return __expectString(entry) as any;
+  });
+  return retVal;
+}
+
+/**
+ * deserializeAws_restJson1ScopeDown
+ */
+const de_ScopeDown = (
+  output: any,
+  context: __SerdeContext
+): ScopeDown => {
+  return take(output, {
+    'permissions': (_: any) => de_Permissions(_, context),
+    'repositoryIds': (_: any) => de_RepositoryIds(_, context),
+    'repositoryNames': (_: any) => de_RepositoryNames(_, context),
+  }) as any;
 }
 
 const deserializeMetadata = (output: __HttpResponse): __ResponseMetadata => ({

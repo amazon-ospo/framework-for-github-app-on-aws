@@ -131,9 +131,19 @@ export interface GetInstallationDataOutput {
 /**
  * @public
  */
+export interface ScopeDown {
+  repositoryIds?: (number)[] | undefined;
+  repositoryNames?: (string)[] | undefined;
+  permissions?: Record<string, string> | undefined;
+}
+
+/**
+ * @public
+ */
 export interface GetInstallationTokenInput {
   appId: number | undefined;
   nodeId: string | undefined;
+  scopeDown?: ScopeDown | undefined;
 }
 
 /**

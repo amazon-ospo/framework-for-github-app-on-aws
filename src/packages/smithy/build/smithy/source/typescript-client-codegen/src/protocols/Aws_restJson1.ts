@@ -19,6 +19,7 @@ import {
 import { AppFrameworkServiceException as __BaseException } from "../models/AppFrameworkServiceException";
 import {
   ClientSideError,
+  ScopeDown,
   ServerSideError,
   ValidationException,
 } from "../models/models_0";
@@ -111,6 +112,7 @@ export const se_GetInstallationTokenCommand = async(
   body = JSON.stringify(take(input, {
     'appId': [],
     'nodeId': [],
+    'scopeDown': _ => _json(_),
   }));
   b.m("POST")
   .h(headers)
@@ -322,6 +324,14 @@ const de_CommandError = async(
     });
     return __decorateServiceException(exception, parsedOutput.body);
   };
+
+  // se_Permissions omitted.
+
+  // se_RepositoryIds omitted.
+
+  // se_RepositoryNames omitted.
+
+  // se_ScopeDown omitted.
 
   // de_InstallationData omitted.
 

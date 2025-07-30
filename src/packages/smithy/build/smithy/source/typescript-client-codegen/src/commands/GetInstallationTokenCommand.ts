@@ -47,6 +47,17 @@ export interface GetInstallationTokenCommandOutput extends GetInstallationTokenO
  * const input = { // GetInstallationTokenInput
  *   appId: Number("int"), // required
  *   nodeId: "STRING_VALUE", // required
+ *   scopeDown: { // ScopeDown
+ *     repositoryIds: [ // RepositoryIds
+ *       Number("int"),
+ *     ],
+ *     repositoryNames: [ // RepositoryNames
+ *       "STRING_VALUE",
+ *     ],
+ *     permissions: { // Permissions
+ *       "<keys>": "STRING_VALUE",
+ *     },
+ *   },
  * };
  * const command = new GetInstallationTokenCommand(input);
  * const response = await client.send(command);
