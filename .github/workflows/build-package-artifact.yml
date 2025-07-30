@@ -36,8 +36,11 @@ jobs:
       - name: Build package
         run: yarn build
         working-directory: ${{ inputs.package_path }}
+      - name: Ensure bundled dependencies are installed
+        run: rm -rf node_modules package-lock.json && npm install --legacy-peer-deps --no-workspaces
+        working-directory: ${{ inputs.package_path }}
       - name: Pack artifact
-        run: yarn pack --filename "${{ inputs.package_name }}.tgz"
+        run: npm pack --pack-destination . && mv *.tgz "${{ inputs.package_name }}.tgz"
         working-directory: ${{ inputs.package_path }}
       - name: Backup artifact permissions
         run: mkdir -p dist && cp "${{ inputs.package_name }}.tgz" dist/ && cd dist && getfacl -R . > permissions-backup.acl

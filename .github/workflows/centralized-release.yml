@@ -163,7 +163,7 @@ jobs:
       - name: Publish all packages to NPM registry
         id: publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |-
           version='${{ needs.setup_release.outputs.version }}'
           for pkg in $PACKAGES; do
