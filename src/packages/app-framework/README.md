@@ -221,11 +221,9 @@ const installations = response.installations;
 Stores GitHub App IDs and their corresponding private key ARNs
 
 - Schema:
-
   - Partition Key: `AppId` (NUMBER)
 
 - Configuration:
-
   - Billing Mode: PAY_PER_REQUEST
   - Point-in-Time Recovery: Enabled
   - Removal Policy: RETAIN
@@ -235,14 +233,11 @@ Stores GitHub App IDs and their corresponding private key ARNs
 Tracks GitHub App installations with node_id, installation_id, and app_id
 
 - Schema:
-
   - Partition Key: `AppId` (NUMBER)
   - Sort Key: `NodeId` (STRING)
 
 - Global Secondary Indexes:
-
   - `NodeID`:
-
     - Partition Key: `NodeId` (STRING)
     - Sort Key: `AppId` (NUMBER)
 
@@ -251,7 +246,6 @@ Tracks GitHub App installations with node_id, installation_id, and app_id
     - Sort Key: `AppId` (NUMBER)
 
 - Configuration:
-
   - Billing Mode: PAY_PER_REQUEST
   - Point-in-Time Recovery: Enabled
 
@@ -266,7 +260,6 @@ and performs RSA signing operations through KMS.
 Access is restricted to IAM principals explicitly granted through `grantGetAppToken`.
 
 - Permissions:
-
   - KMS:Sign for GitHub App private keys
   - DynamoDB Read access to App table
 
@@ -279,7 +272,6 @@ It is exposed through a Function URL with IAM authentication,
 and access is controlled via `grantGetInstallationAccessToken`.
 
 - Permissions:
-
   - KMS:Sign for GitHub App private keys
   - DynamoDB Read access to both tables
 
@@ -287,15 +279,16 @@ and access is controlled via `grantGetInstallationAccessToken`.
 
 The Refresh Cached Data Lambda function
 synchronizes installation data between GitHub and DynamoDB.
-While the AppInstallation Table is automatically updated by the installation tracker every 30 minutes,
+While the AppInstallation Table is automatically updated
+by the installation tracker every 30 minutes,
 this API gives you the ability to refresh cached data at any time on-demand.
-It retrieves all App IDs from the App Table, fetches current installations from GitHub,
+It retrieves all App IDs from the App Table,
+fetches current installations from GitHub,
 and updates the Installation Table with refreshed timestamps.
 It is exposed through a Function URL with IAM authentication,
 and access is controlled via `grantRefreshCachedData`.
 
 - Permissions:
-
   - KMS:Sign for GitHub App private keys
   - DynamoDB Read/Write access to both tables
 
@@ -308,7 +301,6 @@ It is exposed through a Function URL with IAM authentication,
 and access is controlled via `grantGetInstallationRecord`.
 
 - Permissions:
-
   - DynamoDB Read access to Installation table
 
 ### Scheduler
@@ -354,19 +346,16 @@ to enforce fine-grained permissions.
 These AWS resources incur usage-based charges:
 
 1. **DynamoDB**
-
    - Pay-per-request billing for both tables
    - Point-in-Time Recovery costs
    - Storage costs for table data
 
 1. **Lambda**
-
    - Function invocation charges
    - Memory usage
    - Function URL requests
 
 1. **KMS**
-
    - Key storage fees
    - Signing operation charges
 
@@ -389,12 +378,15 @@ This approach provides better flexibility and control over resource management.
 
 ### Resources Tags
 
-| Resource           | Tag Key                             | Tag Value                                              |
-| ------------------ | ----------------------------------- | ------------------------------------------------------ |
-| Stack              | `FrameworkForGitHubAppOnAwsManaged` | `CredentialManager`                                    |
-| App Table          | `CredentialManager`                 | `AppTable`                                             |
-| Installation Table | `CredentialManager`                 | `AppInstallationTable`                                 |
-| Function URLs      | `CredentialManager`                 | `AppTokenEndpoint` / `InstallationAccessTokenEndpoint` / `RefreshCachedDataEndpoint` / `InstallationCachedDataEndpoint` |
+| Resource           | Tag Key                             | Tag Value                         |
+| ------------------ | ----------------------------------- | --------------------------------- |
+| Stack              | `FrameworkForGitHubAppOnAwsManaged` | `CredentialManager`               |
+| App Table          | `CredentialManager`                 | `AppTable`                        |
+| Installation Table | `CredentialManager`                 | `AppInstallationTable`            |
+| Function URLs      | `CredentialManager`                 | `AppTokenEndpoint`                |
+|                    |                                     | `InstallationAccessTokenEndpoint` |
+|                    |                                     | `RefreshCachedDataEndpoint`       |
+|                    |                                     | `InstallationCachedDataEndpoint`  |
 
 ### Tag-Based Access Control
 

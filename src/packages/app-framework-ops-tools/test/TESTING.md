@@ -98,7 +98,6 @@ recheck if the environment variables are set correctly.
   security.
 
 - To clean up test resources and avoid ongoing costs:
-
   1. Go to your GitHub App settings and delete the generated private keys
 
   1. Go to AWS KMS console and schedule the KMS keys for deletion with
