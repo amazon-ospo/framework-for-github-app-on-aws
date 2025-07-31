@@ -3,9 +3,7 @@
 The Genet Service Smithy model consists of:
 
 - Credential Management Service:
-
   - `/tokens/installation` API endpoint:
-
     - Retrieves the installation access token
       for a specific App and target installation from
       GitHub based on the App ID and the Node ID as input.

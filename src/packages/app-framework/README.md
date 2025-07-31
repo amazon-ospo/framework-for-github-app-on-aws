@@ -126,6 +126,22 @@ Grants permission to invoke the installation access token endpoint:
 grantGetInstallationAccessToken(grantee: IGrantable): void
 ```
 
+#### grantRefreshCachedData
+
+Grants permission to invoke the refresh cached data endpoint:
+
+```text
+grantRefreshCachedData(grantee: IGrantable): void
+```
+
+#### grantGetInstallationRecord
+
+Grants permission to invoke the installation record retrieval endpoint:
+
+```text
+grantGetInstallationRecord(grantee: IGrantable): void
+```
+
 ### Smithy Client
 
 To interact with Credential Manager’s APIs,
@@ -173,6 +189,29 @@ const response = await client.send(command);
 const token = response.appToken;
 ```
 
+#### Example: Refresh Cached Data
+
+```text
+import { RefreshCachedDataCommand } from '@aws/app-framework-for-github-apps-on-aws-client';
+
+const command = new RefreshCachedDataCommand({});
+
+const response = await client.send(command);
+```
+
+#### Example: Get Installation Data
+
+```text
+import { GetInstallationDataCommand } from '@aws/app-framework-for-github-apps-on-aws-client';
+
+const command = new GetInstallationDataCommand({
+  nodeId: '<your target node_id>',
+});
+
+const response = await client.send(command);
+const installations = response.installations;
+```
+
 ## What Resources Are Created by Credential Manager
 
 ### DynamoDB Tables
@@ -182,11 +221,9 @@ const token = response.appToken;
 Stores GitHub App IDs and their corresponding private key ARNs
 
 - Schema:
-
   - Partition Key: `AppId` (NUMBER)
 
 - Configuration:
-
   - Billing Mode: PAY_PER_REQUEST
   - Point-in-Time Recovery: Enabled
   - Removal Policy: RETAIN
@@ -196,14 +233,11 @@ Stores GitHub App IDs and their corresponding private key ARNs
 Tracks GitHub App installations with node_id, installation_id, and app_id
 
 - Schema:
-
   - Partition Key: `AppId` (NUMBER)
   - Sort Key: `NodeId` (STRING)
 
 - Global Secondary Indexes:
-
   - `NodeID`:
-
     - Partition Key: `NodeId` (STRING)
     - Sort Key: `AppId` (NUMBER)
 
@@ -212,7 +246,6 @@ Tracks GitHub App installations with node_id, installation_id, and app_id
     - Sort Key: `AppId` (NUMBER)
 
 - Configuration:
-
   - Billing Mode: PAY_PER_REQUEST
   - Point-in-Time Recovery: Enabled
 
@@ -227,7 +260,6 @@ and performs RSA signing operations through KMS.
 Access is restricted to IAM principals explicitly granted through `grantGetAppToken`.
 
 - Permissions:
-
   - KMS:Sign for GitHub App private keys
   - DynamoDB Read access to App table
 
@@ -240,9 +272,36 @@ It is exposed through a Function URL with IAM authentication,
 and access is controlled via `grantGetInstallationAccessToken`.
 
 - Permissions:
-
   - KMS:Sign for GitHub App private keys
   - DynamoDB Read access to both tables
+
+#### Refresh Cached Data
+
+The Refresh Cached Data Lambda function
+synchronizes installation data between GitHub and DynamoDB.
+While the AppInstallation Table is automatically updated
+by the installation tracker every 30 minutes,
+this API gives you the ability to refresh cached data at any time on-demand.
+It retrieves all App IDs from the App Table,
+fetches current installations from GitHub,
+and updates the Installation Table with refreshed timestamps.
+It is exposed through a Function URL with IAM authentication,
+and access is controlled via `grantRefreshCachedData`.
+
+- Permissions:
+  - KMS:Sign for GitHub App private keys
+  - DynamoDB Read/Write access to both tables
+
+#### Get Installation Data
+
+The Get Installation Data Lambda function
+retrieves cached installation data from DynamoDB for a given nodeId.
+It provides access to installation records without requiring GitHub API calls.
+It is exposed through a Function URL with IAM authentication,
+and access is controlled via `grantGetInstallationRecord`.
+
+- Permissions:
+  - DynamoDB Read access to Installation table
 
 ### Scheduler
 
@@ -287,19 +346,16 @@ to enforce fine-grained permissions.
 These AWS resources incur usage-based charges:
 
 1. **DynamoDB**
-
    - Pay-per-request billing for both tables
    - Point-in-Time Recovery costs
    - Storage costs for table data
 
 1. **Lambda**
-
    - Function invocation charges
    - Memory usage
    - Function URL requests
 
 1. **KMS**
-
    - Key storage fees
    - Signing operation charges
 
@@ -322,12 +378,15 @@ This approach provides better flexibility and control over resource management.
 
 ### Resources Tags
 
-| Resource           | Tag Key                             | Tag Value                                              |
-| ------------------ | ----------------------------------- | ------------------------------------------------------ |
-| Stack              | `FrameworkForGitHubAppOnAwsManaged` | `CredentialManager`                                    |
-| App Table          | `CredentialManager`                 | `AppTable`                                             |
-| Installation Table | `CredentialManager`                 | `AppInstallationTable`                                 |
-| Function URLs      | `CredentialManager`                 | `AppTokenEndpoint` / `InstallationAccessTokenEndpoint` |
+| Resource           | Tag Key                             | Tag Value                         |
+| ------------------ | ----------------------------------- | --------------------------------- |
+| Stack              | `FrameworkForGitHubAppOnAwsManaged` | `CredentialManager`               |
+| App Table          | `CredentialManager`                 | `AppTable`                        |
+| Installation Table | `CredentialManager`                 | `AppInstallationTable`            |
+| Function URLs      | `CredentialManager`                 | `AppTokenEndpoint`                |
+|                    |                                     | `InstallationAccessTokenEndpoint` |
+|                    |                                     | `RefreshCachedDataEndpoint`       |
+|                    |                                     | `InstallationCachedDataEndpoint`  |
 
 ### Tag-Based Access Control
 
