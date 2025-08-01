@@ -144,10 +144,13 @@ grantGetInstallationRecord(grantee: IGrantable): void
 
 #### rateLimitDashboard
 
-Creates a Cloudwatch dashboard with two widgets consisting of an alarm
-which goes below a default value of 20% of the total rate limit
-for any GitHub App it will go in an alarm state and there is a widget
-which shows all the rate limit percent remaining for each GitHub App:
+Creates a CloudWatch dashboard with two widgets:
+
+1. A widget displaying the percentage of remaining rate limit
+   for each GitHub App installation
+
+1. An alarm that triggers when the remaining rate limit for
+   any GitHub App installation falls below a specified threshold (default: 20%)
 
 ```text
 rateLimitDashboard({ limit?: number }): void
@@ -325,9 +328,10 @@ and can be used to track installation lifecycles reliably.
 
 ### Rate Limit Scheduler
 
-Scans GitHub App Rate Limit usages every 5 minutes and generates metrics
-using AWS Powertools. These metrics can be seen from the rate limit dashboard.
-This enables proper tracking of rate limit usage for each GitHub App.
+Scans GitHub App Rate Limit usages every 5 minutes
+and generates corresponding metrics.
+These metrics are accessible through the rate limit dashboard.
+This enables proper tracking of API usage for each GitHub App.
 
 ## Security Considerations
 
