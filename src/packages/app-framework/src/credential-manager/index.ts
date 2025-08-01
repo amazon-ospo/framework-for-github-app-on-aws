@@ -17,6 +17,7 @@ import { Construct } from 'constructs';
 import { SERVICE_NAME } from './constants';
 import { GitHubAppToken } from './get-app-token/appToken';
 import { InstallationAcessTokenGenerator } from './get-installation-access-token';
+import { InstallationCachedData } from './get-installation-data';
 import { InstallationTracker } from './installation-tracker';
 import { RateLimitTracker } from './rate-limit-tracker';
 import {
@@ -44,6 +45,8 @@ export class CredentialManager extends NestedStack {
   readonly installationTable: Table;
   readonly refreshCachedDataEndpoint: string;
   readonly refreshCachedDataLambdaArn: string;
+  readonly installationRecordLambdaArn: string;
+  readonly installationRecordEndpoint: string;
 
   constructor(scope: Construct, id: string, props?: CredentialManagerProps) {
     super(scope, id, props);
@@ -126,14 +129,17 @@ export class CredentialManager extends NestedStack {
     this.installationAccessTokenEndpoint =
       getInstallationAccessTokenEndpoint.functionUrl.url;
 
+    // Creates a construct to track GitHub App installations and handle installation events
     new InstallationTracker(this, 'InstallationTracker', {
       AppTable: this.appTable,
       InstallationTable: this.installationTable,
     });
+    // Creates a construct to monitor and track GitHub API rate limits
     new RateLimitTracker(this, 'RateLimitTracker', {
       AppTable: this.appTable,
       InstallationTable: this.installationTable,
     });
+    // Creates a construct to refresh cached installation data
     const refreshCache = new InstallationRefresher(
       this,
       'InstallationRefresher',
@@ -142,10 +148,22 @@ export class CredentialManager extends NestedStack {
         InstallationTable: this.installationTable,
       },
     );
+    // Grant the refresh cache lambda read access to the app table
     this.appTable.grantReadData(refreshCache.lambdaHandler);
     this.installationTable.grantReadWriteData(refreshCache.lambdaHandler);
     this.refreshCachedDataEndpoint = refreshCache.functionUrl.url;
     this.refreshCachedDataLambdaArn = refreshCache.lambdaHandler.functionArn;
+    // Creates a construct to provide cached installation data
+    const installationData = new InstallationCachedData(
+      this,
+      'InstallationData',
+      {
+        InstallationTable: this.installationTable,
+      },
+    );
+    this.installationRecordLambdaArn =
+      installationData.lambdaHandler.functionArn;
+    this.installationRecordEndpoint = installationData.functionUrl.url;
   }
 
   // Grants a caller permission to invoke the app token lambda Function URL.
@@ -185,6 +203,21 @@ export class CredentialManager extends NestedStack {
         actions: ['lambda:InvokeFunctionUrl'],
         effect: Effect.ALLOW,
         resources: [this.refreshCachedDataLambdaArn],
+        conditions: {
+          StringEquals: {
+            'lambda:FunctionUrlAuthType': 'AWS_IAM',
+          },
+        },
+      }),
+    );
+  }
+
+  grantGetInstallationRecord(grantee: IGrantable) {
+    grantee.grantPrincipal.addToPrincipalPolicy(
+      new PolicyStatement({
+        actions: ['lambda:InvokeFunctionUrl'],
+        effect: Effect.ALLOW,
+        resources: [this.installationRecordLambdaArn],
         conditions: {
           StringEquals: {
             'lambda:FunctionUrlAuthType': 'AWS_IAM',
