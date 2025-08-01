@@ -232,7 +232,6 @@ const installations = response.installations;
 Stores GitHub App IDs and their corresponding private key ARNs
 
 - Schema:
-
   - Partition Key: `AppId` (NUMBER)
 
 - Configuration:
@@ -245,14 +244,11 @@ Stores GitHub App IDs and their corresponding private key ARNs
 Tracks GitHub App installations with node_id, installation_id, and app_id
 
 - Schema:
-
   - Partition Key: `AppId` (NUMBER)
   - Sort Key: `NodeId` (STRING)
 
 - Global Secondary Indexes:
-
   - `NodeID`:
-
     - Partition Key: `NodeId` (STRING)
     - Sort Key: `AppId` (NUMBER)
 
@@ -367,13 +363,11 @@ to enforce fine-grained permissions.
 These AWS resources incur usage-based charges:
 
 1. **DynamoDB**
-
    - Pay-per-request billing for both tables
    - Point-in-Time Recovery costs
    - Storage costs for table data
 
 1. **Lambda**
-
    - Function invocation charges
    - Memory usage
    - Function URL requests
