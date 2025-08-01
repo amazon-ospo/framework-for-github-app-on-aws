@@ -142,6 +142,17 @@ Grants permission to invoke the installation record retrieval endpoint:
 grantGetInstallationRecord(grantee: IGrantable): void
 ```
 
+#### rateLimitDashboard
+
+Creates a Cloudwatch dashboard with two widgets consisting of an alarm
+which goes below a default value of 20% of the total rate limit
+for any GitHub App it will go in an alarm state and there is a widget
+which shows all the rate limit percent remaining for each GitHub App:
+
+```text
+rateLimitDashboard({ limit?: number }): void
+```
+
 ### Smithy Client
 
 To interact with Credential Manager’s APIs,
@@ -221,6 +232,7 @@ const installations = response.installations;
 Stores GitHub App IDs and their corresponding private key ARNs
 
 - Schema:
+
   - Partition Key: `AppId` (NUMBER)
 
 - Configuration:
@@ -233,11 +245,14 @@ Stores GitHub App IDs and their corresponding private key ARNs
 Tracks GitHub App installations with node_id, installation_id, and app_id
 
 - Schema:
+
   - Partition Key: `AppId` (NUMBER)
   - Sort Key: `NodeId` (STRING)
 
 - Global Secondary Indexes:
+
   - `NodeID`:
+
     - Partition Key: `NodeId` (STRING)
     - Sort Key: `AppId` (NUMBER)
 
@@ -312,6 +327,12 @@ and updates the Installation Table.
 This ensures the table stays in sync with active installations
 and can be used to track installation lifecycles reliably.
 
+### Rate Limit Scheduler
+
+Scans GitHub App Rate Limit usages every 5 minutes and generates metrics
+using AWS Powertools. These metrics can be seen from the rate limit dashboard.
+This enables proper tracking of rate limit usage for each GitHub App.
+
 ## Security Considerations
 
 ### Data Protection
@@ -346,11 +367,13 @@ to enforce fine-grained permissions.
 These AWS resources incur usage-based charges:
 
 1. **DynamoDB**
+
    - Pay-per-request billing for both tables
    - Point-in-Time Recovery costs
    - Storage costs for table data
 
 1. **Lambda**
+
    - Function invocation charges
    - Memory usage
    - Function URL requests
