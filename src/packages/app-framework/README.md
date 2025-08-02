@@ -142,6 +142,20 @@ Grants permission to invoke the installation record retrieval endpoint:
 grantGetInstallationRecord(grantee: IGrantable): void
 ```
 
+#### rateLimitDashboard
+
+Creates a CloudWatch dashboard with two widgets:
+
+1. A widget displaying the percentage of remaining rate limit
+   for each GitHub App installation
+
+1. An alarm that triggers when the remaining rate limit for
+   any GitHub App installation falls below a specified threshold (default: 20%)
+
+```text
+rateLimitDashboard({ limit?: number }): void
+```
+
 ### Smithy Client
 
 To interact with Credential Manager’s APIs,
@@ -311,6 +325,13 @@ Scans the GitHub App installation metadata every 30 minutes
 and updates the Installation Table.
 This ensures the table stays in sync with active installations
 and can be used to track installation lifecycles reliably.
+
+### Rate Limit Scheduler
+
+Scans GitHub App Rate Limit usages every 5 minutes
+and generates corresponding metrics.
+These metrics are accessible through the rate limit dashboard.
+This enables proper tracking of API usage for each GitHub App.
 
 ## Security Considerations
 
