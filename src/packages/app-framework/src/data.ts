@@ -265,19 +265,26 @@ export const getInstallationsDataByNodeId: GetInstallationsByNodeId = async ({
 }) => {
   const getInstallations = new TableOperations({ TableName: tableName });
   const result: InstallationRecord[] = [];
-  const itemList = await getInstallations.scan();
+
+  const itemList = await getInstallations.query({
+    keyConditionExpression: 'NodeId = :nodeId',
+    expressionAttributeValues: {
+      ':nodeId': { S: nodeId },
+    },
+    indexName: 'NodeID',
+  });
+
   itemList.map((item) => {
     const appId: number = item.AppId;
+    const itemNodeId: string = item.NodeId;
     const installationId: number = item.InstallationId;
-    const itemNodeId: string = item.NodeId ?? '';
-    if (nodeId === itemNodeId) {
-      result.push({
-        appId,
-        nodeId,
-        installationId,
-      });
-    }
+    result.push({
+      appId,
+      nodeId: itemNodeId,
+      installationId,
+    });
   });
+
   if (result.length === 0) {
     throw new NotFound(`No installations found for node: ${nodeId}`);
   }

@@ -325,7 +325,7 @@ describe('getInstallationId', () => {
     it('should successfully retrieve all installations for a specific nodeId from DynamoDB', async () => {
       const mockAppId2 = 12346;
       const mockInstallationId2 = 123457;
-      mockTableOperations.prototype.scan.mockResolvedValue([
+      mockTableOperations.prototype.query.mockResolvedValue([
         {
           AppId: mockAppId,
           InstallationId: mockInstallationId,
@@ -356,38 +356,17 @@ describe('getInstallationId', () => {
       expect(TableOperations).toHaveBeenCalledWith({
         TableName: mockTableName,
       });
-      expect(mockTableOperations.prototype.scan).toHaveBeenCalled();
-    });
-
-    it('should throw NotFound when no installations exist for the given nodeId', async () => {
-      const differentNodeId = 'different-node';
-      mockTableOperations.prototype.scan.mockResolvedValue([
-        {
-          AppId: mockAppId,
-          InstallationId: mockInstallationId,
-          NodeId: differentNodeId,
+      expect(mockTableOperations.prototype.query).toHaveBeenCalledWith({
+        keyConditionExpression: 'NodeId = :nodeId',
+        expressionAttributeValues: {
+          ':nodeId': { S: mockNodeId },
         },
-      ]);
-      await expect(
-        getInstallationsDataByNodeId({
-          nodeId: mockNodeId,
-          tableName: mockTableName,
-        }),
-      ).rejects.toThrow(NotFound);
-      await expect(
-        getInstallationsDataByNodeId({
-          nodeId: mockNodeId,
-          tableName: mockTableName,
-        }),
-      ).rejects.toThrow(`No installations found for node: ${mockNodeId}`);
-      expect(TableOperations).toHaveBeenCalledWith({
-        TableName: mockTableName,
+        indexName: 'NodeID',
       });
-      expect(mockTableOperations.prototype.scan).toHaveBeenCalled();
     });
 
     it('should throw NotFound when DynamoDB returns empty result set', async () => {
-      mockTableOperations.prototype.scan.mockResolvedValue([]);
+      mockTableOperations.prototype.query.mockResolvedValue([]);
       await expect(
         getInstallationsDataByNodeId({
           nodeId: mockNodeId,
@@ -403,47 +382,17 @@ describe('getInstallationId', () => {
       expect(TableOperations).toHaveBeenCalledWith({
         TableName: mockTableName,
       });
-      expect(mockTableOperations.prototype.scan).toHaveBeenCalled();
-    });
-
-    it('should handle installations with missing or undefined NodeId', async () => {
-      mockTableOperations.prototype.scan.mockResolvedValue([
-        {
-          AppId: mockAppId,
-          InstallationId: mockInstallationId,
-          NodeId: mockNodeId,
+      expect(mockTableOperations.prototype.query).toHaveBeenCalledWith({
+        keyConditionExpression: 'NodeId = :nodeId',
+        expressionAttributeValues: {
+          ':nodeId': { S: mockNodeId },
         },
-        {
-          AppId: 12346,
-          InstallationId: 123457,
-          NodeId: undefined,
-        },
-        {
-          AppId: 12347,
-          InstallationId: 123458,
-          // NodeId property missing entirely
-        },
-      ]);
-      const result = await getInstallationsDataByNodeId({
-        nodeId: mockNodeId,
-        tableName: mockTableName,
+        indexName: 'NodeID',
       });
-      expect(result).toEqual([
-        {
-          appId: mockAppId,
-          nodeId: mockNodeId,
-          installationId: mockInstallationId,
-        },
-      ]);
-      expect(result).toHaveLength(1);
-      expect(TableOperations).toHaveBeenCalledWith({
-        TableName: mockTableName,
-      });
-      expect(mockTableOperations.prototype.scan).toHaveBeenCalled();
     });
 
     it('should throw an exception if DynamoDB call fails', async () => {
-      mockTableOperations.prototype.scan.mockRejectedValue(() => {
+      mockTableOperations.prototype.query.mockRejectedValue(() => {
         throw new Error('DynamoDB service error');
       });
       await expect(
@@ -452,6 +401,16 @@ describe('getInstallationId', () => {
           tableName: mockTableName,
         }),
       ).rejects.toThrow('DynamoDB service error');
+      expect(TableOperations).toHaveBeenCalledWith({
+        TableName: mockTableName,
+      });
+      expect(mockTableOperations.prototype.query).toHaveBeenCalledWith({
+        keyConditionExpression: 'NodeId = :nodeId',
+        expressionAttributeValues: {
+          ':nodeId': { S: mockNodeId },
+        },
+        indexName: 'NodeID',
+      });
     });
   });
 });

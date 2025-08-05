@@ -26,12 +26,15 @@ export const handler = async (
   const context =
     event.requestContext as APIGatewayEventRequestContextV2WithAuthorizer<APIGatewayEventRequestContextIAMAuthorizer>;
   const result: APIGatewayProxyResultV2 = await handlerImpl({ event });
+  // Serialize/deserialize needed because APIGatewayProxyResultV2 is a union type,
+  // string | APIGatewayProxyStructuredResultV2 | T,
+  // TypeScript can't guarantee 'body' property exists.
   const parseResponse = JSON.parse(JSON.stringify(result));
-  const bodyData = JSON.parse(parseResponse.body) as GetInstallationDataOutput;
-  if (!!bodyData.installations) {
+  const body = parseResponse.body as GetInstallationDataOutput;
+  if (!!body) {
     const logResponse = {
       caller: context.authorizer.iam.userArn,
-      installations: bodyData.installations,
+      installations: body,
     };
     console.log(JSON.stringify(logResponse));
   }
@@ -65,13 +68,16 @@ export const handlerImpl: Handler = async ({
   getInstallationRecordOperation = getInstallationRecordOperationImpl,
 }) => {
   console.log('Event received', event);
-  const context = checkEnvironment();
+  const getTableName = checkEnvironment();
   const httpRequest = convertEvent(event);
   console.log('Converted Http Request:', JSON.stringify(httpRequest));
   const installationRecordHandler = getGetInstallationDataHandler(
     getInstallationRecordOperation,
   );
-  const result = await installationRecordHandler.handle(httpRequest, context);
+  const result = await installationRecordHandler.handle(
+    httpRequest,
+    getTableName,
+  );
   return convertVersion1Response(result);
 };
 

@@ -33,48 +33,48 @@ beforeEach(() => {
 });
 
 describe('handlerImpl', () => {
-  const addDimensionSpy = jest.spyOn(Metrics.prototype, 'addDimension');
+  const addDimensionsSpy = jest.spyOn(Metrics.prototype, 'addDimensions');
   const addMetricSpy = jest.spyOn(Metrics.prototype, 'addMetric');
   const publishStoredMetricsSpy = jest.spyOn(
     Metrics.prototype,
     'publishStoredMetrics',
   );
-  // it('Publish metrics three times due to three different rate limits present in GitHub output', async () => {
-  //   const rate_limit_response = {
-  //     resources: {
-  //       core: {
-  //         limit: 5000,
-  //         used: 1,
-  //         remaining: 4999,
-  //         reset: 1691591363,
-  //       },
-  //       search: {
-  //         limit: 30,
-  //         used: 12,
-  //         remaining: 18,
-  //         reset: 1691591091,
-  //       },
-  //       rate: {
-  //         limit: 5000,
-  //         used: 1,
-  //         remaining: 4999,
-  //         reset: 1372700873,
-  //       },
-  //     },
-  //   };
-  //   mockGetRateLimit.mockReturnValue(rate_limit_response);
-  //   await handlerImpl({
-  //     getInstallationsFromTable: jest
-  //       .fn()
-  //       .mockReturnValue([{ appId: 1, installationId: 20, nodeId: 'foo' }]),
-  //     getInstallationAccessToken: jest
-  //       .fn()
-  //       .mockReturnValue({ installationToken: 'some-token' }),
-  //   });
-  //   expect(addDimensionSpy).toHaveBeenCalledTimes(9);
-  //   expect(addMetricSpy).toHaveBeenCalledTimes(15);
-  //   expect(publishStoredMetricsSpy).toHaveBeenCalledTimes(3);
-  // });
+  it('Publish metrics three times due to three different rate limits present in GitHub output', async () => {
+    const rate_limit_response = {
+      resources: {
+        core: {
+          limit: 5000,
+          used: 1,
+          remaining: 4999,
+          reset: 1691591363,
+        },
+        search: {
+          limit: 30,
+          used: 12,
+          remaining: 18,
+          reset: 1691591091,
+        },
+        rate: {
+          limit: 5000,
+          used: 1,
+          remaining: 4999,
+          reset: 1372700873,
+        },
+      },
+    };
+    mockGetRateLimit.mockReturnValue(rate_limit_response);
+    await handlerImpl({
+      getInstallationsFromTable: jest
+        .fn()
+        .mockReturnValue([{ appId: 1, installationId: 20, nodeId: 'foo' }]),
+      getInstallationAccessToken: jest
+        .fn()
+        .mockReturnValue({ installationToken: 'some-token' }),
+    });
+    expect(addDimensionsSpy).toHaveBeenCalledTimes(3);
+    expect(addMetricSpy).toHaveBeenCalledTimes(15);
+    expect(publishStoredMetricsSpy).toHaveBeenCalledTimes(3);
+  });
   it('No metrics are published when rate limit API throws error', async () => {
     mockGetRateLimit.mockRejectedValue(
       new GitHubError(
@@ -92,7 +92,7 @@ describe('handlerImpl', () => {
       }),
     ).rejects.toThrow(GitHubError);
 
-    expect(addDimensionSpy).not.toHaveBeenCalled();
+    expect(addDimensionsSpy).not.toHaveBeenCalled();
     expect(addMetricSpy).not.toHaveBeenCalled();
     expect(publishStoredMetricsSpy).not.toHaveBeenCalled();
   });
