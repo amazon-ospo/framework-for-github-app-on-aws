@@ -154,6 +154,8 @@ export interface GetInstallationTokenOutput {
   nodeId?: string | undefined;
   appId?: number | undefined;
   expirationTime?: Date | undefined;
+  requestedScopeDown?: ScopeDown | undefined;
+  actualScopeDown?: ScopeDown | undefined;
 }
 
 /**

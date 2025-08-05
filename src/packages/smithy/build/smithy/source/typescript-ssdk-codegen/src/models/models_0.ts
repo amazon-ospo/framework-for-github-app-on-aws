@@ -446,6 +446,8 @@ export interface GetInstallationTokenOutput {
   nodeId?: string | undefined;
   appId?: number | undefined;
   expirationTime?: Date | undefined;
+  requestedScopeDown?: ScopeDown | undefined;
+  actualScopeDown?: ScopeDown | undefined;
 }
 
 export namespace GetInstallationTokenOutput {
@@ -454,6 +456,8 @@ export namespace GetInstallationTokenOutput {
     nodeId?: __MultiConstraintValidator<string>,
     appId?: __MultiConstraintValidator<number>,
     expirationTime?: __MultiConstraintValidator<Date>,
+    requestedScopeDown?: __MultiConstraintValidator<ScopeDown>,
+    actualScopeDown?: __MultiConstraintValidator<ScopeDown>,
   } = {};
   /**
    * @internal
@@ -478,6 +482,20 @@ export namespace GetInstallationTokenOutput {
             memberValidators["expirationTime"] = new __NoOpValidator();
             break;
           }
+          case "requestedScopeDown": {
+            memberValidators["requestedScopeDown"] = new __CompositeStructureValidator<ScopeDown>(
+              new __NoOpValidator(),
+              ScopeDown.validate
+            );
+            break;
+          }
+          case "actualScopeDown": {
+            memberValidators["actualScopeDown"] = new __CompositeStructureValidator<ScopeDown>(
+              new __NoOpValidator(),
+              ScopeDown.validate
+            );
+            break;
+          }
         }
       }
       return memberValidators[member]!!;
@@ -487,6 +505,8 @@ export namespace GetInstallationTokenOutput {
       ...getMemberValidator("nodeId").validate(obj.nodeId, `${path}/nodeId`),
       ...getMemberValidator("appId").validate(obj.appId, `${path}/appId`),
       ...getMemberValidator("expirationTime").validate(obj.expirationTime, `${path}/expirationTime`),
+      ...getMemberValidator("requestedScopeDown").validate(obj.requestedScopeDown, `${path}/requestedScopeDown`),
+      ...getMemberValidator("actualScopeDown").validate(obj.actualScopeDown, `${path}/actualScopeDown`),
     ];
   }
 }

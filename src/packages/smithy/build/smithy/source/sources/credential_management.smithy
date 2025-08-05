@@ -71,6 +71,8 @@ structure GetInstallationTokenOutput {
     appId: Integer
     @timestampFormat("date-time")
     expirationTime: Timestamp
+    requestedScopeDown: ScopeDown
+    actualScopeDown: ScopeDown
 }
 
 structure GetAppTokenInput {

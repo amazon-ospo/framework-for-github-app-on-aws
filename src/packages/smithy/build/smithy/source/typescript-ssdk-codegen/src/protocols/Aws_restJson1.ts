@@ -256,10 +256,12 @@ export const serializeGetInstallationTokenResponse = async(
   });
   let body: any;
   body = JSON.stringify(take(input, {
+    'actualScopeDown': _ => se_ScopeDown(_, context),
     'appId': [],
     'expirationTime': _ => __serializeDateTime(_),
     'installationToken': [],
     'nodeId': [],
+    'requestedScopeDown': _ => se_ScopeDown(_, context),
   }));
   if (body && Object.keys(headers).map((str) => str.toLowerCase()).indexOf('content-length') === -1) {
     const length = calculateBodyLength(body);
@@ -502,6 +504,56 @@ const se_InstallationDataList = (
 ): any => {
   return input.filter((e: any) => e != null).map(entry => {
     return se_InstallationData(entry, context);
+  });
+}
+
+/**
+ * serializeAws_restJson1Permissions
+ */
+const se_Permissions = (
+  input: Record<string, string>,
+  context: __SerdeContext
+): any => {
+  return Object.entries(input).reduce((acc: Record<string, any>, [key, value]: [string, any]) => {
+    if (value === null) {
+      return acc;
+    }
+    acc[key] = value;
+    return acc;
+  }, {});
+}
+
+/**
+ * serializeAws_restJson1RepositoryIds
+ */
+const se_RepositoryIds = (
+  input: (number)[],
+  context: __SerdeContext
+): any => {
+  return input.filter((e: any) => e != null);
+}
+
+/**
+ * serializeAws_restJson1RepositoryNames
+ */
+const se_RepositoryNames = (
+  input: (string)[],
+  context: __SerdeContext
+): any => {
+  return input.filter((e: any) => e != null);
+}
+
+/**
+ * serializeAws_restJson1ScopeDown
+ */
+const se_ScopeDown = (
+  input: ScopeDown,
+  context: __SerdeContext
+): any => {
+  return take(input, {
+    'permissions': _ => se_Permissions(_, context),
+    'repositoryIds': _ => se_RepositoryIds(_, context),
+    'repositoryNames': _ => se_RepositoryNames(_, context),
   });
 }
 

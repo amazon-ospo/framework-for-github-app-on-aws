@@ -197,10 +197,12 @@ export const de_GetInstallationTokenCommand = async(
   });
   const data: Record<string, any> = __expectNonNull((__expectObject(await parseBody(output.body, context))), "body");
   const doc = take(data, {
+    'actualScopeDown': _json,
     'appId': __expectInt32,
     'expirationTime': _ => __expectNonNull(__parseRfc3339DateTimeWithOffset(_)),
     'installationToken': __expectString,
     'nodeId': __expectString,
+    'requestedScopeDown': _json,
   });
   Object.assign(contents, doc);
   return contents;
@@ -336,6 +338,14 @@ const de_CommandError = async(
   // de_InstallationData omitted.
 
   // de_InstallationDataList omitted.
+
+  // de_Permissions omitted.
+
+  // de_RepositoryIds omitted.
+
+  // de_RepositoryNames omitted.
+
+  // de_ScopeDown omitted.
 
   // de_ValidationExceptionField omitted.
 
