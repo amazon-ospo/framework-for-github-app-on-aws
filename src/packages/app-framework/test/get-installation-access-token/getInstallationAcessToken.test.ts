@@ -149,7 +149,7 @@ describe('getInstallationAccessTokenImpl', () => {
         nodeId: 'test-id',
         appTable: 'AppTable',
         installationTable: 'InstallationTable',
-        getAppToken: jest.fn().mockResolvedValue({ appToken: 'app-token' }),
+        getAppToken: jest.fn().mockResolvedValue('app-token'),
         getInstallationId: jest.fn().mockResolvedValue(6789),
       }),
     ).rejects.toThrow('Failed to generate token.');
