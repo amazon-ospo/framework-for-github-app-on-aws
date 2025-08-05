@@ -204,7 +204,7 @@ const command = new GetInstallationTokenCommand({
   scopeDown: {
     repositoryNames: ['repo1', 'repo2'], // Limit to specific repositories by name
     repositoryIds: [123456, 789012], // Or limit by repository IDs
-    permissions: { 
+    permissions: {  // Specify which permissions to grant (e.g., contents, issues, pull_requests)
       contents: 'read',
       pull_requests: 'write'
     }
@@ -219,6 +219,9 @@ const token = response.installationToken; // Token with limited scope
 not expand them.
 Your GitHub App must already have the requested permissions,
 and the specified repositories must be accessible to the installation.
+
+For a complete list of available permissions and detailed scoping parameters,
+see the [GitHub API documentation for creating installation access tokens](https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#create-an-installation-access-token-for-an-app).
 
 #### Example: Get App Token
 
