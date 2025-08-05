@@ -2066,6 +2066,12 @@
                     "traits": {
                         "smithy.api#timestampFormat": "date-time"
                     }
+                },
+                "requestedScopeDown": {
+                    "target": "framework.api#ScopeDown"
+                },
+                "actualScopeDown": {
+                    "target": "framework.api#ScopeDown"
                 }
             }
         },

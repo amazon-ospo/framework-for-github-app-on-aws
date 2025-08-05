@@ -66,6 +66,28 @@ export interface GetInstallationTokenCommandOutput extends GetInstallationTokenO
  * //   nodeId: "STRING_VALUE",
  * //   appId: Number("int"),
  * //   expirationTime: new Date("TIMESTAMP"),
+ * //   requestedScopeDown: { // ScopeDown
+ * //     repositoryIds: [ // RepositoryIds
+ * //       Number("int"),
+ * //     ],
+ * //     repositoryNames: [ // RepositoryNames
+ * //       "STRING_VALUE",
+ * //     ],
+ * //     permissions: { // Permissions
+ * //       "<keys>": "STRING_VALUE",
+ * //     },
+ * //   },
+ * //   actualScopeDown: {
+ * //     repositoryIds: [
+ * //       Number("int"),
+ * //     ],
+ * //     repositoryNames: [
+ * //       "STRING_VALUE",
+ * //     ],
+ * //     permissions: {
+ * //       "<keys>": "STRING_VALUE",
+ * //     },
+ * //   },
  * // };
  *
  * ```
