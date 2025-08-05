@@ -7,9 +7,18 @@ import { NotFound } from '../../error';
 import { GitHubAPIService } from '../../gitHubService';
 import { GetAppToken, getAppTokenImpl } from '../get-app-token/getAppToken';
 
+export type ScopeDown = {
+  repositoryIds?: number[];
+  repositoryNames?: string[];
+  permissions?: {
+    [key: string]: string;
+  };
+};
+
 export type GetInstallationAccessToken = ({
   appId,
   nodeId,
+  scopeDown,
   installationTable,
   appTable,
   getAppToken,
@@ -17,6 +26,7 @@ export type GetInstallationAccessToken = ({
 }: {
   appId: number;
   nodeId: string;
+  scopeDown?: ScopeDown;
   installationTable: string;
   appTable: string;
   getAppToken?: GetAppToken;
@@ -43,6 +53,7 @@ export const getInstallationAccessTokenImpl: GetInstallationAccessToken =
     appId,
     nodeId,
     appTable,
+    scopeDown,
     installationTable,
     getAppToken = getAppTokenImpl,
     getInstallationId = getInstallationIdImpl,
@@ -50,6 +61,10 @@ export const getInstallationAccessTokenImpl: GetInstallationAccessToken =
     try {
       console.log('App ID: ', appId);
       console.log('Node ID: ', nodeId);
+      console.log(
+        'ScopeDown permissions received: ',
+        JSON.stringify(scopeDown),
+      );
       const appToken = await getAppToken({
         appId: appId,
         tableName: appTable,
@@ -65,6 +80,9 @@ export const getInstallationAccessTokenImpl: GetInstallationAccessToken =
       });
       const installationAccessToken = await githubService.getInstallationToken({
         installationId: installationID,
+        repositoryIds: scopeDown?.repositoryIds,
+        repositoryNames: scopeDown?.repositoryNames,
+        permissions: scopeDown?.permissions,
       });
       return {
         appId: appId,

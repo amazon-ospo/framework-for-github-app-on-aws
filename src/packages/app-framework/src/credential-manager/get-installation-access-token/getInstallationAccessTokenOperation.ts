@@ -5,7 +5,10 @@ import {
   ServerSideError,
 } from '@aws/app-framework-for-github-apps-on-aws-ssdk';
 import { Operation } from '@aws-smithy/server-common';
-import { getInstallationAccessTokenImpl } from './getInstallationAccessToken';
+import {
+  getInstallationAccessTokenImpl,
+  ScopeDown,
+} from './getInstallationAccessToken';
 import { VisibleError } from '../../error';
 
 /**
@@ -22,10 +25,15 @@ export const getInstallationAccessTokenOperationImpl: Operation<
   { appTable: string; installationTable: string }
 > = async (input, _context) => {
   try {
-    const { appId, nodeId } = input as { appId: number; nodeId: string };
+    const { appId, nodeId, scopeDown } = input as {
+      appId: number;
+      nodeId: string;
+      scopeDown: ScopeDown;
+    };
     const result = await getInstallationAccessTokenImpl({
       appId,
       nodeId,
+      scopeDown,
       appTable: _context.appTable,
       installationTable: _context.installationTable,
     });

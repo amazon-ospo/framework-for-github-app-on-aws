@@ -190,6 +190,36 @@ const response = await client.send(command);
 const token = response.installationToken;
 ```
 
+#### Example: Get Scoped Installation Access Token
+
+You can limit the token's access to specific repositories and
+permissions using the `scopeDown` parameter:
+
+```text
+import { GetInstallationTokenCommand } from '@aws/app-framework-for-github-apps-on-aws-client';
+
+const command = new GetInstallationTokenCommand({
+  appId: '<your App ID>',
+  nodeId: '<your App installation target node_id>',
+  scopeDown: {
+    repositoryNames: ['repo1', 'repo2'], // Limit to specific repositories by name
+    repositoryIds: [123456, 789012], // Or limit by repository IDs
+    permissions: { 
+      contents: 'read',
+      pull_requests: 'write'
+    }
+  }
+});
+
+const response = await client.send(command);
+const token = response.installationToken; // Token with limited scope
+```
+
+**Note**: The `scopeDown` parameter can only reduce permissions,
+not expand them.
+Your GitHub App must already have the requested permissions,
+and the specified repositories must be accessible to the installation.
+
 #### Example: Get App Token
 
 ```text

@@ -60,16 +60,26 @@ export class GitHubAPIService {
 
   async getInstallationToken({
     installationId,
+    repositoryIds,
+    repositoryNames,
+    permissions,
     ocktokitClient: octokitClient = this.getOctokitClient.bind(this),
   }: {
     installationId: number;
+    repositoryIds?: number[];
+    repositoryNames?: string[];
+    permissions?: {
+      [key: string]: string;
+    };
     ocktokitClient?: () => Octokit;
   }): Promise<GetInstallationAccessTokenResponseType> {
     const octokit = octokitClient();
     const response = await octokit.rest.apps.createInstallationAccessToken({
       installation_id: installationId,
+      repository_ids: repositoryIds,
+      repositories: repositoryNames,
+      permissions,
     });
-
     if (response.status >= 400) {
       throw new GitHubError(
         `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
