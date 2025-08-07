@@ -4,6 +4,7 @@ import {
   GetItemCommand,
   GetItemCommandOutput,
   PutItemCommand,
+  QueryCommand,
   ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
@@ -106,6 +107,39 @@ export class TableOperations {
       throw new Error(
         `Error deleting item in ${this.config.TableName}: ${error}`,
       );
+    }
+  }
+
+  /**
+   * Queries data from a DynamoDB table or GSI.
+   * @param keyConditionExpression the key condition expression for the query.
+   * @param expressionAttributeValues the values for the expression attributes.
+   * @param indexName optional GSI name to query against.
+   * @returns an array of items matching the query.
+   */
+  async query({
+    keyConditionExpression,
+    expressionAttributeValues,
+    indexName,
+  }: {
+    keyConditionExpression: string;
+    expressionAttributeValues: Record<string, AttributeValue>;
+    indexName?: string;
+  }): Promise<Record<string, NativeAttributeValue>[]> {
+    const client = dynamodbClient();
+    try {
+      const command = new QueryCommand({
+        TableName: this.config.TableName,
+        KeyConditionExpression: keyConditionExpression,
+        ExpressionAttributeValues: expressionAttributeValues,
+        IndexName: indexName,
+      });
+
+      const response = await client.send(command);
+      return (response.Items || []).map((item) => unmarshall(item));
+    } catch (error) {
+      console.error(`ERROR: ${error}`);
+      throw new Error(`Error querying ${this.config.TableName}: ${error}`);
     }
   }
 

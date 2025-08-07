@@ -3,6 +3,7 @@ import {
   DynamoDBClient,
   GetItemCommand,
   PutItemCommand,
+  QueryCommand,
 } from '@aws-sdk/client-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { NotFound } from '../src/error';
@@ -108,5 +109,89 @@ describe('scan', () => {
     expect(call.args[0].input).toEqual({
       TableName: 'Test',
     });
+  });
+});
+
+describe('query', () => {
+  it('should successfully call DynamoDB with QueryCommand', async () => {
+    mockDynamoDBClient.on(QueryCommand).resolves({
+      Items: [
+        {
+          AppId: { N: '123' },
+          NodeId: { S: 'node1' },
+          InstallationId: { N: '456' },
+        },
+        {
+          AppId: { N: '124' },
+          NodeId: { S: 'node1' },
+          InstallationId: { N: '457' },
+        },
+      ],
+    });
+
+    const queryResult = await tableOperationsTest.query({
+      keyConditionExpression: 'NodeId = :nodeId',
+      expressionAttributeValues: {
+        ':nodeId': { S: 'node1' },
+      },
+      indexName: 'NodeID',
+    });
+
+    expect(queryResult.length).toBe(2);
+    expect(queryResult[0]).toEqual({
+      AppId: 123,
+      NodeId: 'node1',
+      InstallationId: 456,
+    });
+    expect(queryResult[1]).toEqual({
+      AppId: 124,
+      NodeId: 'node1',
+      InstallationId: 457,
+    });
+
+    expect(mockDynamoDBClient.commandCalls(QueryCommand)).toHaveLength(1);
+    expect(
+      mockDynamoDBClient.commandCalls(QueryCommand, {
+        TableName: 'Test',
+        KeyConditionExpression: 'NodeId = :nodeId',
+        ExpressionAttributeValues: {
+          ':nodeId': { S: 'node1' },
+        },
+        IndexName: 'NodeID',
+      }),
+    ).toHaveLength(1);
+  });
+
+  it('should return empty array when no items are found', async () => {
+    mockDynamoDBClient.on(QueryCommand).resolves({
+      Items: [],
+    });
+
+    const queryResult = await tableOperationsTest.query({
+      keyConditionExpression: 'NodeId = :nodeId',
+      expressionAttributeValues: {
+        ':nodeId': { S: 'nonexistent' },
+      },
+      indexName: 'NodeID',
+    });
+
+    expect(queryResult).toEqual([]);
+    expect(mockDynamoDBClient.commandCalls(QueryCommand)).toHaveLength(1);
+  });
+
+  it('should throw an error if DynamoDB throws an error', async () => {
+    mockDynamoDBClient
+      .on(QueryCommand)
+      .rejects(new Error('DynamoDB service error'));
+
+    await expect(
+      tableOperationsTest.query({
+        keyConditionExpression: 'NodeId = :nodeId',
+        expressionAttributeValues: {
+          ':nodeId': { S: 'node1' },
+        },
+        indexName: 'NodeID',
+      }),
+    ).rejects.toThrow('Error querying Test: Error: DynamoDB service error');
   });
 });
