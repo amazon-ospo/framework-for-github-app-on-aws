@@ -213,12 +213,20 @@ const command = new GetInstallationTokenCommand({
 
 const response = await client.send(command);
 const token = response.installationToken; // Token with limited scope
+const requestedScope = response.requestedScopeDown; // What you requested (if scoping was used)
+const actualScope = response.actualScopeDown; // What GitHub actually granted
 ```
 
-**Note**: The `scopeDown` parameter can only reduce permissions,
-not expand them.
+##### Scope Down Parameters
+
+- **`scopeDown.permissions`** - Object with permission keys and `'read'`/`'write'`/`'admin'` values
+- **`scopeDown.repositoryNames`** - Array of repository names to limit access
+- **`scopeDown.repositoryIds`** - Array of repository IDs to limit access
+
+**Note**: The `scopeDown` parameter can only reduce permissions, not expand them.
 Your GitHub App must already have the requested permissions,
 and the specified repositories must be accessible to the installation.
+Invalid scope down parameters (non-existent repositories, unauthorized permissions) will result in an error rather than a successful response.
 
 For a complete list of available permissions and detailed scoping parameters,
 see the [GitHub API documentation for creating installation access tokens](https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#create-an-installation-access-token-for-an-app).

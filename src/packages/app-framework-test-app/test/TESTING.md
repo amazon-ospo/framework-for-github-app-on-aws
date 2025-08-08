@@ -13,6 +13,9 @@ This test suite validates:
 - Retrieval of a GitHub App token and Installation access token
   using the deployed Lambda API endpoints.
 
+- Scope down functionality for Installation access tokens,
+  including permission and repository limitations.
+
 - Expected behavior for valid and invalid GitHub App IDs.
 
 - Integration across the Framework generated Smithy client,

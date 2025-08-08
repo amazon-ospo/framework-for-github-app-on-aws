@@ -1,5 +1,5 @@
 import { Octokit } from '@octokit/rest';
-import { DataError, GitHubError } from './error';
+import { DataError, GitHubError, GitHubRequestError } from './error';
 import {
   AppAuthenticationResponseType,
   AppInstallationsResponseType,
@@ -74,21 +74,29 @@ export class GitHubAPIService {
     ocktokitClient?: () => Octokit;
   }): Promise<GetInstallationAccessTokenResponseType> {
     const octokit = octokitClient();
-    const response = await octokit.rest.apps.createInstallationAccessToken({
-      installation_id: installationId,
-      repository_ids: repositoryIds,
-      repositories: repositoryNames,
-      permissions,
-    });
-    if (response.status >= 400) {
-      throw new GitHubError(
-        `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
+    try {
+      const response = await octokit.rest.apps.createInstallationAccessToken({
+        installation_id: installationId,
+        repository_ids: repositoryIds,
+        repositories: repositoryNames,
+        permissions,
+      });
+      if (response.status >= 400) {
+        throw new GitHubError(
+          `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
+        );
+      }
+
+      if (!!response.data.token) {
+        return response.data;
+      }
+    } catch (error: any) {
+      console.error(`Uncaught error calling octokit ${JSON.stringify(error)}`);
+      throw new GitHubRequestError(
+        `GitHub API Request Error: ${error.message}`,
       );
     }
 
-    if (!!response.data.token) {
-      return response.data;
-    }
     throw new DataError(
       'GitHub API Error: No installation access token returned',
     );

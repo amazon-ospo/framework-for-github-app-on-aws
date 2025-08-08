@@ -9,7 +9,7 @@ import {
   getInstallationAccessTokenImpl,
   ScopeDown,
 } from './getInstallationAccessToken';
-import { VisibleError } from '../../error';
+import { GitHubRequestError, VisibleError } from '../../error';
 
 /**
  *  Smithy operation that retrieves Installation Access token from GitHub APIs.
@@ -39,7 +39,7 @@ export const getInstallationAccessTokenOperationImpl: Operation<
     });
     return result;
   } catch (error) {
-    if (error instanceof VisibleError) {
+    if (error instanceof VisibleError || error instanceof GitHubRequestError) {
       throw new ClientSideError({ message: `Invalid Request: ${error}` });
     }
     console.error(error);

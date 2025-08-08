@@ -23,10 +23,15 @@ beforeEach(() => {
 
 describe('getInstallationAccessTokenImpl', () => {
   it('should return installation access token with app id and node id', async () => {
+    // Assuming the GitHub App has these permissions granted
     mockGetInstallationToken.mockResolvedValue({
       token: 'installation-access-token',
       expires_at: '2017-07-08T16:18:44-04:00',
-      permissions: {},
+      permissions: {
+        contents: 'read',
+        metadata: 'read',
+        pull_requests: 'write',
+      },
       repository_selection: 'selected',
     });
 
@@ -35,7 +40,7 @@ describe('getInstallationAccessTokenImpl', () => {
       nodeId: 'test-id',
       appTable: 'AppTable',
       installationTable: 'InstallationTable',
-      getAppToken: jest.fn().mockResolvedValue('app-token'),
+      getAppToken: jest.fn().mockResolvedValue({ appToken: 'app-token' }),
       getInstallationId: jest.fn().mockResolvedValue(6789),
     });
 
@@ -44,97 +49,171 @@ describe('getInstallationAccessTokenImpl', () => {
       nodeId: 'test-id',
       installationToken: 'installation-access-token',
       expirationTime: new Date('2017-07-08T16:18:44-04:00'),
+      requestedScopeDown: undefined,
+      actualScopeDown: {
+        repositoryIds: undefined,
+        repositoryNames: undefined,
+        permissions: {
+          contents: 'read',
+          metadata: 'read',
+          pull_requests: 'write',
+        },
+      },
     });
   });
 
-  it.each([
-    [
-      'should return installation access token with repository ID scoping',
-      { repositoryIds: [123, 456] },
-      {
-        installationId: 6789,
-        repositoryIds: [123, 456],
-        repositoryNames: undefined,
-        permissions: undefined,
-      },
-      {
-        token: 'scoped-installation-token',
-        expires_at: '2017-07-08T16:18:44-04:00',
-        permissions: {},
-        repository_selection: 'selected',
-      },
-    ],
-    [
-      'should return installation access token with repository name scoping',
-      { repositoryNames: ['repo1', 'repo2'] },
-      {
-        installationId: 6789,
-        repositoryIds: undefined,
-        repositoryNames: ['repo1', 'repo2'],
-        permissions: undefined,
-      },
-      {
-        token: 'scoped-installation-token',
-        expires_at: '2017-07-08T16:18:44-04:00',
-        permissions: {},
-        repository_selection: 'selected',
-      },
-    ],
-    [
-      'should return installation access token with permission scoping',
-      { permissions: { contents: 'read', issues: 'write' } },
-      {
-        installationId: 6789,
-        repositoryIds: undefined,
-        repositoryNames: undefined,
-        permissions: { contents: 'read', issues: 'write' },
-      },
-      {
-        token: 'scoped-installation-token',
-        expires_at: '2017-07-08T16:18:44-04:00',
-        permissions: { contents: 'read', issues: 'write' },
-        repository_selection: 'selected',
-      },
-    ],
-    [
-      'should return installation access token with repository and permission scoping',
-      {
-        repositoryIds: [789],
-        repositoryNames: ['specific-repo'],
-        permissions: { contents: 'read', pull_requests: 'write' },
-      },
-      {
-        installationId: 6789,
-        repositoryIds: [789],
-        repositoryNames: ['specific-repo'],
-        permissions: { contents: 'read', pull_requests: 'write' },
-      },
-      {
-        token: 'fully-scoped-token',
-        expires_at: '2017-07-08T16:18:44-04:00',
-        permissions: { contents: 'read', pull_requests: 'write' },
-        repository_selection: 'selected',
-      },
-    ],
-  ])('%s', async (_: string, scopeDown, expectedCall, mockResponse) => {
-    mockGetInstallationToken.mockResolvedValue(mockResponse);
+  it('should return installation access token with repository ID scoping', async () => {
+    mockGetInstallationToken.mockResolvedValue({
+      token: 'scoped-installation-token',
+      expires_at: '2017-07-08T16:18:44-04:00',
+      permissions: { contents: 'read', metadata: 'read' },
+      repository_selection: 'selected',
+      repositories: [
+        { id: 123456789, name: 'repo1' },
+        { id: 987654321, name: 'repo2' },
+      ],
+    });
 
     const result = await getInstallationAccessTokenImpl({
       appId: 1234,
       nodeId: 'test-id',
       appTable: 'AppTable',
       installationTable: 'InstallationTable',
-      scopeDown,
-      getAppToken: jest.fn().mockResolvedValue('app-token'),
+      scopeDown: { repositoryIds: [123456789, 987654321] },
+      getAppToken: jest.fn().mockResolvedValue({ appToken: 'app-token' }),
       getInstallationId: jest.fn().mockResolvedValue(6789),
     });
 
-    expect(mockGetInstallationToken).toHaveBeenCalledWith(expectedCall);
     expect(result).toEqual({
       appId: 1234,
       nodeId: 'test-id',
-      installationToken: mockResponse.token,
+      installationToken: 'scoped-installation-token',
       expirationTime: new Date('2017-07-08T16:18:44-04:00'),
+      requestedScopeDown: { repositoryIds: [123456789, 987654321] },
+      actualScopeDown: {
+        repositoryIds: [123456789, 987654321],
+        repositoryNames: ['repo1', 'repo2'],
+        permissions: { contents: 'read', metadata: 'read' },
+      },
+    });
+  });
+
+  it('should return installation access token with repository name scoping', async () => {
+    mockGetInstallationToken.mockResolvedValue({
+      token: 'scoped-installation-token',
+      expires_at: '2017-07-08T16:18:44-04:00',
+      permissions: { contents: 'read', metadata: 'read' },
+      repository_selection: 'selected',
+      repositories: [
+        { id: 456789123, name: 'repo1' },
+        { id: 654321987, name: 'repo2' },
+      ],
+    });
+
+    const result = await getInstallationAccessTokenImpl({
+      appId: 1234,
+      nodeId: 'test-id',
+      appTable: 'AppTable',
+      installationTable: 'InstallationTable',
+      scopeDown: { repositoryNames: ['repo1', 'repo2'] },
+      getAppToken: jest.fn().mockResolvedValue({ appToken: 'app-token' }),
+      getInstallationId: jest.fn().mockResolvedValue(6789),
+    });
+
+    expect(result).toEqual({
+      appId: 1234,
+      nodeId: 'test-id',
+      installationToken: 'scoped-installation-token',
+      expirationTime: new Date('2017-07-08T16:18:44-04:00'),
+      requestedScopeDown: { repositoryNames: ['repo1', 'repo2'] },
+      actualScopeDown: {
+        repositoryIds: [456789123, 654321987],
+        repositoryNames: ['repo1', 'repo2'],
+        permissions: { contents: 'read', metadata: 'read' },
+      },
+    });
+  });
+
+  it('should return installation access token with permission scoping', async () => {
+    mockGetInstallationToken.mockResolvedValue({
+      token: 'scoped-installation-token',
+      expires_at: '2017-07-08T16:18:44-04:00',
+      permissions: { contents: 'read', issues: 'write', metadata: 'read' },
+      repository_selection: 'selected',
+    });
+
+    const result = await getInstallationAccessTokenImpl({
+      appId: 1234,
+      nodeId: 'test-id',
+      appTable: 'AppTable',
+      installationTable: 'InstallationTable',
+      scopeDown: { permissions: { contents: 'read', issues: 'write' } },
+      getAppToken: jest.fn().mockResolvedValue({ appToken: 'app-token' }),
+      getInstallationId: jest.fn().mockResolvedValue(6789),
+    });
+
+    expect(result).toEqual({
+      appId: 1234,
+      nodeId: 'test-id',
+      installationToken: 'scoped-installation-token',
+      expirationTime: new Date('2017-07-08T16:18:44-04:00'),
+      requestedScopeDown: {
+        permissions: { contents: 'read', issues: 'write' },
+      },
+      actualScopeDown: {
+        repositoryIds: undefined,
+        repositoryNames: undefined,
+        permissions: { contents: 'read', issues: 'write', metadata: 'read' },
+      },
+    });
+  });
+
+  it('should return installation access token with repository and permission scoping', async () => {
+    mockGetInstallationToken.mockResolvedValue({
+      token: 'fully-scoped-token',
+      expires_at: '2017-07-08T16:18:44-04:00',
+      permissions: {
+        contents: 'read',
+        pull_requests: 'write',
+        metadata: 'read',
+      },
+      repository_selection: 'selected',
+      repositories: [{ id: 789123456, name: 'specific-repo' }],
+    });
+
+    const result = await getInstallationAccessTokenImpl({
+      appId: 1234,
+      nodeId: 'test-id',
+      appTable: 'AppTable',
+      installationTable: 'InstallationTable',
+      scopeDown: {
+        repositoryIds: [789123456],
+        repositoryNames: ['specific-repo'],
+        permissions: { contents: 'read', pull_requests: 'write' },
+      },
+      getAppToken: jest.fn().mockResolvedValue({ appToken: 'app-token' }),
+      getInstallationId: jest.fn().mockResolvedValue(6789),
+    });
+
+    expect(result).toEqual({
+      appId: 1234,
+      nodeId: 'test-id',
+      installationToken: 'fully-scoped-token',
+      expirationTime: new Date('2017-07-08T16:18:44-04:00'),
+      requestedScopeDown: {
+        repositoryIds: [789123456],
+        repositoryNames: ['specific-repo'],
+        permissions: { contents: 'read', pull_requests: 'write' },
+      },
+      actualScopeDown: {
+        repositoryIds: [789123456],
+        repositoryNames: ['specific-repo'],
+        permissions: {
+          contents: 'read',
+          pull_requests: 'write',
+          metadata: 'read',
+        },
+      },
     });
   });
 
@@ -155,32 +234,45 @@ describe('getInstallationAccessTokenImpl', () => {
     ).rejects.toThrow('Failed to generate token.');
   });
 
-  it('should throw error when scoped token generation fails', async () => {
-    mockGetInstallationToken.mockRejectedValue(
-      new Error(
-        'The permissions requested are not granted to this installation.',
-      ),
-    );
-
-    await expect(
-      getInstallationAccessTokenImpl({
-        appId: 1234,
-        nodeId: 'test-id',
-        appTable: 'AppTable',
-        installationTable: 'InstallationTable',
-        scopeDown: {
-          repositoryNames: ['specific-repo'],
-          permissions: {
-            contents: 'write',
-          },
-        },
-        getAppToken: jest.fn().mockResolvedValue('app-token'),
-        getInstallationId: jest.fn().mockResolvedValue(6789),
-      }),
-    ).rejects.toThrow(
+  it.each([
+    [
+      'requesting permissions not granted to the app',
+      { permissions: { xyz: 'write' } },
       'The permissions requested are not granted to this installation.',
-    );
-  });
+    ],
+    [
+      'requested repositories do not exist or app not installed',
+      { repositoryNames: ['nonexistent-repo'] },
+      'There is at least one repository that does not exist or is not accessible to the parent installation.',
+    ],
+    [
+      'requesting invalid permission values',
+      { permissions: { issues: 'invalid' } },
+      'There is at least one permission action that is not supported. It should be one of: "read", "write" or "admin".',
+    ],
+    [
+      'repositoryId is invalid',
+      { repositoryIds: [99] },
+      'No repositories were provided.',
+    ],
+  ])(
+    'should throw error when %s',
+    async (_: string, scopeDown, errorMessage) => {
+      mockGetInstallationToken.mockRejectedValue(new Error(errorMessage));
+
+      await expect(
+        getInstallationAccessTokenImpl({
+          appId: 1234,
+          nodeId: 'test-id',
+          appTable: 'AppTable',
+          installationTable: 'InstallationTable',
+          scopeDown,
+          getAppToken: jest.fn().mockResolvedValue('app-token'),
+          getInstallationId: jest.fn().mockResolvedValue(6789),
+        }),
+      ).rejects.toThrow(errorMessage);
+    },
+  );
 });
 
 describe('getInstallationIdImpl', () => {

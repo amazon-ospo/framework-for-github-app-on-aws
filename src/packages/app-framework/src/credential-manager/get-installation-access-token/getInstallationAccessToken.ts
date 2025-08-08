@@ -89,6 +89,16 @@ export const getInstallationAccessTokenImpl: GetInstallationAccessToken =
         nodeId: nodeId,
         installationToken: installationAccessToken.token,
         expirationTime: new Date(installationAccessToken.expires_at),
+        requestedScopeDown: scopeDown,
+        actualScopeDown: {
+          repositoryIds: installationAccessToken.repositories?.map(
+            (repo) => repo.id,
+          ),
+          repositoryNames: installationAccessToken.repositories?.map(
+            (repo) => repo.name,
+          ),
+          permissions: installationAccessToken.permissions,
+        },
       };
     } catch (error) {
       console.error(error);

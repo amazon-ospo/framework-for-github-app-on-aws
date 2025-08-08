@@ -18,10 +18,5 @@ export class GitHubError extends ServerError {}
 // Error is thrown when environment for lambda functions are not configured properly
 export class EnvironmentError extends ServerError {}
 
-/**
- * TODO: After we change the smithy model to perform empty string validation, delete these.
- */
-export class ClientError extends Error {}
-
-// Error is thrown when request parameters provided to APIs are of incorrect format
-export class RequestError extends ClientError {}
+// Error is thrown when request parameters provided to GitHub APIs are of incorrect format
+export class GitHubRequestError extends GitHubError {}

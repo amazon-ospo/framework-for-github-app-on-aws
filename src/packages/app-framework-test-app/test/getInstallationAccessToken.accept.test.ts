@@ -177,4 +177,139 @@ describe('Smithy client for installation access token API', () => {
     });
     await expect(client.send(command)).rejects.toThrow('Missing credentials');
   });
+
+  it('should return requestedScopeDown and actualScopeDown fields when scoping is requested', async () => {
+    const client = new AppFrameworkClient({
+      endpoint,
+      region,
+      credentials: defaultProvider(),
+      sha256: Sha256,
+    });
+    const command = new GetInstallationTokenCommand({
+      appId: validAppId,
+      nodeId: validNodeId,
+      scopeDown: {
+        permissions: { metadata: 'read' }, // metadata is always available
+      },
+    });
+    const response = await client.send(command);
+    expect(response).toHaveProperty('requestedScopeDown');
+    expect(response).toHaveProperty('actualScopeDown');
+    expect(response.requestedScopeDown).toEqual({
+      permissions: { metadata: 'read' },
+    });
+    expect(response.actualScopeDown).toBeDefined();
+    expect(response.actualScopeDown).toEqual(response.requestedScopeDown);
+  });
+
+  it('should return undefined requestedScopeDown when no scoping is requested', async () => {
+    const client = new AppFrameworkClient({
+      endpoint,
+      region,
+      credentials: defaultProvider(),
+      sha256: Sha256,
+    });
+    const command = new GetInstallationTokenCommand({
+      appId: validAppId,
+      nodeId: validNodeId,
+    });
+    const response = await client.send(command);
+    expect(response.requestedScopeDown).toBeUndefined();
+    expect(response.actualScopeDown).toBeDefined();
+    expect(response.actualScopeDown).toMatchObject({
+      permissions: { metadata: 'read' },
+    });
+  });
+
+  it('should throw error when requesting permissions not granted to the app', async () => {
+    const client = new AppFrameworkClient({
+      endpoint,
+      region,
+      credentials: defaultProvider(),
+      sha256: Sha256,
+    });
+    const command = new GetInstallationTokenCommand({
+      appId: validAppId,
+      nodeId: validNodeId,
+      scopeDown: {
+        permissions: {
+          xyz: 'write',
+        },
+      },
+    });
+    await expect(client.send(command)).rejects.toThrow(
+      'Invalid Request: Error: GitHub API Request Error: The permissions requested are not granted to this installation. - https://docs.github.com/rest/reference/apps#create-an-installation-access-token-for-an-app',
+    );
+  });
+
+  it.each([
+    [
+      'repository names',
+      { repositoryNames: ['nonexistent-repo', 'appnotinstalledrepo'] }
+    ],
+    [
+      'repository IDs', 
+      { repositoryIds: [999999999] }
+    ],
+    [
+      'repository names and IDs',
+      { repositoryNames: ['nonexistent-repo'], repositoryIds: [999999999] }
+    ]
+  ])('should throw error when requested %s do not exist or app not installed', async (_:string, scopeDown) => {
+    const client = new AppFrameworkClient({
+      endpoint,
+      region,
+      credentials: defaultProvider(),
+      sha256: Sha256,
+    });
+    const command = new GetInstallationTokenCommand({
+      appId: validAppId,
+      nodeId: validNodeId,
+      scopeDown,
+    });
+    await expect(client.send(command)).rejects.toThrow(
+      'Invalid Request: Error: GitHub API Request Error: There is at least one repository that does not exist or is not accessible to the parent installation. - https://docs.github.com/rest/reference/apps#create-an-installation-access-token-for-an-app',
+    );
+  });
+
+  it("should throw error when repository ID is invalid", async () => {
+    const client = new AppFrameworkClient({
+      endpoint,
+      region,
+      credentials: defaultProvider(),
+      sha256: Sha256,
+    });
+    const command = new GetInstallationTokenCommand({
+      appId: validAppId,
+      nodeId: validNodeId,
+      scopeDown: {
+        repositoryIds: [2753] 
+      },
+    });
+    await expect(client.send(command)).rejects.toThrow(
+      'Invalid Request: Error: GitHub API Request Error: No repositories were provided. - https://docs.github.com/rest/reference/apps#create-an-installation-access-token-for-an-app',
+    );
+  })
+
+  it('should throw error when requesting invalid permission values', async () => {
+    const client = new AppFrameworkClient({
+      endpoint,
+      region,
+      credentials: defaultProvider(),
+      sha256: Sha256,
+    });
+    const command = new GetInstallationTokenCommand({
+      appId: validAppId,
+      nodeId: validNodeId,
+      scopeDown: {
+        permissions: {
+          issues: 'invalid',
+        },
+      },
+    });
+    await expect(client.send(command)).rejects.toThrow(
+      'Invalid Request: Error: GitHub API Request Error: There is at least one permission action that is not supported. It should be one of: \"read\", \"write\" or \"admin\". - https://docs.github.com/rest/reference/apps#create-an-installation-access-token-for-an-app',
+    );
+  });
+
 });
