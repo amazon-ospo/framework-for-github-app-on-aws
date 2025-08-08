@@ -245,34 +245,34 @@ describe('Smithy client for installation access token API', () => {
   it.each([
     [
       'repository names',
-      { repositoryNames: ['nonexistent-repo', 'appnotinstalledrepo'] }
+      { repositoryNames: ['nonexistent-repo', 'appnotinstalledrepo'] },
     ],
-    [
-      'repository IDs', 
-      { repositoryIds: [999999999] }
-    ],
+    ['repository IDs', { repositoryIds: [999999999] }],
     [
       'repository names and IDs',
-      { repositoryNames: ['nonexistent-repo'], repositoryIds: [999999999] }
-    ]
-  ])('should throw error when requested %s do not exist or app not installed', async (_:string, scopeDown) => {
-    const client = new AppFrameworkClient({
-      endpoint,
-      region,
-      credentials: defaultProvider(),
-      sha256: Sha256,
-    });
-    const command = new GetInstallationTokenCommand({
-      appId: validAppId,
-      nodeId: validNodeId,
-      scopeDown,
-    });
-    await expect(client.send(command)).rejects.toThrow(
-      'Invalid Request: Error: GitHub API Request Error: There is at least one repository that does not exist or is not accessible to the parent installation. - https://docs.github.com/rest/reference/apps#create-an-installation-access-token-for-an-app',
-    );
-  });
+      { repositoryNames: ['nonexistent-repo'], repositoryIds: [999999999] },
+    ],
+  ])(
+    'should throw error when requested %s do not exist or app not installed',
+    async (_: string, scopeDown) => {
+      const client = new AppFrameworkClient({
+        endpoint,
+        region,
+        credentials: defaultProvider(),
+        sha256: Sha256,
+      });
+      const command = new GetInstallationTokenCommand({
+        appId: validAppId,
+        nodeId: validNodeId,
+        scopeDown,
+      });
+      await expect(client.send(command)).rejects.toThrow(
+        'Invalid Request: Error: GitHub API Request Error: There is at least one repository that does not exist or is not accessible to the parent installation. - https://docs.github.com/rest/reference/apps#create-an-installation-access-token-for-an-app',
+      );
+    },
+  );
 
-  it("should throw error when repository ID is invalid", async () => {
+  it('should throw error when repository ID is invalid', async () => {
     const client = new AppFrameworkClient({
       endpoint,
       region,
@@ -283,13 +283,13 @@ describe('Smithy client for installation access token API', () => {
       appId: validAppId,
       nodeId: validNodeId,
       scopeDown: {
-        repositoryIds: [2753] 
+        repositoryIds: [2753],
       },
     });
     await expect(client.send(command)).rejects.toThrow(
       'Invalid Request: Error: GitHub API Request Error: No repositories were provided. - https://docs.github.com/rest/reference/apps#create-an-installation-access-token-for-an-app',
     );
-  })
+  });
 
   it('should throw error when requesting invalid permission values', async () => {
     const client = new AppFrameworkClient({
@@ -311,5 +311,4 @@ describe('Smithy client for installation access token API', () => {
       'Invalid Request: Error: GitHub API Request Error: There is at least one permission action that is not supported. It should be one of: \"read\", \"write\" or \"admin\". - https://docs.github.com/rest/reference/apps#create-an-installation-access-token-for-an-app',
     );
   });
-
 });

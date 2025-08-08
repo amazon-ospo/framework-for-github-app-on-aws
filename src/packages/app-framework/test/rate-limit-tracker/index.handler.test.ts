@@ -69,17 +69,9 @@ describe('handlerImpl', () => {
         .mockReturnValue([{ appId: 1, installationId: 20, nodeId: 'foo' }]),
       getInstallationAccessToken: jest
         .fn()
-        .mockReturnValue({ 
-          appId: 1,
-          nodeId: 'foo',
-          installationToken: 'some-token',
-          expirationTime: new Date(),
-          actualScopeDown: {
-            permissions: { metadata: 'read' }
-          }
-        }),
+        .mockReturnValue({ installationToken: 'some-token' }),
     });
-    expect(addDimensionsSpy).toHaveBeenCalledTimes(9);
+    expect(addDimensionsSpy).toHaveBeenCalledTimes(3);
     expect(addMetricSpy).toHaveBeenCalledTimes(15);
     expect(publishStoredMetricsSpy).toHaveBeenCalledTimes(3);
   });
@@ -96,15 +88,7 @@ describe('handlerImpl', () => {
           .mockReturnValue([{ appId: 1, installationId: 20, nodeId: 'foo' }]),
         getInstallationAccessToken: jest
           .fn()
-          .mockReturnValue({ 
-            appId: 1,
-            nodeId: 'foo',
-            installationToken: 'some-token',
-            expirationTime: new Date(),
-            actualScopeDown: {
-              permissions: { metadata: 'read' }
-            }
-          }),
+          .mockReturnValue({ installationToken: 'some-token' }),
       }),
     ).rejects.toThrow(GitHubError);
 
