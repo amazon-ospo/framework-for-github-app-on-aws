@@ -41,6 +41,8 @@ export const handler = async (
       nodeId: bodyData.nodeId,
       expirationTime: bodyData.expirationTime,
       hashedToken: getHashedToken(bodyData.installationToken as string),
+      requestedScopeDown: bodyData.requestedScopeDown,
+      actualScopeDown: bodyData.actualScopeDown,
     };
     console.log(JSON.stringify(logResponse));
   }

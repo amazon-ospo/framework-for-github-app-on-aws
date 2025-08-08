@@ -190,6 +190,54 @@ const response = await client.send(command);
 const token = response.installationToken;
 ```
 
+#### Example: Get Scoped Installation Access Token
+
+You can limit the token's access to specific repositories and
+permissions using the `scopeDown` parameter:
+
+```text
+import { GetInstallationTokenCommand } from '@aws/app-framework-for-github-apps-on-aws-client';
+
+const command = new GetInstallationTokenCommand({
+  appId: '<your App ID>',
+  nodeId: '<your App installation target node_id>',
+  scopeDown: {
+    repositoryNames: ['repo1', 'repo2'], // Limit to specific repositories by name
+    repositoryIds: [123456, 789012], // Or limit by repository IDs
+    permissions: {  // Specify which permissions to grant (e.g., contents, issues, pull_requests)
+      contents: 'read',
+      pull_requests: 'write'
+    }
+  }
+});
+
+const response = await client.send(command);
+const token = response.installationToken; // Token with limited scope
+const requestedScope = response.requestedScopeDown; // What you requested (if scoping was used)
+const actualScope = response.actualScopeDown; // What GitHub actually granted
+```
+
+##### Scope Down Parameters
+
+- **`scopeDown.permissions`** - Object with permission keys and
+  `'read'`/`'write'`/`'admin'` values
+
+- **`scopeDown.repositoryNames`** - Array of repository names to limit
+  access
+
+- **`scopeDown.repositoryIds`** - Array of repository IDs to limit access
+
+**Note**: The `scopeDown` parameter can only reduce permissions, not expand
+them.
+Your GitHub App must already have the requested permissions,
+and the specified repositories must be accessible to the installation.
+Invalid scope down parameters (non-existent repositories,
+unauthorized permissions) will result in an error rather than a successful
+response.
+
+For a complete list of available permissions and detailed scoping parameters,
+see the [GitHub API documentation for creating installation access tokens](https://docs.github.com/en/rest/apps/apps?apiVersion=2022-11-28#create-an-installation-access-token-for-an-app).
+
 #### Example: Get App Token
 
 ```text
