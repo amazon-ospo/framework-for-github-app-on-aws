@@ -147,9 +147,13 @@ project.package.file.addOverride("workspaces", [
   "src/packages/*",
   "src/packages/smithy/build/smithy/source/*",
 ]);
+
 // Run Lerna build one package at a time and,
 // waits for each package to complete before showing its logs.
-project.preCompileTask.exec("npx lerna run build --concurrency=1 --no-stream");
+// Use --sort to build packages in topological dependency order
+project.preCompileTask.exec(
+  "npx lerna run build --concurrency=1 --no-stream --sort",
+);
 project.addScripts({
   cli: "ts-node src/packages/app-framework-ops-tools/src/app-framework-cli.ts",
 });
