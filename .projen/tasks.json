@@ -207,7 +207,7 @@
       "description": "Prepare the project for compilation",
       "steps": [
         {
-          "exec": "npx lerna run build --concurrency=1 --no-stream"
+          "exec": "npx lerna run build --concurrency=1 --no-stream --sort"
         }
       ]
     },
