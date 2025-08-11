@@ -1,7 +1,0 @@
-{
-  "the-app-framework-test-stack": {
-    "AppTokenEndpoint": "https://ni2kk7y2pp2qe36xn5tb3ttenm0miehy.lambda-url.us-west-2.on.aws/",
-    "InstallationAccessTokenEndpoint": "https://yipbdamdptbfd3kfqgnjg6g5ei0nshxh.lambda-url.us-west-2.on.aws/",
-    "Region": "us-west-2"
-  }
-}
