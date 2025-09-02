@@ -46,16 +46,35 @@ export class GitHubAPIService {
     ocktokitClient?: () => Octokit;
   }): Promise<AppInstallationsResponseType> {
     const octokit = ocktokitClient();
+    const allInstallations: AppInstallationsResponseType = [];
 
-    const response = await octokit.rest.apps.listInstallations();
+    let page = 1;
+    const perPage = 100;
 
-    if (response.status >= 400) {
-      throw new GitHubError(
-        `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
-      );
+    // Fetch all pages of installations
+    while (true) {
+      const response = await octokit.rest.apps.listInstallations({
+        per_page: perPage,
+        page: page,
+      });
+
+      if (response.status >= 400) {
+        throw new GitHubError(
+          `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
+        );
+      }
+
+      // Add this page's installations to our list
+      allInstallations.push(...response.data);
+
+      // If we got fewer results than requested, we've reached the last page
+      if (response.data.length < perPage) {
+        break;
+      }
+      page++;
     }
 
-    return response.data;
+    return allInstallations;
   }
 
   async getInstallationToken({
