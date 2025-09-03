@@ -50,9 +50,9 @@ export class GitHubAPIService {
 
     let page = 1;
     const perPage = 100;
+    let pagesRemaining = true;
 
-    // Fetch all pages of installations
-    while (true) {
+    while (pagesRemaining) {
       const response = await octokit.rest.apps.listInstallations({
         per_page: perPage,
         page: page,
@@ -67,13 +67,14 @@ export class GitHubAPIService {
       // Add this page's installations to our list
       allInstallations.push(...response.data);
 
-      // If we got fewer results than requested, we've reached the last page
-      if (response.data.length < perPage) {
-        break;
-      }
-      page++;
-    }
+      // Check for Link header to determine if there are more pages
+      const linkHeader = response.headers.link;
+      pagesRemaining = !!(linkHeader && linkHeader.includes('rel="next"'));
 
+      if (pagesRemaining) {
+        page++;
+      }
+    }
     return allInstallations;
   }
 

@@ -97,8 +97,8 @@ describe('GitHubAPIService', () => {
       ).rejects.toThrow(GitHubError);
     });
 
-    // Pagination tests
-    it('should handle pagination and fetch all installations across multiple pages', async () => {
+    // Pagination tests with Link header
+    it('should handle pagination using Link header with rel="next"', async () => {
       // Create test data for multiple pages
       const page1Installations = Array.from({ length: 100 }, (_, i) => ({
         id: i + 1,
@@ -118,31 +118,37 @@ describe('GitHubAPIService', () => {
         app_id: 1010,
       }));
 
-      // Mock the API calls for each page
+      // Mock the API calls for each page with Link headers
       mockOctokitRest.apps.listInstallations
         .mockResolvedValueOnce({
           status: 200,
           data: page1Installations,
-          headers: {},
+          headers: {
+            link: '<https://api.github.com/app/installations?page=2>; rel="next", <https://api.github.com/app/installations?page=3>; rel="last"',
+          },
           url: '',
         })
         .mockResolvedValueOnce({
           status: 200,
           data: page2Installations,
-          headers: {},
+          headers: {
+            link: '<https://api.github.com/app/installations?page=3>; rel="next", <https://api.github.com/app/installations?page=1>; rel="prev"',
+          },
           url: '',
         })
-        // Less than 100, should stop pagination
         .mockResolvedValueOnce({
           status: 200,
           data: page3Installations,
-          headers: {},
+          headers: {
+            link: '<https://api.github.com/app/installations?page=2>; rel="prev", <https://api.github.com/app/installations?page=1>; rel="first"',
+          },
           url: '',
         });
 
       const result = await service.getInstallations({
         ocktokitClient: () => new Octokit() as any,
       });
+
       expect(mockOctokitRest.apps.listInstallations).toHaveBeenCalledTimes(3);
       expect(mockOctokitRest.apps.listInstallations).toHaveBeenNthCalledWith(
         1,
@@ -183,10 +189,12 @@ describe('GitHubAPIService', () => {
         app_id: 1010,
       }));
 
-      mockOctokitRest.apps.listInstallations.mockResolvedValue({
+      mockOctokitRest.apps.listInstallations.mockResolvedValueOnce({
         status: 200,
         data: installations,
-        headers: {},
+        headers: {
+          link: '<https://api.github.com/app/installations?page=1>; rel="prev", <https://api.github.com/app/installations?page=1>; rel="first"',
+        },
         url: '',
       });
 
@@ -205,34 +213,28 @@ describe('GitHubAPIService', () => {
       expect(result).toHaveLength(25);
     });
 
-    it('should handle exactly 100 installations on first page and empty second page', async () => {
+    it('should handle exactly 100 installations on first page', async () => {
       const page1Installations = Array.from({ length: 100 }, (_, i) => ({
         id: i + 1,
         account: { node_id: `node_${i + 1}` },
         app_id: 1010,
       }));
 
-      mockOctokitRest.apps.listInstallations
-        .mockResolvedValueOnce({
-          status: 200,
-          data: page1Installations,
-          headers: {},
-          url: '',
-        })
-        // Empty second page
-        .mockResolvedValueOnce({
-          status: 200,
-          data: [],
-          headers: {},
-          url: '',
-        });
+      mockOctokitRest.apps.listInstallations.mockResolvedValueOnce({
+        status: 200,
+        data: page1Installations,
+        headers: {
+          link: '<https://api.github.com/app/installations?page=1>; rel="first", <https://api.github.com/app/installations?page=1>; rel="last"',
+        },
+        url: '',
+      });
 
       const result = await service.getInstallations({
         ocktokitClient: () => new Octokit() as any,
       });
 
-      // Should call the API twice
-      expect(mockOctokitRest.apps.listInstallations).toHaveBeenCalledTimes(2);
+      // Should call the API only once since Link header has no rel="next"
+      expect(mockOctokitRest.apps.listInstallations).toHaveBeenCalledTimes(1);
       expect(result).toEqual(page1Installations);
       expect(result).toHaveLength(100);
     });
@@ -248,7 +250,9 @@ describe('GitHubAPIService', () => {
         .mockResolvedValueOnce({
           status: 200,
           data: page1Installations,
-          headers: {},
+          headers: {
+            link: '<https://api.github.com/app/installations?page=2>; rel="next"',
+          },
           url: '',
         })
         .mockResolvedValueOnce({
@@ -268,8 +272,8 @@ describe('GitHubAPIService', () => {
       expect(mockOctokitRest.apps.listInstallations).toHaveBeenCalledTimes(2);
     });
 
-    it('should handle empty first page', async () => {
-      mockOctokitRest.apps.listInstallations.mockResolvedValue({
+    it('should handle empty installations list', async () => {
+      mockOctokitRest.apps.listInstallations.mockResolvedValueOnce({
         status: 200,
         data: [],
         headers: {},
@@ -280,7 +284,7 @@ describe('GitHubAPIService', () => {
         ocktokitClient: () => new Octokit() as any,
       });
 
-      // Should only call the API once since we got 0 results (less than 100)
+      // Should only call the API once since we got 0 results
       expect(mockOctokitRest.apps.listInstallations).toHaveBeenCalledTimes(1);
       expect(mockOctokitRest.apps.listInstallations).toHaveBeenCalledWith({
         per_page: 100,
@@ -289,6 +293,96 @@ describe('GitHubAPIService', () => {
 
       expect(result).toEqual([]);
       expect(result).toHaveLength(0);
+    });
+
+    it('should stop pagination when Link header has no rel="next"', async () => {
+      const installations = Array.from({ length: 100 }, (_, i) => ({
+        id: i + 1,
+        account: { node_id: `node_${i + 1}` },
+        app_id: 1010,
+      }));
+
+      mockOctokitRest.apps.listInstallations.mockResolvedValueOnce({
+        status: 200,
+        data: installations,
+        headers: {
+          link: '<https://api.github.com/app/installations?page=1>; rel="prev", <https://api.github.com/app/installations?page=1>; rel="first"',
+        },
+        url: '',
+      });
+
+      const result = await service.getInstallations({
+        ocktokitClient: () => new Octokit() as any,
+      });
+
+      // Should only call the API once since Link header doesn't contain rel="next"
+      expect(mockOctokitRest.apps.listInstallations).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(installations);
+      expect(result).toHaveLength(100);
+    });
+
+    it('should handle Link header with rel="next"', async () => {
+      const page1Installations = Array.from({ length: 50 }, (_, i) => ({
+        id: i + 1,
+        account: { node_id: `node_${i + 1}` },
+        app_id: 1010,
+      }));
+
+      const page2Installations = Array.from({ length: 30 }, (_, i) => ({
+        id: i + 51,
+        account: { node_id: `node_${i + 51}` },
+        app_id: 1010,
+      }));
+
+      mockOctokitRest.apps.listInstallations
+        .mockResolvedValueOnce({
+          status: 200,
+          data: page1Installations,
+          headers: {
+            link: '<https://api.github.com/app/installations?page=2>; rel="next"',
+          },
+          url: '',
+        })
+        .mockResolvedValueOnce({
+          status: 200,
+          data: page2Installations,
+          headers: {},
+          url: '',
+        });
+
+      const result = await service.getInstallations({
+        ocktokitClient: () => new Octokit() as any,
+      });
+
+      expect(mockOctokitRest.apps.listInstallations).toHaveBeenCalledTimes(2);
+      expect(result).toEqual([...page1Installations, ...page2Installations]);
+      expect(result).toHaveLength(80);
+    });
+
+    it('should handle undefined Link header', async () => {
+      const installations = Array.from({ length: 75 }, (_, i) => ({
+        id: i + 1,
+        account: { node_id: `node_${i + 1}` },
+        app_id: 1010,
+      }));
+
+      mockOctokitRest.apps.listInstallations.mockResolvedValueOnce({
+        status: 200,
+        data: installations,
+        headers: {
+          link: undefined,
+        },
+        url: '',
+      });
+
+      const result = await service.getInstallations({
+        ocktokitClient: () => new Octokit() as any,
+      });
+
+      // Should only call the API once since undefined Link header evaluates to falsy
+      expect(mockOctokitRest.apps.listInstallations).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(installations);
+      expect(result).toHaveLength(75);
     });
   });
 
