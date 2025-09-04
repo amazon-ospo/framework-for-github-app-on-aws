@@ -22,9 +22,12 @@ const mockOctokitRest = {
   },
 };
 
+const mockPaginate = jest.fn();
+
 jest.mock('@octokit/rest', () => ({
   Octokit: jest.fn().mockImplementation(() => ({
     rest: mockOctokitRest,
+    paginate: mockPaginate,
   })),
 }));
 
@@ -38,7 +41,7 @@ describe('GitHubAPIService', () => {
 
   describe('getInstallations', () => {
     it('should return list of installations if able to find in output', async () => {
-      const listInstallations = [
+      const expectedInstallations = [
         {
           id: 788,
           account: {
@@ -55,46 +58,79 @@ describe('GitHubAPIService', () => {
         },
       ];
 
-      mockOctokitRest.apps.listInstallations.mockResolvedValue({
-        status: 200,
-        data: listInstallations,
-        headers: {},
-        url: '',
-      });
+      mockPaginate.mockResolvedValue(expectedInstallations);
 
       const result = await service.getInstallations({
-        ocktokitClient: () => new Octokit() as any,
+        octokitClient: () => new Octokit() as any,
       });
-      expect(result).toEqual(listInstallations);
+
+      expect(mockPaginate).toHaveBeenCalledWith(
+        mockOctokitRest.apps.listInstallations,
+        { per_page: 100 },
+      );
+      expect(result).toEqual(expectedInstallations);
     });
 
-    it('should return empty list of installations if able to find in output', async () => {
-      mockOctokitRest.apps.listInstallations.mockResolvedValue({
-        status: 200,
-        data: [{}],
-        headers: {},
-        url: '',
-      });
+    it('should return empty array when no installations found', async () => {
+      mockPaginate.mockResolvedValue([]);
 
       const result = await service.getInstallations({
-        ocktokitClient: () => new Octokit() as any,
+        octokitClient: () => new Octokit() as any,
       });
-      expect(result).toEqual([{}]);
+
+      expect(mockPaginate).toHaveBeenCalledWith(
+        mockOctokitRest.apps.listInstallations,
+        { per_page: 100 },
+      );
+      expect(result).toEqual([]);
+      expect(result).toHaveLength(0);
     });
 
-    it('should throw error if GitHub API has an error', async () => {
-      mockOctokitRest.apps.listInstallations.mockResolvedValue({
+    it('should handle multiple pages automatically with octokit.paginate', async () => {
+      const expectedInstallations = Array.from({ length: 250 }, (_, i) => ({
+        id: i + 1,
+        account: { node_id: `node_${i + 1}` },
+        app_id: 1010,
+      }));
+
+      mockPaginate.mockResolvedValue(expectedInstallations);
+
+      const result = await service.getInstallations({
+        octokitClient: () => new Octokit() as any,
+      });
+
+      expect(mockPaginate).toHaveBeenCalledWith(
+        mockOctokitRest.apps.listInstallations,
+        { per_page: 100 },
+      );
+      expect(result).toEqual(expectedInstallations);
+      expect(result).toHaveLength(250);
+    });
+
+    it('should throw GitHubError when paginate throws HTTP error', async () => {
+      const httpError = {
         status: 401,
-        data: 'Invalid token',
-        headers: { 'content-type': 'text/plain' },
-        url: '',
-      });
+        response: {
+          status: 401,
+          headers: { 'content-type': 'application/json' },
+          data: { message: 'Bad credentials' },
+        },
+        message: 'Bad credentials',
+      };
+
+      mockPaginate.mockRejectedValue(httpError);
 
       await expect(
         service.getInstallations({
-          ocktokitClient: () => new Octokit() as any,
+          octokitClient: () => new Octokit() as any,
         }),
       ).rejects.toThrow(GitHubError);
+
+      await expect(
+        service.getInstallations({
+          octokitClient: () => new Octokit() as any,
+        }),
+      ).rejects.toThrow('GitHub API Error: status: 401');
     });
   });
 
@@ -118,7 +154,7 @@ describe('GitHubAPIService', () => {
 
       const result = await service.getInstallationToken({
         installationId,
-        ocktokitClient: () => new Octokit() as any,
+        octokitClient: () => new Octokit() as any,
       });
       expect(result).toEqual(data);
     });
@@ -138,7 +174,7 @@ describe('GitHubAPIService', () => {
       await expect(
         service.getInstallationToken({
           installationId,
-          ocktokitClient: () => new Octokit() as any,
+          octokitClient: () => new Octokit() as any,
         }),
       ).rejects.toThrow(DataError);
     });
@@ -154,7 +190,7 @@ describe('GitHubAPIService', () => {
       await expect(
         service.getInstallationToken({
           installationId,
-          ocktokitClient: () => new Octokit() as any,
+          octokitClient: () => new Octokit() as any,
         }),
       ).rejects.toThrow(GitHubError);
     });
@@ -174,7 +210,7 @@ describe('GitHubAPIService', () => {
       });
 
       const result = await service.getAuthenticatedApp({
-        ocktokitClient: () => new Octokit() as any,
+        octokitClient: () => new Octokit() as any,
       });
       expect(result).toEqual(output);
     });
@@ -193,7 +229,7 @@ describe('GitHubAPIService', () => {
 
       await expect(
         service.getAuthenticatedApp({
-          ocktokitClient: () => new Octokit() as any,
+          octokitClient: () => new Octokit() as any,
         }),
       ).rejects.toThrow(DataError);
     });
@@ -208,7 +244,7 @@ describe('GitHubAPIService', () => {
 
       await expect(
         service.getAuthenticatedApp({
-          ocktokitClient: () => new Octokit() as any,
+          octokitClient: () => new Octokit() as any,
         }),
       ).rejects.toThrow(GitHubError);
     });
@@ -253,7 +289,7 @@ describe('GitHubAPIService', () => {
       });
 
       const result = await service.getRateLimit({
-        ocktokitClient: () => new Octokit() as any,
+        octokitClient: () => new Octokit() as any,
       });
       expect(result).toEqual(output);
     });
@@ -268,7 +304,7 @@ describe('GitHubAPIService', () => {
 
       await expect(
         service.getRateLimit({
-          ocktokitClient: () => new Octokit() as any,
+          octokitClient: () => new Octokit() as any,
         }),
       ).rejects.toThrow(GitHubError);
     });
@@ -283,7 +319,7 @@ describe('GitHubAPIService', () => {
 
     await expect(
       service.getRateLimit({
-        ocktokitClient: () => new Octokit() as any,
+        octokitClient: () => new Octokit() as any,
       }),
     ).rejects.toThrow(DataError);
   });

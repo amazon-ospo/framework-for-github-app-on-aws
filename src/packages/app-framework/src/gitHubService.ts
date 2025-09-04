@@ -41,21 +41,30 @@ export class GitHubAPIService {
   }
 
   async getInstallations({
-    ocktokitClient = this.getOctokitClient.bind(this),
+    octokitClient = this.getOctokitClient.bind(this),
   }: {
-    ocktokitClient?: () => Octokit;
+    octokitClient?: () => Octokit;
   }): Promise<AppInstallationsResponseType> {
-    const octokit = ocktokitClient();
+    const octokit = octokitClient();
 
-    const response = await octokit.rest.apps.listInstallations();
+    try {
+      const installations = await octokit.paginate(
+        octokit.rest.apps.listInstallations,
+        { per_page: 100 },
+      );
 
-    if (response.status >= 400) {
+      return installations as AppInstallationsResponseType;
+    } catch (err: any) {
+      const status = err?.status ?? err?.response?.status;
+      const headers = err?.response?.headers;
+      const data = err?.response?.data;
+
       throw new GitHubError(
-        `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
+        `GitHub API Error: status: ${status}, headers: ${JSON.stringify(
+          headers,
+        )}, error: ${JSON.stringify(data)}`,
       );
     }
-
-    return response.data;
   }
 
   async getInstallationToken({
@@ -63,7 +72,7 @@ export class GitHubAPIService {
     repositoryIds,
     repositoryNames,
     permissions,
-    ocktokitClient: octokitClient = this.getOctokitClient.bind(this),
+    octokitClient: octokitClient = this.getOctokitClient.bind(this),
   }: {
     installationId: number;
     repositoryIds?: number[];
@@ -71,7 +80,7 @@ export class GitHubAPIService {
     permissions?: {
       [key: string]: string;
     };
-    ocktokitClient?: () => Octokit;
+    octokitClient?: () => Octokit;
   }): Promise<GetInstallationAccessTokenResponseType> {
     const octokit = octokitClient();
     try {
@@ -103,11 +112,11 @@ export class GitHubAPIService {
   }
 
   async getAuthenticatedApp({
-    ocktokitClient = this.getOctokitClient.bind(this),
+    octokitClient: octokitClient = this.getOctokitClient.bind(this),
   }: {
-    ocktokitClient?: () => Octokit;
+    octokitClient?: () => Octokit;
   }): Promise<AppAuthenticationResponseType> {
-    const octokit = ocktokitClient();
+    const octokit = octokitClient();
     try {
       const response = await octokit.rest.apps.getAuthenticated();
 
@@ -131,11 +140,11 @@ export class GitHubAPIService {
   }
 
   async getRateLimit({
-    ocktokitClient = this.getOctokitClient.bind(this),
+    octokitClient: octokitClient = this.getOctokitClient.bind(this),
   }: {
-    ocktokitClient?: () => Octokit;
+    octokitClient?: () => Octokit;
   }): Promise<GetRateLimitResponseType> {
-    const octokit = ocktokitClient();
+    const octokit = octokitClient();
     const response = await octokit.rest.rateLimit.get();
     if (response.status >= 400) {
       throw new GitHubError(
