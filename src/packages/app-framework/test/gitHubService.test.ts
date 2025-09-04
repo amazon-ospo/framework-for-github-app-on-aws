@@ -154,7 +154,7 @@ describe('GitHubAPIService', () => {
 
       const result = await service.getInstallationToken({
         installationId,
-        ocktokitClient: () => new Octokit() as any,
+        octokitClient: () => new Octokit() as any,
       });
       expect(result).toEqual(data);
     });
@@ -174,7 +174,7 @@ describe('GitHubAPIService', () => {
       await expect(
         service.getInstallationToken({
           installationId,
-          ocktokitClient: () => new Octokit() as any,
+          octokitClient: () => new Octokit() as any,
         }),
       ).rejects.toThrow(DataError);
     });
@@ -190,7 +190,7 @@ describe('GitHubAPIService', () => {
       await expect(
         service.getInstallationToken({
           installationId,
-          ocktokitClient: () => new Octokit() as any,
+          octokitClient: () => new Octokit() as any,
         }),
       ).rejects.toThrow(GitHubError);
     });
@@ -210,7 +210,7 @@ describe('GitHubAPIService', () => {
       });
 
       const result = await service.getAuthenticatedApp({
-        ocktokitClient: () => new Octokit() as any,
+        octokitClient: () => new Octokit() as any,
       });
       expect(result).toEqual(output);
     });
@@ -229,7 +229,7 @@ describe('GitHubAPIService', () => {
 
       await expect(
         service.getAuthenticatedApp({
-          ocktokitClient: () => new Octokit() as any,
+          octokitClient: () => new Octokit() as any,
         }),
       ).rejects.toThrow(DataError);
     });
@@ -244,7 +244,7 @@ describe('GitHubAPIService', () => {
 
       await expect(
         service.getAuthenticatedApp({
-          ocktokitClient: () => new Octokit() as any,
+          octokitClient: () => new Octokit() as any,
         }),
       ).rejects.toThrow(GitHubError);
     });
@@ -289,7 +289,7 @@ describe('GitHubAPIService', () => {
       });
 
       const result = await service.getRateLimit({
-        ocktokitClient: () => new Octokit() as any,
+        octokitClient: () => new Octokit() as any,
       });
       expect(result).toEqual(output);
     });
@@ -304,7 +304,7 @@ describe('GitHubAPIService', () => {
 
       await expect(
         service.getRateLimit({
-          ocktokitClient: () => new Octokit() as any,
+          octokitClient: () => new Octokit() as any,
         }),
       ).rejects.toThrow(GitHubError);
     });
@@ -319,7 +319,7 @@ describe('GitHubAPIService', () => {
 
     await expect(
       service.getRateLimit({
-        ocktokitClient: () => new Octokit() as any,
+        octokitClient: () => new Octokit() as any,
       }),
     ).rejects.toThrow(DataError);
   });
