@@ -41,41 +41,30 @@ export class GitHubAPIService {
   }
 
   async getInstallations({
-    ocktokitClient = this.getOctokitClient.bind(this),
+    octokitClient = this.getOctokitClient.bind(this),
   }: {
-    ocktokitClient?: () => Octokit;
+    octokitClient?: () => Octokit;
   }): Promise<AppInstallationsResponseType> {
-    const octokit = ocktokitClient();
-    const allInstallations: AppInstallationsResponseType = [];
+    const octokit = octokitClient();
 
-    let page = 1;
-    const perPage = 100;
-    let pagesRemaining = true;
+    try {
+      const installations = await octokit.paginate(
+        octokit.rest.apps.listInstallations,
+        { per_page: 100 },
+      );
 
-    while (pagesRemaining) {
-      const response = await octokit.rest.apps.listInstallations({
-        per_page: perPage,
-        page: page,
-      });
+      return installations as AppInstallationsResponseType;
+    } catch (err: any) {
+      const status = err?.status ?? err?.response?.status;
+      const headers = err?.response?.headers;
+      const data = err?.response?.data;
 
-      if (response.status >= 400) {
-        throw new GitHubError(
-          `GitHub API Error: status: ${response.status}, headers: ${response.headers}, error: ${response.data}`,
-        );
-      }
-
-      // Add this page's installations to our list
-      allInstallations.push(...response.data);
-
-      // Check for Link header to determine if there are more pages
-      const linkHeader = response.headers.link;
-      pagesRemaining = !!(linkHeader && linkHeader.includes('rel="next"'));
-
-      if (pagesRemaining) {
-        page++;
-      }
+      throw new GitHubError(
+        `GitHub API Error: status: ${status}, headers: ${JSON.stringify(
+          headers,
+        )}, error: ${JSON.stringify(data)}`,
+      );
     }
-    return allInstallations;
   }
 
   async getInstallationToken({
