@@ -86,6 +86,7 @@ export const refreshCachedDataImpl: RefreshCachedData = async ({
               installationId: installation.id,
               appId: appId,
               nodeId: installation.account ? installation.account.node_id : '',
+              targetType: installation.target_type,
             };
           }),
         );

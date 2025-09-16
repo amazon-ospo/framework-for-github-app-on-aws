@@ -14,11 +14,13 @@ describe('getInstallationsDataImpl', () => {
       appId: 12345,
       installationId: 67890,
       nodeId: mockNodeId,
+      targetType: 'Organization',
     },
     {
       appId: 54321,
       installationId: 98765,
       nodeId: mockNodeId,
+      targetType: 'Organization',
     },
   ];
 
@@ -94,16 +96,19 @@ describe('getInstallationsDataImpl', () => {
         appId: 12345,
         installationId: 67890,
         nodeId: mockNodeId,
+        targetType: 'Organization',
       },
       {
         appId: 54321,
         installationId: 98765,
         nodeId: mockNodeId,
+        targetType: 'Organization',
       },
       {
         appId: 11111,
         installationId: 22222,
         nodeId: mockNodeId,
+        targetType: 'Organization',
       },
     ];
     const mockGetInstallationsDataByNodeId = jest

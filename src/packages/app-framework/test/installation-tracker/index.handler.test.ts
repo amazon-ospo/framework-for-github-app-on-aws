@@ -116,7 +116,14 @@ describe('calculateInstallationDifferencesImpl', () => {
     const result = await calculateInstallationDifferencesImpl({
       appIds: [1],
       githubConfirmedInstallations: {
-        1: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
+        1: [
+          {
+            appId: 1,
+            installationId: 20,
+            nodeId: 'foo',
+            targetType: 'Organization',
+          },
+        ],
       },
       registeredInstallations: [],
       getMissingInstallations: jest.fn(),
@@ -136,7 +143,14 @@ describe('calculateInstallationDifferencesImpl', () => {
       appIds: [1],
       githubConfirmedInstallations: {},
       registeredInstallations: {
-        1: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
+        1: [
+          {
+            appId: 1,
+            installationId: 20,
+            nodeId: 'foo',
+            targetType: 'Organization',
+          },
+        ],
       },
       getMissingInstallations: jest
         .fn()
@@ -152,10 +166,24 @@ describe('calculateInstallationDifferencesImpl', () => {
     const result = await calculateInstallationDifferencesImpl({
       appIds: [1, 3],
       githubConfirmedInstallations: {
-        3: [{ appId: 3, installationId: 21, nodeId: 'baz' }],
+        3: [
+          {
+            appId: 3,
+            installationId: 21,
+            nodeId: 'baz',
+            targetType: 'Organization',
+          },
+        ],
       },
       registeredInstallations: {
-        1: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
+        1: [
+          {
+            appId: 1,
+            installationId: 20,
+            nodeId: 'foo',
+            targetType: 'Organization',
+          },
+        ],
       },
       getMissingInstallations: jest
         .fn()
@@ -184,7 +212,12 @@ describe('getUnverifiedInstallationsImpl', () => {
   it('Should return empty list if github installations is empty', async () => {
     const result = await getUnverifiedInstallationsImpl({
       registeredInstallationsForAppId: [
-        { appId: 1, installationId: 20, nodeId: 'foo' },
+        {
+          appId: 1,
+          installationId: 20,
+          nodeId: 'foo',
+          targetType: 'Organization',
+        },
       ],
       gitHubInstallationsForAppId: [],
       putInstallation,
@@ -196,29 +229,76 @@ describe('getUnverifiedInstallationsImpl', () => {
     const result = await getUnverifiedInstallationsImpl({
       registeredInstallationsForAppId: [],
       gitHubInstallationsForAppId: [
-        { appId: 1, installationId: 20, nodeId: 'foo' },
+        {
+          appId: 1,
+          installationId: 20,
+          nodeId: 'foo',
+          targetType: 'Organization',
+        },
       ],
       putInstallation,
     });
-    expect(result).toEqual([{ appId: 1, installationId: 20, nodeId: 'foo' }]);
+    expect(result).toEqual([
+      {
+        appId: 1,
+        installationId: 20,
+        nodeId: 'foo',
+        targetType: 'Organization',
+      },
+    ]);
     expect(putInstallation).toHaveBeenCalledTimes(1);
   });
   it('Should return github installations which are not present in registered installations', async () => {
     const result = await getUnverifiedInstallationsImpl({
       registeredInstallationsForAppId: [
-        { appId: 1, installationId: 20, nodeId: 'foo' },
-        { appId: 2, installationId: 21, nodeId: 'baz' },
+        {
+          appId: 1,
+          installationId: 20,
+          nodeId: 'foo',
+          targetType: 'Organization',
+        },
+        {
+          appId: 2,
+          installationId: 21,
+          nodeId: 'baz',
+          targetType: 'Organization',
+        },
       ],
       gitHubInstallationsForAppId: [
-        { appId: 1, installationId: 20, nodeId: 'foo' },
-        { appId: 3, installationId: 22, nodeId: 'bar' },
-        { appId: 4, installationId: 23, nodeId: 'random' },
+        {
+          appId: 1,
+          installationId: 20,
+          nodeId: 'foo',
+          targetType: 'Organization',
+        },
+        {
+          appId: 3,
+          installationId: 22,
+          nodeId: 'bar',
+          targetType: 'Organization',
+        },
+        {
+          appId: 4,
+          installationId: 23,
+          nodeId: 'random',
+          targetType: 'Organization',
+        },
       ],
       putInstallation,
     });
     expect(result).toEqual([
-      { appId: 3, installationId: 22, nodeId: 'bar' },
-      { appId: 4, installationId: 23, nodeId: 'random' },
+      {
+        appId: 3,
+        installationId: 22,
+        nodeId: 'bar',
+        targetType: 'Organization',
+      },
+      {
+        appId: 4,
+        installationId: 23,
+        nodeId: 'random',
+        targetType: 'Organization',
+      },
     ]);
     expect(putInstallation).toHaveBeenCalledTimes(2);
   });
@@ -237,7 +317,12 @@ describe('getMissingInstallationsImpl', () => {
     const result = await getMissingInstallationsImpl({
       registeredInstallationsForAppId: [],
       gitHubInstallationsForAppId: [
-        { appId: 1, installationId: 20, nodeId: 'foo' },
+        {
+          appId: 1,
+          installationId: 20,
+          nodeId: 'foo',
+          targetType: 'Organization',
+        },
       ],
       deleteInstallation,
     });
@@ -247,30 +332,77 @@ describe('getMissingInstallationsImpl', () => {
   it('Should return registered installations list if github installations is empty', async () => {
     const result = await getMissingInstallationsImpl({
       registeredInstallationsForAppId: [
-        { appId: 1, installationId: 20, nodeId: 'foo' },
+        {
+          appId: 1,
+          installationId: 20,
+          nodeId: 'foo',
+          targetType: 'Organization',
+        },
       ],
       gitHubInstallationsForAppId: [],
       deleteInstallation,
     });
-    expect(result).toEqual([{ appId: 1, installationId: 20, nodeId: 'foo' }]);
+    expect(result).toEqual([
+      {
+        appId: 1,
+        installationId: 20,
+        nodeId: 'foo',
+        targetType: 'Organization',
+      },
+    ]);
     expect(deleteInstallation).toHaveBeenCalledTimes(1);
   });
   it('Should return registered installations which are not present in github installations', async () => {
     const result = await getMissingInstallationsImpl({
       registeredInstallationsForAppId: [
-        { appId: 1, installationId: 20, nodeId: 'foo' },
-        { appId: 3, installationId: 22, nodeId: 'bar' },
-        { appId: 4, installationId: 23, nodeId: 'random' },
+        {
+          appId: 1,
+          installationId: 20,
+          nodeId: 'foo',
+          targetType: 'Organization',
+        },
+        {
+          appId: 3,
+          installationId: 22,
+          nodeId: 'bar',
+          targetType: 'Organization',
+        },
+        {
+          appId: 4,
+          installationId: 23,
+          nodeId: 'random',
+          targetType: 'Organization',
+        },
       ],
       gitHubInstallationsForAppId: [
-        { appId: 1, installationId: 20, nodeId: 'foo' },
-        { appId: 2, installationId: 21, nodeId: 'baz' },
+        {
+          appId: 1,
+          installationId: 20,
+          nodeId: 'foo',
+          targetType: 'Organization',
+        },
+        {
+          appId: 2,
+          installationId: 21,
+          nodeId: 'baz',
+          targetType: 'Organization',
+        },
       ],
       deleteInstallation,
     });
     expect(result).toEqual([
-      { appId: 3, installationId: 22, nodeId: 'bar' },
-      { appId: 4, installationId: 23, nodeId: 'random' },
+      {
+        appId: 3,
+        installationId: 22,
+        nodeId: 'bar',
+        targetType: 'Organization',
+      },
+      {
+        appId: 4,
+        installationId: 23,
+        nodeId: 'random',
+        targetType: 'Organization',
+      },
     ]);
     expect(deleteInstallation).toHaveBeenCalledTimes(2);
   });
@@ -279,50 +411,129 @@ describe('getMissingInstallationsImpl', () => {
 describe('leftJoinInstallationsForOneApp', () => {
   it('returns nothing for equivalent arrays', () => {
     const left: InstallationRecord[] = [
-      { appId: 1, installationId: 2, nodeId: 'foo' },
-      { appId: 3, installationId: 4, nodeId: 'bar' },
+      {
+        appId: 1,
+        installationId: 2,
+        nodeId: 'foo',
+        targetType: 'Organization',
+      },
+      {
+        appId: 3,
+        installationId: 4,
+        nodeId: 'bar',
+        targetType: 'Organization',
+      },
     ];
     const right: InstallationRecord[] = [
-      { appId: 1, installationId: 2, nodeId: 'foo' },
-      { appId: 3, installationId: 4, nodeId: 'bar' },
+      {
+        appId: 1,
+        installationId: 2,
+        nodeId: 'foo',
+        targetType: 'Organization',
+      },
+      {
+        appId: 3,
+        installationId: 4,
+        nodeId: 'bar',
+        targetType: 'Organization',
+      },
     ];
     const result = leftJoinInstallationsForOneApp(left, right);
     expect(result.length).toBe(0);
   });
   it('returns nothing if only right contains new entries', () => {
     const left: InstallationRecord[] = [
-      { appId: 1, installationId: 2, nodeId: 'foo' },
+      {
+        appId: 1,
+        installationId: 2,
+        nodeId: 'foo',
+        targetType: 'Organization',
+      },
     ];
     const right: InstallationRecord[] = [
-      { appId: 1, installationId: 2, nodeId: 'foo' },
-      { appId: 3, installationId: 4, nodeId: 'bar' },
+      {
+        appId: 1,
+        installationId: 2,
+        nodeId: 'foo',
+        targetType: 'Organization',
+      },
+      {
+        appId: 3,
+        installationId: 4,
+        nodeId: 'bar',
+        targetType: 'Organization',
+      },
     ];
     const result = leftJoinInstallationsForOneApp(left, right);
     expect(result.length).toBe(0);
   });
   it('returns entries unique to left if so', () => {
     const left: InstallationRecord[] = [
-      { appId: 1, installationId: 2, nodeId: 'foo' },
-      { appId: 3, installationId: 4, nodeId: 'bar' },
+      {
+        appId: 1,
+        installationId: 2,
+        nodeId: 'foo',
+        targetType: 'Organization',
+      },
+      {
+        appId: 3,
+        installationId: 4,
+        nodeId: 'bar',
+        targetType: 'Organization',
+      },
     ];
     const right: InstallationRecord[] = [
-      { appId: 3, installationId: 4, nodeId: 'bar' },
+      {
+        appId: 3,
+        installationId: 4,
+        nodeId: 'bar',
+        targetType: 'Organization',
+      },
     ];
     const result = leftJoinInstallationsForOneApp(left, right);
     expect(result.length).toBe(1);
-    expect(result).toEqual([{ appId: 1, installationId: 2, nodeId: 'foo' }]);
+    expect(result).toEqual([
+      {
+        appId: 1,
+        installationId: 2,
+        nodeId: 'foo',
+        targetType: 'Organization',
+      },
+    ]);
   });
   it('returns entries with unique installation ID', () => {
     const left: InstallationRecord[] = [
-      { appId: 1, installationId: 2, nodeId: 'bar' },
-      { appId: 1, installationId: 4, nodeId: 'bar' },
+      {
+        appId: 1,
+        installationId: 2,
+        nodeId: 'bar',
+        targetType: 'Organization',
+      },
+      {
+        appId: 1,
+        installationId: 4,
+        nodeId: 'bar',
+        targetType: 'Organization',
+      },
     ];
     const right: InstallationRecord[] = [
-      { appId: 1, installationId: 4, nodeId: 'bar' },
+      {
+        appId: 1,
+        installationId: 4,
+        nodeId: 'bar',
+        targetType: 'Organization',
+      },
     ];
     const result = leftJoinInstallationsForOneApp(left, right);
     expect(result.length).toBe(1);
-    expect(result).toEqual([{ appId: 1, installationId: 2, nodeId: 'bar' }]);
+    expect(result).toEqual([
+      {
+        appId: 1,
+        installationId: 2,
+        nodeId: 'bar',
+        targetType: 'Organization',
+      },
+    ]);
   });
 });
 

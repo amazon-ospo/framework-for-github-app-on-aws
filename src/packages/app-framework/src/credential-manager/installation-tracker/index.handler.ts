@@ -103,6 +103,7 @@ export const handlerImpl: Handler = async ({
             installationId: installation.id,
             appId: appId,
             nodeId: installation.account ? installation.account.node_id : '',
+            targetType: installation.target_type,
           };
         }),
       );
