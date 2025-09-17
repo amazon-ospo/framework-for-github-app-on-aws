@@ -131,6 +131,32 @@ export interface GetInstallationDataOutput {
 /**
  * @public
  */
+export interface GetInstallationsInput {
+  maxResults?: number | undefined;
+  nextToken?: string | undefined;
+}
+
+/**
+ * @public
+ */
+export interface InstallationRecord {
+  appId?: number | undefined;
+  installationId?: number | undefined;
+  nodeId?: string | undefined;
+  targetType?: string | undefined;
+}
+
+/**
+ * @public
+ */
+export interface GetInstallationsOutput {
+  nextToken?: string | undefined;
+  installations?: (InstallationRecord)[] | undefined;
+}
+
+/**
+ * @public
+ */
 export interface ScopeDown {
   repositoryIds?: (number)[] | undefined;
   repositoryNames?: (string)[] | undefined;

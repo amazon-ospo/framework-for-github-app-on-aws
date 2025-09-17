@@ -17,6 +17,11 @@ import {
   GetInstallationTokenServerInput,
 } from "./operations/GetInstallationToken";
 import {
+  GetInstallations,
+  GetInstallationsSerializer,
+  GetInstallationsServerInput,
+} from "./operations/GetInstallations";
+import {
   RefreshCachedData,
   RefreshCachedDataSerializer,
   RefreshCachedDataServerInput,
@@ -58,10 +63,11 @@ import {
   toUtf8,
 } from "@smithy/util-utf8";
 
-export type AppFrameworkServiceOperations = "GetAppToken" | "GetInstallationData" | "GetInstallationToken" | "RefreshCachedData";
+export type AppFrameworkServiceOperations = "GetAppToken" | "GetInstallationData" | "GetInstallations" | "GetInstallationToken" | "RefreshCachedData";
 export interface AppFrameworkService<Context> {
   GetAppToken: GetAppToken<Context>
   GetInstallationData: GetInstallationData<Context>
+  GetInstallations: GetInstallations<Context>
   GetInstallationToken: GetInstallationToken<Context>
   RefreshCachedData: RefreshCachedData<Context>
 }
@@ -153,6 +159,9 @@ export class AppFrameworkServiceHandler<Context> implements __ServiceHandler<Con
       case "GetInstallationData" : {
         return handle(request, context, "GetInstallationData", this.serializerFactory("GetInstallationData"), this.service.GetInstallationData, this.serializeFrameworkException, GetInstallationDataServerInput.validate, this.validationCustomizer);
       }
+      case "GetInstallations" : {
+        return handle(request, context, "GetInstallations", this.serializerFactory("GetInstallations"), this.service.GetInstallations, this.serializeFrameworkException, GetInstallationsServerInput.validate, this.validationCustomizer);
+      }
       case "GetInstallationToken" : {
         return handle(request, context, "GetInstallationToken", this.serializerFactory("GetInstallationToken"), this.service.GetInstallationToken, this.serializeFrameworkException, GetInstallationTokenServerInput.validate, this.validationCustomizer);
       }
@@ -183,6 +192,14 @@ export const getAppFrameworkServiceHandler = <Context>(service: AppFrameworkServ
       [
       ],
       { service: "AppFramework", operation: "GetInstallationData" }),
+    new httpbinding.UriSpec<"AppFramework", "GetInstallations">(
+      'POST',
+      [
+        { type: 'path_literal', value: "installations" },
+      ],
+      [
+      ],
+      { service: "AppFramework", operation: "GetInstallations" }),
     new httpbinding.UriSpec<"AppFramework", "GetInstallationToken">(
       'POST',
       [
@@ -206,6 +223,7 @@ export const getAppFrameworkServiceHandler = <Context>(service: AppFrameworkServ
     switch (op) {
       case "GetAppToken": return new GetAppTokenSerializer();
       case "GetInstallationData": return new GetInstallationDataSerializer();
+      case "GetInstallations": return new GetInstallationsSerializer();
       case "GetInstallationToken": return new GetInstallationTokenSerializer();
       case "RefreshCachedData": return new RefreshCachedDataSerializer();
     }

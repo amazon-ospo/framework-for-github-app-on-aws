@@ -3,6 +3,7 @@
     "operationShapeIds": [
         "framework.api#GetAppToken",
         "framework.api#GetInstallationData",
+        "framework.api#GetInstallations",
         "framework.api#GetInstallationToken",
         "framework.api#RefreshCachedData"
     ],
@@ -177,6 +178,7 @@
         "smithy.api#length",
         "smithy.api#mixin",
         "smithy.api#notProperty",
+        "smithy.api#paginated",
         "smithy.api#pattern",
         "smithy.api#private",
         "smithy.api#protocolDefinition",

@@ -2,7 +2,7 @@ $version: "2.0"
 namespace framework.api
 
 resource CredentialManagementService{
-    operations: [GetInstallationToken, GetAppToken, RefreshCachedData, GetInstallationData]
+    operations: [GetInstallationToken, GetAppToken, RefreshCachedData, GetInstallationData, GetInstallations]
 }
 
 // Placeholder API endpoints
@@ -32,6 +32,15 @@ operation RefreshCachedData {
 operation GetInstallationData {
     input: GetInstallationDataInput,
     output: GetInstallationDataOutput,
+    errors: [ServerSideError, ClientSideError]
+}
+
+@paginated(inputToken: "nextToken", outputToken: "nextToken",
+           pageSize: "maxResults", items: "installations")
+@http(method: "POST", uri: "/installations")
+operation GetInstallations {
+    input: GetInstallationsInput,
+    output: GetInstallationsOutput,
     errors: [ServerSideError, ClientSideError]
 }
 
@@ -113,6 +122,27 @@ list InstallationDataList {
 }
 structure GetInstallationDataOutput {
     installations: InstallationDataList
+}
+
+structure GetInstallationsInput {
+    maxResults: Integer
+    nextToken: String
+}
+
+structure InstallationRecord {
+  appId: Integer
+  installationId: Integer
+  nodeId: String
+  targetType: String
+}
+
+list InstallationRecordList {
+   member: InstallationRecord
+}
+
+structure GetInstallationsOutput {
+    nextToken: String
+    installations: InstallationRecordList
 }
 
 @httpError(500)
