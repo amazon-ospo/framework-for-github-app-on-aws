@@ -13,6 +13,7 @@ export type InstallationRecord = {
   appId: number;
   installationId: number;
   nodeId: string;
+  targetType: string;
 };
 
 type AppInstallations = {
@@ -115,12 +116,14 @@ export type PutInstallation = ({
   appId,
   nodeId,
   installationId,
+  targetType,
   lastRefreshed,
 }: {
   tableName: string;
   appId: number;
   nodeId: string;
   installationId: number;
+  targetType: string;
   lastRefreshed?: string;
 }) => Promise<void>;
 
@@ -129,6 +132,7 @@ export const putInstallationImpl: PutInstallation = async ({
   appId,
   nodeId,
   installationId,
+  targetType,
   lastRefreshed,
 }): Promise<void> => {
   const tableOperations = new TableOperations({
@@ -139,6 +143,7 @@ export const putInstallationImpl: PutInstallation = async ({
     AppId: { N: appId.toString() },
     NodeId: { S: nodeId },
     InstallationId: { N: installationId.toString() },
+    TargetType: { S: targetType },
     LastRefreshed: { S: lastRefreshed || '' },
   };
 
@@ -241,11 +246,13 @@ export const getInstallationsImpl: GetInstallations = async ({ tableName }) => {
   itemList.map((item) => {
     const appId: number = item.AppId;
     const installationId: number = item.InstallationId;
+    const targetType: string = item.targetType;
     const nodeId: string = item.NodeId ?? '';
     result.push({
       appId,
       nodeId,
       installationId,
+      targetType,
     });
   });
   return result;
@@ -278,10 +285,12 @@ export const getInstallationsDataByNodeId: GetInstallationsByNodeId = async ({
     const appId: number = item.AppId;
     const itemNodeId: string = item.NodeId;
     const installationId: number = item.InstallationId;
+    const targetType: string = item.targetType;
     result.push({
       appId,
       nodeId: itemNodeId,
       installationId,
+      targetType,
     });
   });
 

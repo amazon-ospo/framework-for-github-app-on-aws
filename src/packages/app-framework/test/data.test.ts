@@ -24,6 +24,7 @@ const mockAppId = 12345;
 const mockTableName = 'validAppTableName';
 const mockNodeId = 'foo';
 const mockInstallationId = 123456;
+const mockTargetType = 'Organization';
 const mockArn = 'arn:aws:kms:region:account:key/mock-key-id';
 describe('getKeyArnByID', () => {
   it('should successfully retrieve KMS ARN from DynamoDB', async () => {
@@ -224,6 +225,7 @@ describe('getInstallationId', () => {
         appId: mockAppId,
         installationId: mockInstallationId,
         nodeId: mockNodeId,
+        targetType: mockTargetType,
       });
 
       expect(TableOperations).toHaveBeenCalledWith({
@@ -234,6 +236,7 @@ describe('getInstallationId', () => {
         InstallationId: { N: mockInstallationId.toString() },
         LastRefreshed: { S: '' },
         NodeId: { S: mockNodeId },
+        TargetType: { S: mockTargetType },
       });
     });
 
@@ -248,6 +251,7 @@ describe('getInstallationId', () => {
           lastRefreshed: '',
           installationId: mockInstallationId,
           nodeId: mockNodeId,
+          targetType: mockTargetType,
         }),
       ).rejects.toThrow('DynamoDB service error');
     });

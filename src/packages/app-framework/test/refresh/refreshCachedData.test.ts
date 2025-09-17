@@ -27,6 +27,7 @@ const existingInstallationInDDB: InstallationRecord = {
   appId,
   installationId: 888,
   nodeId: 'node-existing',
+  targetType: 'Organization',
 };
 describe('refreshCachedDataImpl', () => {
   beforeEach(() => {
@@ -65,8 +66,18 @@ describe('refreshCachedDataImpl', () => {
       { id: 1000, account: { node_id: 'node-def' } },
     ];
     const expectedUnverified: InstallationRecord[] = [
-      { appId, installationId: 999, nodeId: 'node-abc' },
-      { appId, installationId: 1000, nodeId: 'node-def' },
+      {
+        appId,
+        installationId: 999,
+        nodeId: 'node-abc',
+        targetType: 'Organization',
+      },
+      {
+        appId,
+        installationId: 1000,
+        nodeId: 'node-def',
+        targetType: 'Organization',
+      },
     ];
     (GitHubAPIService as jest.Mock).mockImplementation(() => ({
       getInstallations: jest
