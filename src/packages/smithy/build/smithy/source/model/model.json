@@ -1892,6 +1892,9 @@
                     "target": "framework.api#GetInstallationData"
                 },
                 {
+                    "target": "framework.api#GetInstallations"
+                },
+                {
                     "target": "framework.api#GetInstallationToken"
                 },
                 {
@@ -2075,6 +2078,60 @@
                 }
             }
         },
+        "framework.api#GetInstallations": {
+            "type": "operation",
+            "input": {
+                "target": "framework.api#GetInstallationsInput"
+            },
+            "output": {
+                "target": "framework.api#GetInstallationsOutput"
+            },
+            "errors": [
+                {
+                    "target": "framework.api#ClientSideError"
+                },
+                {
+                    "target": "framework.api#ServerSideError"
+                }
+            ],
+            "traits": {
+                "smithy.api#http": {
+                    "method": "POST",
+                    "uri": "/installations"
+                },
+                "smithy.api#paginated": {
+                    "inputToken": "nextToken",
+                    "outputToken": "nextToken",
+                    "pageSize": "maxResults",
+                    "items": "installations"
+                }
+            }
+        },
+        "framework.api#GetInstallationsInput": {
+            "type": "structure",
+            "members": {
+                "maxResults": {
+                    "target": "smithy.api#Integer"
+                },
+                "nextToken": {
+                    "target": "smithy.api#String"
+                }
+            }
+        },
+        "framework.api#GetInstallationsOutput": {
+            "type": "structure",
+            "members": {
+                "nextToken": {
+                    "target": "smithy.api#String"
+                },
+                "installations": {
+                    "target": "framework.api#InstallationRecordList",
+                    "traits": {
+                        "smithy.api#required": {}
+                    }
+                }
+            }
+        },
         "framework.api#InstallationData": {
             "type": "structure",
             "members": {
@@ -2093,6 +2150,41 @@
             "type": "list",
             "member": {
                 "target": "framework.api#InstallationData"
+            }
+        },
+        "framework.api#InstallationRecord": {
+            "type": "structure",
+            "members": {
+                "appId": {
+                    "target": "smithy.api#Integer",
+                    "traits": {
+                        "smithy.api#required": {}
+                    }
+                },
+                "installationId": {
+                    "target": "smithy.api#Integer",
+                    "traits": {
+                        "smithy.api#required": {}
+                    }
+                },
+                "nodeId": {
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#required": {}
+                    }
+                },
+                "targetType": {
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#required": {}
+                    }
+                }
+            }
+        },
+        "framework.api#InstallationRecordList": {
+            "type": "list",
+            "member": {
+                "target": "framework.api#InstallationRecord"
             }
         },
         "framework.api#Permissions": {

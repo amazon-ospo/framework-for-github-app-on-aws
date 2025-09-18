@@ -3,6 +3,7 @@
 import {
   ClientSideError,
   InstallationData,
+  InstallationRecord,
   ScopeDown,
   ServerSideError,
   ValidationException,
@@ -20,6 +21,10 @@ import {
   GetInstallationTokenServerInput,
   GetInstallationTokenServerOutput,
 } from "../server/operations/GetInstallationToken";
+import {
+  GetInstallationsServerInput,
+  GetInstallationsServerOutput,
+} from "../server/operations/GetInstallations";
 import {
   RefreshCachedDataServerInput,
   RefreshCachedDataServerOutput,
@@ -111,6 +116,35 @@ export const deserializeGetInstallationDataRequest = async(
   const data: Record<string, any> = __expectNonNull((__expectObject(await parseBody(output.body, context))), "body");
   const doc = take(data, {
     'nodeId': __expectString,
+  });
+  Object.assign(contents, doc);
+  return contents;
+}
+
+export const deserializeGetInstallationsRequest = async(
+  output: __HttpRequest,
+  context: __SerdeContext
+): Promise<GetInstallationsServerInput> => {
+  const contentTypeHeaderKey: string | undefined = Object.keys(output.headers).find(key => key.toLowerCase() === 'content-type');
+  if (contentTypeHeaderKey != null) {
+    const contentType = output.headers[contentTypeHeaderKey];
+    if (contentType !== undefined && contentType !== "application/json") {
+      throw new __UnsupportedMediaTypeException();
+    };
+  };
+  const acceptHeaderKey: string | undefined = Object.keys(output.headers).find(key => key.toLowerCase() === 'accept');
+  if (acceptHeaderKey != null) {
+    const accept = output.headers[acceptHeaderKey];
+    if (!__acceptMatches(accept, "application/json")) {
+      throw new __NotAcceptableException();
+    };
+  };
+  const contents: any = map({
+  });
+  const data: Record<string, any> = __expectNonNull((__expectObject(await parseBody(output.body, context))), "body");
+  const doc = take(data, {
+    'maxResults': __expectInt32,
+    'nextToken': __expectString,
   });
   Object.assign(contents, doc);
   return contents;
@@ -224,6 +258,40 @@ export const serializeGetInstallationDataResponse = async(
   let body: any;
   body = JSON.stringify(take(input, {
     'installations': _ => se_InstallationDataList(_, context),
+  }));
+  if (body && Object.keys(headers).map((str) => str.toLowerCase()).indexOf('content-length') === -1) {
+    const length = calculateBodyLength(body);
+    if (length !== undefined) {
+      headers = { ...headers, 'content-length': String(length) };
+    }
+  }
+  return new __HttpResponse({
+    headers,
+    body,
+    statusCode,
+  });
+}
+
+export const serializeGetInstallationsResponse = async(
+  input: GetInstallationsServerOutput,
+  ctx: ServerSerdeContext
+): Promise<__HttpResponse> => {
+  const context: __SerdeContext = {
+    ...ctx,
+    endpoint: () => Promise.resolve({
+      protocol: '',
+      hostname: '',
+      path: '',
+    }),
+  }
+  let statusCode: number = 200
+  let headers: any = map({}, isSerializableHeaderValue, {
+    'content-type': 'application/json',
+  });
+  let body: any;
+  body = JSON.stringify(take(input, {
+    'installations': _ => se_InstallationRecordList(_, context),
+    'nextToken': [],
   }));
   if (body && Object.keys(headers).map((str) => str.toLowerCase()).indexOf('content-length') === -1) {
     const length = calculateBodyLength(body);
@@ -504,6 +572,33 @@ const se_InstallationDataList = (
 ): any => {
   return input.filter((e: any) => e != null).map(entry => {
     return se_InstallationData(entry, context);
+  });
+}
+
+/**
+ * serializeAws_restJson1InstallationRecord
+ */
+const se_InstallationRecord = (
+  input: InstallationRecord,
+  context: __SerdeContext
+): any => {
+  return take(input, {
+    'appId': [],
+    'installationId': [],
+    'nodeId': [],
+    'targetType': [],
+  });
+}
+
+/**
+ * serializeAws_restJson1InstallationRecordList
+ */
+const se_InstallationRecordList = (
+  input: (InstallationRecord)[],
+  context: __SerdeContext
+): any => {
+  return input.filter((e: any) => e != null).map(entry => {
+    return se_InstallationRecord(entry, context);
   });
 }
 

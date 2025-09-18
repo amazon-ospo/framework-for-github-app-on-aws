@@ -330,6 +330,153 @@ export namespace GetInstallationDataOutput {
 /**
  * @public
  */
+export interface GetInstallationsInput {
+  maxResults?: number | undefined;
+  nextToken?: string | undefined;
+}
+
+export namespace GetInstallationsInput {
+  const memberValidators : {
+    maxResults?: __MultiConstraintValidator<number>,
+    nextToken?: __MultiConstraintValidator<string>,
+  } = {};
+  /**
+   * @internal
+   */
+  export const validate = (obj: GetInstallationsInput, path: string = ""): __ValidationFailure[] => {
+    function getMemberValidator<T extends keyof typeof memberValidators>(member: T): NonNullable<typeof memberValidators[T]> {
+      if (memberValidators[member] === undefined) {
+        switch (member) {
+          case "maxResults": {
+            memberValidators["maxResults"] = new __NoOpValidator();
+            break;
+          }
+          case "nextToken": {
+            memberValidators["nextToken"] = new __NoOpValidator();
+            break;
+          }
+        }
+      }
+      return memberValidators[member]!!;
+    }
+    return [
+      ...getMemberValidator("maxResults").validate(obj.maxResults, `${path}/maxResults`),
+      ...getMemberValidator("nextToken").validate(obj.nextToken, `${path}/nextToken`),
+    ];
+  }
+}
+
+/**
+ * @public
+ */
+export interface InstallationRecord {
+  appId: number | undefined;
+  installationId: number | undefined;
+  nodeId: string | undefined;
+  targetType: string | undefined;
+}
+
+export namespace InstallationRecord {
+  const memberValidators : {
+    appId?: __MultiConstraintValidator<number>,
+    installationId?: __MultiConstraintValidator<number>,
+    nodeId?: __MultiConstraintValidator<string>,
+    targetType?: __MultiConstraintValidator<string>,
+  } = {};
+  /**
+   * @internal
+   */
+  export const validate = (obj: InstallationRecord, path: string = ""): __ValidationFailure[] => {
+    function getMemberValidator<T extends keyof typeof memberValidators>(member: T): NonNullable<typeof memberValidators[T]> {
+      if (memberValidators[member] === undefined) {
+        switch (member) {
+          case "appId": {
+            memberValidators["appId"] = new __CompositeValidator<number>([
+              new __RequiredValidator(),
+            ]);
+            break;
+          }
+          case "installationId": {
+            memberValidators["installationId"] = new __CompositeValidator<number>([
+              new __RequiredValidator(),
+            ]);
+            break;
+          }
+          case "nodeId": {
+            memberValidators["nodeId"] = new __CompositeValidator<string>([
+              new __RequiredValidator(),
+            ]);
+            break;
+          }
+          case "targetType": {
+            memberValidators["targetType"] = new __CompositeValidator<string>([
+              new __RequiredValidator(),
+            ]);
+            break;
+          }
+        }
+      }
+      return memberValidators[member]!!;
+    }
+    return [
+      ...getMemberValidator("appId").validate(obj.appId, `${path}/appId`),
+      ...getMemberValidator("installationId").validate(obj.installationId, `${path}/installationId`),
+      ...getMemberValidator("nodeId").validate(obj.nodeId, `${path}/nodeId`),
+      ...getMemberValidator("targetType").validate(obj.targetType, `${path}/targetType`),
+    ];
+  }
+}
+
+/**
+ * @public
+ */
+export interface GetInstallationsOutput {
+  nextToken?: string | undefined;
+  installations: (InstallationRecord)[] | undefined;
+}
+
+export namespace GetInstallationsOutput {
+  const memberValidators : {
+    nextToken?: __MultiConstraintValidator<string>,
+    installations?: __MultiConstraintValidator<Iterable<InstallationRecord>>,
+  } = {};
+  /**
+   * @internal
+   */
+  export const validate = (obj: GetInstallationsOutput, path: string = ""): __ValidationFailure[] => {
+    function getMemberValidator<T extends keyof typeof memberValidators>(member: T): NonNullable<typeof memberValidators[T]> {
+      if (memberValidators[member] === undefined) {
+        switch (member) {
+          case "nextToken": {
+            memberValidators["nextToken"] = new __NoOpValidator();
+            break;
+          }
+          case "installations": {
+            memberValidators["installations"] = new __CompositeCollectionValidator<InstallationRecord>(
+              new __CompositeValidator<(InstallationRecord)[]>([
+                new __RequiredValidator(),
+              ]),
+              new __CompositeStructureValidator<InstallationRecord>(
+                new __NoOpValidator(),
+                InstallationRecord.validate
+              )
+            );
+            break;
+          }
+        }
+      }
+      return memberValidators[member]!!;
+    }
+    return [
+      ...getMemberValidator("nextToken").validate(obj.nextToken, `${path}/nextToken`),
+      ...getMemberValidator("installations").validate(obj.installations, `${path}/installations`),
+    ];
+  }
+}
+
+/**
+ * @public
+ */
 export interface ScopeDown {
   repositoryIds?: (number)[] | undefined;
   repositoryNames?: (string)[] | undefined;

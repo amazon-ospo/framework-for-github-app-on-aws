@@ -13,6 +13,10 @@ import {
   GetInstallationTokenCommandOutput,
 } from "../commands/GetInstallationTokenCommand";
 import {
+  GetInstallationsCommandInput,
+  GetInstallationsCommandOutput,
+} from "../commands/GetInstallationsCommand";
+import {
   RefreshCachedDataCommandInput,
   RefreshCachedDataCommandOutput,
 } from "../commands/RefreshCachedDataCommand";
@@ -89,6 +93,29 @@ export const se_GetInstallationDataCommand = async(
   let body: any;
   body = JSON.stringify(take(input, {
     'nodeId': [],
+  }));
+  b.m("POST")
+  .h(headers)
+  .b(body);
+  return b.build();
+}
+
+/**
+ * serializeAws_restJson1GetInstallationsCommand
+ */
+export const se_GetInstallationsCommand = async(
+  input: GetInstallationsCommandInput,
+  context: __SerdeContext
+): Promise<__HttpRequest> => {
+  const b = rb(input, context);
+  const headers: any = {
+    'content-type': 'application/json',
+  };
+  b.bp("/installations");
+  let body: any;
+  body = JSON.stringify(take(input, {
+    'maxResults': [],
+    'nextToken': [],
   }));
   b.m("POST")
   .h(headers)
@@ -177,6 +204,28 @@ export const de_GetInstallationDataCommand = async(
   const data: Record<string, any> = __expectNonNull((__expectObject(await parseBody(output.body, context))), "body");
   const doc = take(data, {
     'installations': _json,
+  });
+  Object.assign(contents, doc);
+  return contents;
+}
+
+/**
+ * deserializeAws_restJson1GetInstallationsCommand
+ */
+export const de_GetInstallationsCommand = async(
+  output: __HttpResponse,
+  context: __SerdeContext
+): Promise<GetInstallationsCommandOutput> => {
+  if (output.statusCode !== 200 && output.statusCode >= 300) {
+    return de_CommandError(output, context);
+  }
+  const contents: any = map({
+    $metadata: deserializeMetadata(output),
+  });
+  const data: Record<string, any> = __expectNonNull((__expectObject(await parseBody(output.body, context))), "body");
+  const doc = take(data, {
+    'installations': _json,
+    'nextToken': __expectString,
   });
   Object.assign(contents, doc);
   return contents;
@@ -338,6 +387,10 @@ const de_CommandError = async(
   // de_InstallationData omitted.
 
   // de_InstallationDataList omitted.
+
+  // de_InstallationRecord omitted.
+
+  // de_InstallationRecordList omitted.
 
   // de_Permissions omitted.
 

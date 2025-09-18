@@ -20,6 +20,11 @@ import {
   GetInstallationTokenCommandOutput,
 } from "./commands/GetInstallationTokenCommand";
 import {
+  GetInstallationsCommand,
+  GetInstallationsCommandInput,
+  GetInstallationsCommandOutput,
+} from "./commands/GetInstallationsCommand";
+import {
   RefreshCachedDataCommand,
   RefreshCachedDataCommandInput,
   RefreshCachedDataCommandOutput,
@@ -30,6 +35,7 @@ import { HttpHandlerOptions as __HttpHandlerOptions } from "@smithy/types";
 const commands = {
   GetAppTokenCommand,
   GetInstallationDataCommand,
+  GetInstallationsCommand,
   GetInstallationTokenCommand,
   RefreshCachedDataCommand,
 }
@@ -67,6 +73,24 @@ export interface AppFramework {
     args: GetInstallationDataCommandInput,
     options: __HttpHandlerOptions,
     cb: (err: any, data?: GetInstallationDataCommandOutput) => void
+  ): void;
+
+  /**
+   * @see {@link GetInstallationsCommand}
+   */
+  getInstallations(): Promise<GetInstallationsCommandOutput>;
+  getInstallations(
+    args: GetInstallationsCommandInput,
+    options?: __HttpHandlerOptions,
+  ): Promise<GetInstallationsCommandOutput>;
+  getInstallations(
+    args: GetInstallationsCommandInput,
+    cb: (err: any, data?: GetInstallationsCommandOutput) => void
+  ): void;
+  getInstallations(
+    args: GetInstallationsCommandInput,
+    options: __HttpHandlerOptions,
+    cb: (err: any, data?: GetInstallationsCommandOutput) => void
   ): void;
 
   /**

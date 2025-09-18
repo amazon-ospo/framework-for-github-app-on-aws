@@ -19,6 +19,10 @@ import {
   GetInstallationTokenCommandOutput,
 } from "./commands/GetInstallationTokenCommand";
 import {
+  GetInstallationsCommandInput,
+  GetInstallationsCommandOutput,
+} from "./commands/GetInstallationsCommand";
+import {
   RefreshCachedDataCommandInput,
   RefreshCachedDataCommandOutput,
 } from "./commands/RefreshCachedDataCommand";
@@ -94,6 +98,7 @@ export type ServiceInputTypes =
   | GetAppTokenCommandInput
   | GetInstallationDataCommandInput
   | GetInstallationTokenCommandInput
+  | GetInstallationsCommandInput
   | RefreshCachedDataCommandInput;
 
 /**
@@ -103,6 +108,7 @@ export type ServiceOutputTypes =
   | GetAppTokenCommandOutput
   | GetInstallationDataCommandOutput
   | GetInstallationTokenCommandOutput
+  | GetInstallationsCommandOutput
   | RefreshCachedDataCommandOutput;
 
 /**
