@@ -370,10 +370,10 @@ export namespace GetInstallationsInput {
  * @public
  */
 export interface InstallationRecord {
-  appId?: number | undefined;
-  installationId?: number | undefined;
-  nodeId?: string | undefined;
-  targetType?: string | undefined;
+  appId: number | undefined;
+  installationId: number | undefined;
+  nodeId: string | undefined;
+  targetType: string | undefined;
 }
 
 export namespace InstallationRecord {
@@ -391,19 +391,27 @@ export namespace InstallationRecord {
       if (memberValidators[member] === undefined) {
         switch (member) {
           case "appId": {
-            memberValidators["appId"] = new __NoOpValidator();
+            memberValidators["appId"] = new __CompositeValidator<number>([
+              new __RequiredValidator(),
+            ]);
             break;
           }
           case "installationId": {
-            memberValidators["installationId"] = new __NoOpValidator();
+            memberValidators["installationId"] = new __CompositeValidator<number>([
+              new __RequiredValidator(),
+            ]);
             break;
           }
           case "nodeId": {
-            memberValidators["nodeId"] = new __NoOpValidator();
+            memberValidators["nodeId"] = new __CompositeValidator<string>([
+              new __RequiredValidator(),
+            ]);
             break;
           }
           case "targetType": {
-            memberValidators["targetType"] = new __NoOpValidator();
+            memberValidators["targetType"] = new __CompositeValidator<string>([
+              new __RequiredValidator(),
+            ]);
             break;
           }
         }
@@ -424,7 +432,7 @@ export namespace InstallationRecord {
  */
 export interface GetInstallationsOutput {
   nextToken?: string | undefined;
-  installations?: (InstallationRecord)[] | undefined;
+  installations: (InstallationRecord)[] | undefined;
 }
 
 export namespace GetInstallationsOutput {
@@ -445,7 +453,9 @@ export namespace GetInstallationsOutput {
           }
           case "installations": {
             memberValidators["installations"] = new __CompositeCollectionValidator<InstallationRecord>(
-              new __NoOpValidator(),
+              new __CompositeValidator<(InstallationRecord)[]>([
+                new __RequiredValidator(),
+              ]),
               new __CompositeStructureValidator<InstallationRecord>(
                 new __NoOpValidator(),
                 InstallationRecord.validate

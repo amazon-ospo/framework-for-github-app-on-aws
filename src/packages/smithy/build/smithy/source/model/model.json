@@ -2125,7 +2125,10 @@
                     "target": "smithy.api#String"
                 },
                 "installations": {
-                    "target": "framework.api#InstallationRecordList"
+                    "target": "framework.api#InstallationRecordList",
+                    "traits": {
+                        "smithy.api#required": {}
+                    }
                 }
             }
         },
@@ -2153,16 +2156,28 @@
             "type": "structure",
             "members": {
                 "appId": {
-                    "target": "smithy.api#Integer"
+                    "target": "smithy.api#Integer",
+                    "traits": {
+                        "smithy.api#required": {}
+                    }
                 },
                 "installationId": {
-                    "target": "smithy.api#Integer"
+                    "target": "smithy.api#Integer",
+                    "traits": {
+                        "smithy.api#required": {}
+                    }
                 },
                 "nodeId": {
-                    "target": "smithy.api#String"
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#required": {}
+                    }
                 },
                 "targetType": {
-                    "target": "smithy.api#String"
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#required": {}
+                    }
                 }
             }
         },

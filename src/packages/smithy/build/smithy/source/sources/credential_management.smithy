@@ -130,9 +130,13 @@ structure GetInstallationsInput {
 }
 
 structure InstallationRecord {
+  @required
   appId: Integer
+  @required
   installationId: Integer
+  @required
   nodeId: String
+  @required
   targetType: String
 }
 
@@ -142,6 +146,7 @@ list InstallationRecordList {
 
 structure GetInstallationsOutput {
     nextToken: String
+    @required
     installations: InstallationRecordList
 }
 

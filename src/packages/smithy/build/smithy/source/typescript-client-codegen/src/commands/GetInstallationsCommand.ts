@@ -52,12 +52,12 @@ export interface GetInstallationsCommandOutput extends GetInstallationsOutput, _
  * const response = await client.send(command);
  * // { // GetInstallationsOutput
  * //   nextToken: "STRING_VALUE",
- * //   installations: [ // InstallationRecordList
+ * //   installations: [ // InstallationRecordList // required
  * //     { // InstallationRecord
- * //       appId: Number("int"),
- * //       installationId: Number("int"),
- * //       nodeId: "STRING_VALUE",
- * //       targetType: "STRING_VALUE",
+ * //       appId: Number("int"), // required
+ * //       installationId: Number("int"), // required
+ * //       nodeId: "STRING_VALUE", // required
+ * //       targetType: "STRING_VALUE", // required
  * //     },
  * //   ],
  * // };

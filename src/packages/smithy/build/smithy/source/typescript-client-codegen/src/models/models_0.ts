@@ -140,10 +140,10 @@ export interface GetInstallationsInput {
  * @public
  */
 export interface InstallationRecord {
-  appId?: number | undefined;
-  installationId?: number | undefined;
-  nodeId?: string | undefined;
-  targetType?: string | undefined;
+  appId: number | undefined;
+  installationId: number | undefined;
+  nodeId: string | undefined;
+  targetType: string | undefined;
 }
 
 /**
@@ -151,7 +151,7 @@ export interface InstallationRecord {
  */
 export interface GetInstallationsOutput {
   nextToken?: string | undefined;
-  installations?: (InstallationRecord)[] | undefined;
+  installations: (InstallationRecord)[] | undefined;
 }
 
 /**
