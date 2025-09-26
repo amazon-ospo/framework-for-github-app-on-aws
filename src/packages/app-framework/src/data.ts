@@ -299,3 +299,44 @@ export const getInstallationsDataByNodeId: GetInstallationsByNodeId = async ({
   }
   return result;
 };
+
+export type GetPaginatedInstallations = ({
+  tableName,
+  ExclusiveStartKey,
+  Limit,
+}: {
+  tableName: string;
+  ExclusiveStartKey?: string | undefined;
+  Limit?: number | undefined;
+}) => Promise<{
+  installations: InstallationRecord[];
+  LastEvaluatedKey: string | undefined;
+}>;
+
+export const getPaginatedInstallationsImpl: GetPaginatedInstallations = async ({
+  tableName,
+  ExclusiveStartKey,
+  Limit,
+}) => {
+  const getInstallations = new TableOperations({ TableName: tableName });
+  const installations: InstallationRecord[] = [];
+  const scan = await getInstallations.paginated_scan({
+    ExclusiveStartKey,
+    Limit,
+  });
+  const itemList = scan.items;
+  const LastEvaluatedKey = scan.LastEvaluatedKey;
+  itemList.map((item) => {
+    const appId: number = item.AppId;
+    const installationId: number = item.InstallationId;
+    const targetType: string = item.TargetType;
+    const nodeId: string = item.NodeId ?? '';
+    installations.push({
+      appId,
+      nodeId,
+      installationId,
+      targetType,
+    });
+  });
+  return { installations, LastEvaluatedKey };
+};

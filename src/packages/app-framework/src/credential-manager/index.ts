@@ -18,6 +18,7 @@ import { SERVICE_NAME } from './constants';
 import { GitHubAppToken } from './get-app-token/appToken';
 import { InstallationAcessTokenGenerator } from './get-installation-access-token';
 import { InstallationCachedData } from './get-installation-data';
+import { GetInstallations } from './get-installations';
 import { InstallationTracker } from './installation-tracker';
 import { RateLimitTracker } from './rate-limit-tracker';
 import {
@@ -47,6 +48,8 @@ export class CredentialManager extends NestedStack {
   readonly refreshCachedDataLambdaArn: string;
   readonly installationRecordLambdaArn: string;
   readonly installationRecordEndpoint: string;
+  readonly installationsLambdaArn: string;
+  readonly installationsEndpoint: string;
 
   constructor(scope: Construct, id: string, props?: CredentialManagerProps) {
     super(scope, id, props);
@@ -164,6 +167,12 @@ export class CredentialManager extends NestedStack {
     this.installationRecordLambdaArn =
       installationData.lambdaHandler.functionArn;
     this.installationRecordEndpoint = installationData.functionUrl.url;
+    // Creates a construct to retrieve all cached installations
+    const getInstallations = new GetInstallations(this, 'GetInstallations', {
+      InstallationTable: this.installationTable,
+    });
+    this.installationsLambdaArn = getInstallations.lambdaHandler.functionArn;
+    this.installationsEndpoint = getInstallations.functionUrl.url;
   }
 
   // Grants a caller permission to invoke the app token lambda Function URL.

@@ -7,6 +7,7 @@ import {
   deleteInstallationImpl,
   getInstallationsImpl,
   getInstallationsDataByNodeId,
+  getPaginatedInstallationsImpl,
 } from '../src/data';
 import { DataError, NotFound } from '../src/error';
 import { TableOperations } from '../src/tableOperations';
@@ -24,6 +25,8 @@ const mockAppId = 12345;
 const mockTableName = 'validAppTableName';
 const mockNodeId = 'foo';
 const mockInstallationId = 123456;
+const mockAppId2 = 12346;
+const mockInstallationId2 = 123457;
 const mockTargetType = 'Organization';
 const mockArn = 'arn:aws:kms:region:account:key/mock-key-id';
 describe('getKeyArnByID', () => {
@@ -327,8 +330,6 @@ describe('getInstallationId', () => {
 
   describe('GetInstallationsByNodeId', () => {
     it('should successfully retrieve all installations for a specific nodeId from DynamoDB', async () => {
-      const mockAppId2 = 12346;
-      const mockInstallationId2 = 123457;
       mockTableOperations.prototype.query.mockResolvedValue([
         {
           AppId: mockAppId,
@@ -415,6 +416,59 @@ describe('getInstallationId', () => {
         },
         indexName: 'NodeID',
       });
+    });
+  });
+
+  describe('GetPaginatedInstallations', () => {
+    it('should successfully retrieve all installations from DynamoDB', async () => {
+      mockTableOperations.prototype.paginated_scan.mockResolvedValue({
+        LastEvaluatedKey: 'encodedkey',
+        items: [
+          {
+            AppId: mockAppId,
+            InstallationId: mockInstallationId,
+            TargetType: mockTargetType,
+          },
+          {
+            AppId: mockAppId2,
+            InstallationId: mockInstallationId2,
+            NodeId: mockNodeId,
+            TargetType: mockTargetType,
+          },
+        ],
+      });
+      const result = await getPaginatedInstallationsImpl({
+        tableName: mockTableName,
+      });
+      expect(result.LastEvaluatedKey).toEqual('encodedkey');
+      expect(result.installations).toEqual([
+        {
+          appId: mockAppId,
+          nodeId: '',
+          installationId: mockInstallationId,
+          targetType: mockTargetType,
+        },
+        {
+          appId: mockAppId2,
+          nodeId: mockNodeId,
+          installationId: mockInstallationId2,
+          targetType: mockTargetType,
+        },
+      ]);
+      expect(TableOperations).toHaveBeenCalledWith({
+        TableName: mockTableName,
+      });
+      expect(mockTableOperations.prototype.paginated_scan).toHaveBeenCalled();
+    });
+    it('should throw an exception if DynamoDB call fails', async () => {
+      mockTableOperations.prototype.paginated_scan.mockRejectedValue(() => {
+        throw new Error('DynamoDB service error');
+      });
+      await expect(
+        getPaginatedInstallationsImpl({
+          tableName: mockTableName,
+        }),
+      ).rejects.toThrow('DynamoDB service error');
     });
   });
 });
