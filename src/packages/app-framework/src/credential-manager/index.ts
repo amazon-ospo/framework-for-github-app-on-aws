@@ -236,6 +236,21 @@ export class CredentialManager extends NestedStack {
     );
   }
 
+  grantGetInstallations(grantee: IGrantable) {
+    grantee.grantPrincipal.addToPrincipalPolicy(
+      new PolicyStatement({
+        actions: ['lambda:InvokeFunctionUrl'],
+        effect: Effect.ALLOW,
+        resources: [this.installationsLambdaArn],
+        conditions: {
+          StringEquals: {
+            'lambda:FunctionUrlAuthType': 'AWS_IAM',
+          },
+        },
+      }),
+    );
+  }
+
   /**
    * Dashboard to help track rate limits pf GitHub App API calls
    * @param limit is the rate limit percent the dashboard will alarm on

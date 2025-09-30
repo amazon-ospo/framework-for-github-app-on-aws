@@ -274,6 +274,22 @@ const response = await client.send(command);
 const installations = response.installations;
 ```
 
+#### Example: Get Installations
+
+```text
+import { GetInstallationsCommand } from '@aws/app-framework-for-github-apps-on-aws-client';
+
+const command = new GetInstallationsCommand({
+  nextToken: '<your nexttoken>'
+  maxResults: '<your maxResults>'
+});
+
+const response = await client.send(command);
+const installations = response.installations;
+```
+
+- `nextToken` and `maxResults` are optional parameters
+
 ## What Resources Are Created by Credential Manager
 
 ### DynamoDB Tables
@@ -361,6 +377,17 @@ retrieves cached installation data from DynamoDB for a given nodeId.
 It provides access to installation records without requiring GitHub API calls.
 It is exposed through a Function URL with IAM authentication,
 and access is controlled via `grantGetInstallationRecord`.
+
+- Permissions:
+  - DynamoDB Read access to Installation table
+
+#### Get Installations
+
+The Get Installations Lambda function
+retrieves cached installation data from DynamoDB installations table.
+It provides access to installation records without requiring GitHub API calls.
+It is exposed through a Function URL with IAM authentication,
+and access is controlled via `grantGetInstallations`.
 
 - Permissions:
   - DynamoDB Read access to Installation table
@@ -456,6 +483,7 @@ This approach provides better flexibility and control over resource management.
 |                    |                                     | `InstallationAccessTokenEndpoint` |
 |                    |                                     | `RefreshCachedDataEndpoint`       |
 |                    |                                     | `InstallationCachedDataEndpoint`  |
+|                    |                                     | `InstallationsEndpoint`           |
 
 ### Tag-Based Access Control
 
