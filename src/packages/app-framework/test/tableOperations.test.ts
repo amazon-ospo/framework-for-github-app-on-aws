@@ -112,6 +112,35 @@ describe('scan', () => {
   });
 });
 
+describe('paginated_scan', () => {
+  it('should call DynamoDB with ScanCommand', async () => {
+    mockDynamoDBClient.resolves({
+      Items: [{ item: { S: 'Foo' } }],
+      LastEvaluatedKey: { item: { S: 'Baz' } },
+    });
+
+    const ExclusiveStartKey = btoa(JSON.stringify({ item: { S: 'Test' } }));
+    const scanResult = await tableOperationsTest.paginated_scan({
+      ExclusiveStartKey,
+      Limit: 1,
+    });
+
+    expect(scanResult.items.length).toBe(1);
+    expect(scanResult.items[0]).toEqual({ item: 'Foo' });
+    const lastEvaluatedKey = btoa(JSON.stringify({ item: { S: 'Baz' } }));
+    expect(scanResult.LastEvaluatedKey).toEqual(lastEvaluatedKey);
+
+    expect(mockDynamoDBClient.calls()).toHaveLength(1);
+    const call = mockDynamoDBClient.calls()[0];
+    expect(call.args[0].constructor.name).toBe('ScanCommand');
+    expect(call.args[0].input).toEqual({
+      TableName: 'Test',
+      ExclusiveStartKey: { item: { S: 'Test' } },
+      Limit: 1,
+    });
+  });
+});
+
 describe('query', () => {
   it('should successfully call DynamoDB with QueryCommand', async () => {
     mockDynamoDBClient.on(QueryCommand).resolves({

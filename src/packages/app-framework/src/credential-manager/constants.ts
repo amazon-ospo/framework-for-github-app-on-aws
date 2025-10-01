@@ -14,6 +14,7 @@ export const TAG_VALUES = {
   INSTALLATION_ACCESS_TOKEN_ENDPOINT: 'InstallationAccessTokenEndpoint',
   INSTALLATION_CACHED_DATA_ENDPOINT: 'InstallationCachedDataEndpoint',
   REFRESH_CACHED_DATA_ENDPOINT: 'RefreshCachedDataEndpoint',
+  INSTALLATIONS_ENDPOINT: 'InstallationsEndpoint',
 };
 
 export enum EnvironmentVariables {

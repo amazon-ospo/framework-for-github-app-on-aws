@@ -1,3 +1,4 @@
+import { AttributeValue } from 'aws-lambda';
 import { DataError, NotFound } from './error';
 import { TableOperations } from './tableOperations';
 
@@ -298,4 +299,67 @@ export const getInstallationsDataByNodeId: GetInstallationsByNodeId = async ({
     throw new NotFound(`No installations found for node: ${nodeId}`);
   }
   return result;
+};
+
+export type GetPaginatedInstallations = ({
+  tableName,
+  ExclusiveStartKey,
+  Limit,
+}: {
+  tableName: string;
+  ExclusiveStartKey?: string | undefined;
+  Limit?: number | undefined;
+}) => Promise<{
+  installations: InstallationRecord[];
+  LastEvaluatedKey: string | undefined;
+}>;
+
+/**
+ * Fetches a list Installations from the DynamoDB installations table.
+ * @param tableName installations table name
+ * @param ExclusiveStartKey the exclusive start key to start scanning the table from
+ * @param Limit the number of items to receive from the DynamoDB table
+ * @returns a list of installations currently in the DynamoDB table.
+ */
+export const getPaginatedInstallationsImpl: GetPaginatedInstallations = async ({
+  tableName,
+  ExclusiveStartKey,
+  Limit,
+}) => {
+  const getInstallations = new TableOperations({ TableName: tableName });
+  const installations: InstallationRecord[] = [];
+  if (!!ExclusiveStartKey) {
+    const decodedExclusiveStartKey: Record<string, AttributeValue> = JSON.parse(
+      atob(ExclusiveStartKey),
+    );
+    if (
+      !decodedExclusiveStartKey.NodeId ||
+      !decodedExclusiveStartKey.AppId ||
+      !decodedExclusiveStartKey.NodeId.S ||
+      !decodedExclusiveStartKey.AppId.N ||
+      typeof decodedExclusiveStartKey.NodeId.S !== 'string' ||
+      isNaN(parseInt(decodedExclusiveStartKey.AppId.N))
+    ) {
+      throw new DataError('Invalid ExclusiveStartKey provided');
+    }
+  }
+  const scan = await getInstallations.paginated_scan({
+    ExclusiveStartKey,
+    Limit,
+  });
+  const itemList = scan.items;
+  const LastEvaluatedKey = scan.LastEvaluatedKey;
+  itemList.map((item) => {
+    const appId: number = item.AppId;
+    const installationId: number = item.InstallationId;
+    const targetType: string = item.TargetType;
+    const nodeId: string = item.NodeId ?? '';
+    installations.push({
+      appId,
+      nodeId,
+      installationId,
+      targetType,
+    });
+  });
+  return { installations, LastEvaluatedKey };
 };

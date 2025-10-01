@@ -170,4 +170,48 @@ export class TableOperations {
     }
     return results;
   }
+
+  /**
+   * Retrieves data for a DynamoDB table from a page
+   * @returns an array of items with a LastEvaluatedKey.
+   */
+  async paginated_scan({
+    ExclusiveStartKey,
+    Limit,
+  }: {
+    ExclusiveStartKey?: string | undefined;
+    Limit?: number | undefined;
+  }) {
+    const client = dynamodbClient();
+    var command = {
+      TableName: this.config.TableName,
+    };
+    var commandInput = command;
+    if (!!ExclusiveStartKey) {
+      const decodedExclusiveStartKey: Record<string, AttributeValue> =
+        JSON.parse(atob(ExclusiveStartKey));
+      const newCommand = {
+        ...commandInput,
+        ExclusiveStartKey: decodedExclusiveStartKey,
+      };
+      commandInput = newCommand;
+    }
+    if (!!Limit) {
+      const newCommand = {
+        ...commandInput,
+        Limit,
+      };
+      commandInput = newCommand;
+    }
+    const scanCommand = new ScanCommand({ ...commandInput });
+    let response = await client.send(scanCommand);
+    let LastEvaluatedKey = undefined;
+    if (!!response.LastEvaluatedKey) {
+      LastEvaluatedKey = btoa(JSON.stringify(response.LastEvaluatedKey));
+    }
+    let results: Record<string, any>[] = (response.Items || []).map((item) =>
+      unmarshall(item),
+    );
+    return { LastEvaluatedKey, items: results };
+  }
 }
