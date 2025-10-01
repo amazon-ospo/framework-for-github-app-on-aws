@@ -421,8 +421,18 @@ describe('getInstallationId', () => {
 
   describe('GetPaginatedInstallations', () => {
     it('should successfully retrieve all installations from DynamoDB', async () => {
+      const LastEvaluatedKey = btoa(
+        JSON.stringify({
+          NodeId: {
+            S: 'NODE_ID',
+          },
+          AppId: {
+            N: 123456,
+          },
+        }),
+      );
       mockTableOperations.prototype.paginated_scan.mockResolvedValue({
-        LastEvaluatedKey: 'encodedkey',
+        LastEvaluatedKey,
         items: [
           {
             AppId: mockAppId,
@@ -440,7 +450,7 @@ describe('getInstallationId', () => {
       const result = await getPaginatedInstallationsImpl({
         tableName: mockTableName,
       });
-      expect(result.LastEvaluatedKey).toEqual('encodedkey');
+      expect(result.LastEvaluatedKey).toEqual(LastEvaluatedKey);
       expect(result.installations).toEqual([
         {
           appId: mockAppId,
@@ -470,5 +480,42 @@ describe('getInstallationId', () => {
         }),
       ).rejects.toThrow('DynamoDB service error');
     });
+  });
+  it.each([
+    {
+      NodeId: {
+        S: 12345,
+      },
+      AppId: {
+        N: 123456,
+      },
+    },
+    {
+      NodeId: {
+        S: 'NODE_ID',
+      },
+      AppId: {
+        N: 'APP_ID',
+      },
+    },
+    ,
+    {},
+    {
+      AppId: {
+        N: 123456,
+      },
+    },
+    {
+      NodeId: {
+        S: 'NODE_ID',
+      },
+    },
+  ])('fails when $s is the exclusive start key', async (value) => {
+    await expect(
+      getPaginatedInstallationsImpl({
+        tableName: mockTableName,
+        ExclusiveStartKey: btoa(JSON.stringify(value)),
+      }),
+    ).rejects.toThrow('Invalid ExclusiveStartKey provided');
   });
 });

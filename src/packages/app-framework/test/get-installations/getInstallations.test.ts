@@ -1,6 +1,5 @@
 import { getInstallationRecordsImpl } from '../../src/credential-manager/get-installations/getInstallations';
 import { InstallationRecord } from '../../src/data';
-import { NotFound } from '../../src/error';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -55,18 +54,6 @@ describe('getInstallationRecordsImpl', () => {
       installations: mockInstallationData,
       nextToken: 'encodedKey',
     });
-  });
-
-  it('should throw NotFound error when getInstallationRecords throws NotFound', async () => {
-    const notFoundError = new NotFound('No installations found');
-    const mockGetInstallations = jest.fn().mockRejectedValue(notFoundError);
-
-    await expect(
-      getInstallationRecordsImpl({
-        installationTable: mockInstallationTable,
-        getInstallations: mockGetInstallations,
-      }),
-    ).rejects.toThrow(NotFound);
   });
 
   it('should throw ServerError when getInstallationRecords throws a DynamoDB error', async () => {

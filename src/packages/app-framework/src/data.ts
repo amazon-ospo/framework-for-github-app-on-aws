@@ -1,3 +1,4 @@
+import { AttributeValue } from 'aws-lambda';
 import { DataError, NotFound } from './error';
 import { TableOperations } from './tableOperations';
 
@@ -313,6 +314,13 @@ export type GetPaginatedInstallations = ({
   LastEvaluatedKey: string | undefined;
 }>;
 
+/**
+ * Fetches a list Installations from the DynamoDB installations table.
+ * @param tableName installations table name
+ * @param ExclusiveStartKey the exclusive start key to start scanning the table from
+ * @param Limit the number of items to receive from the DynamoDB table
+ * @returns a list of installations currently in the DynamoDB table.
+ */
 export const getPaginatedInstallationsImpl: GetPaginatedInstallations = async ({
   tableName,
   ExclusiveStartKey,
@@ -320,6 +328,21 @@ export const getPaginatedInstallationsImpl: GetPaginatedInstallations = async ({
 }) => {
   const getInstallations = new TableOperations({ TableName: tableName });
   const installations: InstallationRecord[] = [];
+  if (!!ExclusiveStartKey) {
+    const decodedExclusiveStartKey: Record<string, AttributeValue> = JSON.parse(
+      atob(ExclusiveStartKey),
+    );
+    if (
+      !decodedExclusiveStartKey.NodeId ||
+      !decodedExclusiveStartKey.AppId ||
+      !decodedExclusiveStartKey.NodeId.S ||
+      !decodedExclusiveStartKey.AppId.N ||
+      typeof decodedExclusiveStartKey.NodeId.S !== 'string' ||
+      isNaN(parseInt(decodedExclusiveStartKey.AppId.N))
+    ) {
+      throw new DataError('Invalid ExclusiveStartKey provided');
+    }
+  }
   const scan = await getInstallations.paginated_scan({
     ExclusiveStartKey,
     Limit,
