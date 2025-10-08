@@ -31,11 +31,12 @@ export class RateLimitTracker extends Construct {
           props.InstallationTable.tableName,
       },
       description: 'Tracks GitHub API Rate Limits',
-      memorySize: 512,
+      memorySize: 1024,
+      timeout: Duration.minutes(5),
     });
 
     new Rule(scope, 'rateLimitTrackerRule', {
-      schedule: Schedule.rate(Duration.minutes(5)),
+      schedule: Schedule.rate(Duration.minutes(10)),
       enabled: true,
       targets: [new LambdaFunction(this.lambdaHandler)],
     });
