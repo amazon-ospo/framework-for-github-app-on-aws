@@ -403,7 +403,7 @@ and can be used to track installation lifecycles reliably.
 
 ### Rate Limit Scheduler
 
-Scans GitHub App Rate Limit usages every 5 minutes
+Scans GitHub App Rate Limit usages every 10 minutes
 and generates corresponding metrics.
 These metrics are accessible through the rate limit dashboard.
 This enables proper tracking of API usage for each GitHub App.
