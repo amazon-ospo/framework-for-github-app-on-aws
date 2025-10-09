@@ -33,7 +33,8 @@ export class InstallationTracker extends Construct {
           props.InstallationTable.tableName,
       },
       description: 'Tracks app installations',
-      memorySize: 512,
+      memorySize: 1024,
+      timeout: Duration.minutes(5),
     });
 
     rule.addTarget(new LambdaFunction(installationTrackerFunction));
