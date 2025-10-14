@@ -138,6 +138,8 @@ structure InstallationRecord {
   nodeId: String
   @required
   targetType: String
+  @required
+  name: String
 }
 
 list InstallationRecordList {

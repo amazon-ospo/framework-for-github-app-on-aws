@@ -144,6 +144,7 @@ export interface InstallationRecord {
   installationId: number | undefined;
   nodeId: string | undefined;
   targetType: string | undefined;
+  name: string | undefined;
 }
 
 /**

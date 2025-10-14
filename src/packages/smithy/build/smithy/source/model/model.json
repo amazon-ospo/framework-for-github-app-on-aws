@@ -2178,6 +2178,12 @@
                     "traits": {
                         "smithy.api#required": {}
                     }
+                },
+                "name": {
+                    "target": "smithy.api#String",
+                    "traits": {
+                        "smithy.api#required": {}
+                    }
                 }
             }
         },

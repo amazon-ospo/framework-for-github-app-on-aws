@@ -374,6 +374,7 @@ export interface InstallationRecord {
   installationId: number | undefined;
   nodeId: string | undefined;
   targetType: string | undefined;
+  name: string | undefined;
 }
 
 export namespace InstallationRecord {
@@ -382,6 +383,7 @@ export namespace InstallationRecord {
     installationId?: __MultiConstraintValidator<number>,
     nodeId?: __MultiConstraintValidator<string>,
     targetType?: __MultiConstraintValidator<string>,
+    name?: __MultiConstraintValidator<string>,
   } = {};
   /**
    * @internal
@@ -414,6 +416,12 @@ export namespace InstallationRecord {
             ]);
             break;
           }
+          case "name": {
+            memberValidators["name"] = new __CompositeValidator<string>([
+              new __RequiredValidator(),
+            ]);
+            break;
+          }
         }
       }
       return memberValidators[member]!!;
@@ -423,6 +431,7 @@ export namespace InstallationRecord {
       ...getMemberValidator("installationId").validate(obj.installationId, `${path}/installationId`),
       ...getMemberValidator("nodeId").validate(obj.nodeId, `${path}/nodeId`),
       ...getMemberValidator("targetType").validate(obj.targetType, `${path}/targetType`),
+      ...getMemberValidator("name").validate(obj.name, `${path}/name`),
     ];
   }
 }

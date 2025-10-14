@@ -585,6 +585,7 @@ const se_InstallationRecord = (
   return take(input, {
     'appId': [],
     'installationId': [],
+    'name': [],
     'nodeId': [],
     'targetType': [],
   });
