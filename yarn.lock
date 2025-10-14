@@ -946,10 +946,10 @@
     re2-wasm "^1.0.2"
     tslib "^1.8.0"
 
-"@aws/app-framework-for-github-apps-on-aws-ssdk@^0.0.14":
-  version "0.0.14"
-  resolved "https://registry.npmjs.org/@aws/app-framework-for-github-apps-on-aws-ssdk/-/app-framework-for-github-apps-on-aws-ssdk-0.0.14.tgz#71eb8e23bb5d46f705897bc45d71309501ca132d"
-  integrity sha512-rPB4VLruxbNx8my0AQXPcrHcPJ9T/XxYwFZJ4qwV+qEIMjtM3k2X9z3ZJMFGbs+vfRaP5dgGMvMtE2xP8niVVg==
+"@aws/app-framework-for-github-apps-on-aws-ssdk@^0.0.18":
+  version "0.0.18"
+  resolved "https://registry.npmjs.org/@aws/app-framework-for-github-apps-on-aws-ssdk/-/app-framework-for-github-apps-on-aws-ssdk-0.0.18.tgz#0443061b2def0e7eecba886a13df2ed30f796bff"
+  integrity sha512-h9s4PiQAqdtqtR24PCwdwRr7bBE8k3u2AqcAUxC0wNDRaiiO14QDYnMhb+pc0ZTnvu1oz8ejENC23Gx97uLJbw==
   dependencies:
     "@aws-crypto/sha256-browser" "5.2.0"
     "@aws-crypto/sha256-js" "5.2.0"

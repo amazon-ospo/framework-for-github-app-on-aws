@@ -52,13 +52,35 @@ describe('handlerImpl', () => {
     const result = await handlerImpl({
       getAppIds: jest.fn().mockReturnValue([1, 3]),
       getMappedInstallationIds: jest.fn().mockReturnValue({
-        1: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
+        1: [
+          {
+            appId: 1,
+            installationId: 20,
+            nodeId: 'foo',
+            targetType: 'Organization',
+            name: 'test-org',
+          },
+        ],
       }),
       getAppToken: jest.fn().mockReturnValue('some-token'),
       calculateInstallationDifferences: jest.fn().mockReturnValue({
-        missingInstallations: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
+        missingInstallations: [
+          {
+            appId: 1,
+            installationId: 20,
+            nodeId: 'foo',
+            targetType: 'Organization',
+            name: 'test-org',
+          },
+        ],
         unverifiedInstallations: [
-          { appId: 3, installationId: 21, nodeId: 'baz' },
+          {
+            appId: 3,
+            installationId: 21,
+            nodeId: 'baz',
+            targetType: 'Organization',
+            name: 'test-org-2',
+          },
         ],
       }),
       putInstallation: putInstallationMock,
@@ -66,9 +88,23 @@ describe('handlerImpl', () => {
     expect(result).toEqual({
       body: JSON.stringify({
         unverifiedInstallations: [
-          { appId: 3, installationId: 21, nodeId: 'baz' },
+          {
+            appId: 3,
+            installationId: 21,
+            nodeId: 'baz',
+            targetType: 'Organization',
+            name: 'test-org-2',
+          },
         ],
-        missingInstallations: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
+        missingInstallations: [
+          {
+            appId: 1,
+            installationId: 20,
+            nodeId: 'foo',
+            targetType: 'Organization',
+            name: 'test-org',
+          },
+        ],
       }),
       statusCode: 200,
     });
@@ -92,7 +128,15 @@ describe('handlerImpl', () => {
       handlerImpl({
         getAppIds: jest.fn().mockReturnValue([1, 3]),
         getMappedInstallationIds: jest.fn().mockReturnValue({
-          1: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
+          1: [
+            {
+              appId: 1,
+              installationId: 20,
+              nodeId: 'foo',
+              targetType: 'Organization',
+              name: 'test-org',
+            },
+          ],
         }),
         getAppToken: jest.fn().mockReturnValue('some-token'),
       }),
@@ -122,19 +166,32 @@ describe('calculateInstallationDifferencesImpl', () => {
             installationId: 20,
             nodeId: 'foo',
             targetType: 'Organization',
+            name: 'test-org',
           },
         ],
       },
       registeredInstallations: [],
       getMissingInstallations: jest.fn(),
-      getUnverifiedInstallations: jest
-        .fn()
-        .mockResolvedValue([{ appId: 1, installationId: 20, nodeId: 'foo' }]),
+      getUnverifiedInstallations: jest.fn().mockResolvedValue([
+        {
+          appId: 1,
+          installationId: 20,
+          nodeId: 'foo',
+          targetType: 'Organization',
+          name: 'test-org',
+        },
+      ]),
     });
     expect(result).toEqual({
       missingInstallations: [],
       unverifiedInstallations: [
-        { appId: 1, installationId: 20, nodeId: 'foo' },
+        {
+          appId: 1,
+          installationId: 20,
+          nodeId: 'foo',
+          targetType: 'Organization',
+          name: 'test-org',
+        },
       ],
     });
   });
@@ -149,16 +206,31 @@ describe('calculateInstallationDifferencesImpl', () => {
             installationId: 20,
             nodeId: 'foo',
             targetType: 'Organization',
+            name: 'test-org',
           },
         ],
       },
-      getMissingInstallations: jest
-        .fn()
-        .mockResolvedValue([{ appId: 1, installationId: 20, nodeId: 'foo' }]),
+      getMissingInstallations: jest.fn().mockResolvedValue([
+        {
+          appId: 1,
+          installationId: 20,
+          nodeId: 'foo',
+          targetType: 'Organization',
+          name: 'test-org',
+        },
+      ]),
       getUnverifiedInstallations: jest.fn(),
     });
     expect(result).toEqual({
-      missingInstallations: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
+      missingInstallations: [
+        {
+          appId: 1,
+          installationId: 20,
+          nodeId: 'foo',
+          targetType: 'Organization',
+          name: 'test-org',
+        },
+      ],
       unverifiedInstallations: [],
     });
   });
@@ -172,6 +244,7 @@ describe('calculateInstallationDifferencesImpl', () => {
             installationId: 21,
             nodeId: 'baz',
             targetType: 'Organization',
+            name: 'test-org-2',
           },
         ],
       },
@@ -182,20 +255,47 @@ describe('calculateInstallationDifferencesImpl', () => {
             installationId: 20,
             nodeId: 'foo',
             targetType: 'Organization',
+            name: 'test-org',
           },
         ],
       },
-      getMissingInstallations: jest
-        .fn()
-        .mockResolvedValue([{ appId: 1, installationId: 20, nodeId: 'foo' }]),
-      getUnverifiedInstallations: jest
-        .fn()
-        .mockResolvedValue([{ appId: 3, installationId: 21, nodeId: 'baz' }]),
+      getMissingInstallations: jest.fn().mockResolvedValue([
+        {
+          appId: 1,
+          installationId: 20,
+          nodeId: 'foo',
+          targetType: 'Organization',
+          name: 'test-org',
+        },
+      ]),
+      getUnverifiedInstallations: jest.fn().mockResolvedValue([
+        {
+          appId: 3,
+          installationId: 21,
+          nodeId: 'baz',
+          targetType: 'Organization',
+          name: 'test-org-2',
+        },
+      ]),
     });
     expect(result).toEqual({
-      missingInstallations: [{ appId: 1, installationId: 20, nodeId: 'foo' }],
+      missingInstallations: [
+        {
+          appId: 1,
+          installationId: 20,
+          nodeId: 'foo',
+          targetType: 'Organization',
+          name: 'test-org',
+        },
+      ],
       unverifiedInstallations: [
-        { appId: 3, installationId: 21, nodeId: 'baz' },
+        {
+          appId: 3,
+          installationId: 21,
+          nodeId: 'baz',
+          targetType: 'Organization',
+          name: 'test-org-2',
+        },
       ],
     });
   });
@@ -217,6 +317,7 @@ describe('getUnverifiedInstallationsImpl', () => {
           installationId: 20,
           nodeId: 'foo',
           targetType: 'Organization',
+          name: 'test-org',
         },
       ],
       gitHubInstallationsForAppId: [],
@@ -234,6 +335,7 @@ describe('getUnverifiedInstallationsImpl', () => {
           installationId: 20,
           nodeId: 'foo',
           targetType: 'Organization',
+          name: 'test-org',
         },
       ],
       putInstallation,
@@ -244,6 +346,7 @@ describe('getUnverifiedInstallationsImpl', () => {
         installationId: 20,
         nodeId: 'foo',
         targetType: 'Organization',
+        name: 'test-org',
       },
     ]);
     expect(putInstallation).toHaveBeenCalledTimes(1);
@@ -256,12 +359,14 @@ describe('getUnverifiedInstallationsImpl', () => {
           installationId: 20,
           nodeId: 'foo',
           targetType: 'Organization',
+          name: 'test-org',
         },
         {
           appId: 2,
           installationId: 21,
           nodeId: 'baz',
           targetType: 'Organization',
+          name: 'test-org-2',
         },
       ],
       gitHubInstallationsForAppId: [
@@ -270,18 +375,21 @@ describe('getUnverifiedInstallationsImpl', () => {
           installationId: 20,
           nodeId: 'foo',
           targetType: 'Organization',
+          name: 'test-org',
         },
         {
           appId: 3,
           installationId: 22,
           nodeId: 'bar',
           targetType: 'Organization',
+          name: 'test-org-3',
         },
         {
           appId: 4,
           installationId: 23,
           nodeId: 'random',
           targetType: 'Organization',
+          name: 'test-org-4',
         },
       ],
       putInstallation,
@@ -292,12 +400,14 @@ describe('getUnverifiedInstallationsImpl', () => {
         installationId: 22,
         nodeId: 'bar',
         targetType: 'Organization',
+        name: 'test-org-3',
       },
       {
         appId: 4,
         installationId: 23,
         nodeId: 'random',
         targetType: 'Organization',
+        name: 'test-org-4',
       },
     ]);
     expect(putInstallation).toHaveBeenCalledTimes(2);
@@ -322,6 +432,7 @@ describe('getMissingInstallationsImpl', () => {
           installationId: 20,
           nodeId: 'foo',
           targetType: 'Organization',
+          name: 'test-org',
         },
       ],
       deleteInstallation,
@@ -337,6 +448,7 @@ describe('getMissingInstallationsImpl', () => {
           installationId: 20,
           nodeId: 'foo',
           targetType: 'Organization',
+          name: 'test-org',
         },
       ],
       gitHubInstallationsForAppId: [],
@@ -348,6 +460,7 @@ describe('getMissingInstallationsImpl', () => {
         installationId: 20,
         nodeId: 'foo',
         targetType: 'Organization',
+        name: 'test-org',
       },
     ]);
     expect(deleteInstallation).toHaveBeenCalledTimes(1);
@@ -360,18 +473,21 @@ describe('getMissingInstallationsImpl', () => {
           installationId: 20,
           nodeId: 'foo',
           targetType: 'Organization',
+          name: 'test-org',
         },
         {
           appId: 3,
           installationId: 22,
           nodeId: 'bar',
           targetType: 'Organization',
+          name: 'test-org-3',
         },
         {
           appId: 4,
           installationId: 23,
           nodeId: 'random',
           targetType: 'Organization',
+          name: 'test-org-4',
         },
       ],
       gitHubInstallationsForAppId: [
@@ -380,12 +496,14 @@ describe('getMissingInstallationsImpl', () => {
           installationId: 20,
           nodeId: 'foo',
           targetType: 'Organization',
+          name: 'test-org',
         },
         {
           appId: 2,
           installationId: 21,
           nodeId: 'baz',
           targetType: 'Organization',
+          name: 'test-org-2',
         },
       ],
       deleteInstallation,
@@ -396,12 +514,14 @@ describe('getMissingInstallationsImpl', () => {
         installationId: 22,
         nodeId: 'bar',
         targetType: 'Organization',
+        name: 'test-org-3',
       },
       {
         appId: 4,
         installationId: 23,
         nodeId: 'random',
         targetType: 'Organization',
+        name: 'test-org-4',
       },
     ]);
     expect(deleteInstallation).toHaveBeenCalledTimes(2);
@@ -416,12 +536,14 @@ describe('leftJoinInstallationsForOneApp', () => {
         installationId: 2,
         nodeId: 'foo',
         targetType: 'Organization',
+        name: 'test-org',
       },
       {
         appId: 3,
         installationId: 4,
         nodeId: 'bar',
         targetType: 'Organization',
+        name: 'test-org-2',
       },
     ];
     const right: InstallationRecord[] = [
@@ -430,12 +552,14 @@ describe('leftJoinInstallationsForOneApp', () => {
         installationId: 2,
         nodeId: 'foo',
         targetType: 'Organization',
+        name: 'test-org',
       },
       {
         appId: 3,
         installationId: 4,
         nodeId: 'bar',
         targetType: 'Organization',
+        name: 'test-org-2',
       },
     ];
     const result = leftJoinInstallationsForOneApp(left, right);
@@ -448,6 +572,7 @@ describe('leftJoinInstallationsForOneApp', () => {
         installationId: 2,
         nodeId: 'foo',
         targetType: 'Organization',
+        name: 'test-org',
       },
     ];
     const right: InstallationRecord[] = [
@@ -456,12 +581,14 @@ describe('leftJoinInstallationsForOneApp', () => {
         installationId: 2,
         nodeId: 'foo',
         targetType: 'Organization',
+        name: 'test-org',
       },
       {
         appId: 3,
         installationId: 4,
         nodeId: 'bar',
         targetType: 'Organization',
+        name: 'test-org-2',
       },
     ];
     const result = leftJoinInstallationsForOneApp(left, right);
@@ -474,12 +601,14 @@ describe('leftJoinInstallationsForOneApp', () => {
         installationId: 2,
         nodeId: 'foo',
         targetType: 'Organization',
+        name: 'test-org',
       },
       {
         appId: 3,
         installationId: 4,
         nodeId: 'bar',
         targetType: 'Organization',
+        name: 'test-org-2',
       },
     ];
     const right: InstallationRecord[] = [
@@ -488,6 +617,7 @@ describe('leftJoinInstallationsForOneApp', () => {
         installationId: 4,
         nodeId: 'bar',
         targetType: 'Organization',
+        name: 'test-org-2',
       },
     ];
     const result = leftJoinInstallationsForOneApp(left, right);
@@ -498,6 +628,7 @@ describe('leftJoinInstallationsForOneApp', () => {
         installationId: 2,
         nodeId: 'foo',
         targetType: 'Organization',
+        name: 'test-org',
       },
     ]);
   });
@@ -508,12 +639,14 @@ describe('leftJoinInstallationsForOneApp', () => {
         installationId: 2,
         nodeId: 'bar',
         targetType: 'Organization',
+        name: 'test-org',
       },
       {
         appId: 1,
         installationId: 4,
         nodeId: 'bar',
         targetType: 'Organization',
+        name: 'test-org',
       },
     ];
     const right: InstallationRecord[] = [
@@ -522,6 +655,7 @@ describe('leftJoinInstallationsForOneApp', () => {
         installationId: 4,
         nodeId: 'bar',
         targetType: 'Organization',
+        name: 'test-org',
       },
     ];
     const result = leftJoinInstallationsForOneApp(left, right);
@@ -532,6 +666,7 @@ describe('leftJoinInstallationsForOneApp', () => {
         installationId: 2,
         nodeId: 'bar',
         targetType: 'Organization',
+        name: 'test-org',
       },
     ]);
   });

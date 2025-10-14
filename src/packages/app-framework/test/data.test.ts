@@ -28,6 +28,7 @@ const mockInstallationId = 123456;
 const mockAppId2 = 12346;
 const mockInstallationId2 = 123457;
 const mockTargetType = 'Organization';
+const mockName = 'test-org';
 const mockArn = 'arn:aws:kms:region:account:key/mock-key-id';
 describe('getKeyArnByID', () => {
   it('should successfully retrieve KMS ARN from DynamoDB', async () => {
@@ -229,6 +230,7 @@ describe('getInstallationId', () => {
         installationId: mockInstallationId,
         nodeId: mockNodeId,
         targetType: mockTargetType,
+        name: mockName,
       });
 
       expect(TableOperations).toHaveBeenCalledWith({
@@ -240,6 +242,7 @@ describe('getInstallationId', () => {
         LastRefreshed: { S: '' },
         NodeId: { S: mockNodeId },
         TargetType: { S: mockTargetType },
+        Name: { S: mockName },
       });
     });
 
@@ -255,6 +258,7 @@ describe('getInstallationId', () => {
           installationId: mockInstallationId,
           nodeId: mockNodeId,
           targetType: mockTargetType,
+          name: mockName,
         }),
       ).rejects.toThrow('DynamoDB service error');
     });
@@ -308,6 +312,8 @@ describe('getInstallationId', () => {
           appId: mockAppId,
           nodeId: mockNodeId,
           installationId: mockInstallationId,
+          targetType: undefined,
+          name: '',
         },
       ]);
       expect(TableOperations).toHaveBeenCalledWith({
@@ -351,11 +357,15 @@ describe('getInstallationId', () => {
           appId: mockAppId,
           nodeId: mockNodeId,
           installationId: mockInstallationId,
+          targetType: undefined,
+          name: '',
         },
         {
           appId: mockAppId2,
           nodeId: mockNodeId,
           installationId: mockInstallationId2,
+          targetType: undefined,
+          name: '',
         },
       ]);
       expect(TableOperations).toHaveBeenCalledWith({
@@ -457,12 +467,14 @@ describe('getInstallationId', () => {
           nodeId: '',
           installationId: mockInstallationId,
           targetType: mockTargetType,
+          name: '',
         },
         {
           appId: mockAppId2,
           nodeId: mockNodeId,
           installationId: mockInstallationId2,
           targetType: mockTargetType,
+          name: '',
         },
       ]);
       expect(TableOperations).toHaveBeenCalledWith({

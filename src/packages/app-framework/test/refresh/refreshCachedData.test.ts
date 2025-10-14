@@ -28,6 +28,7 @@ const existingInstallationInDDB: InstallationRecord = {
   installationId: 888,
   nodeId: 'node-existing',
   targetType: 'Organization',
+  name: 'existing-org',
 };
 describe('refreshCachedDataImpl', () => {
   beforeEach(() => {
@@ -71,12 +72,14 @@ describe('refreshCachedDataImpl', () => {
         installationId: 999,
         nodeId: 'node-abc',
         targetType: 'Organization',
+        name: 'test-org-1',
       },
       {
         appId,
         installationId: 1000,
         nodeId: 'node-def',
         targetType: 'Organization',
+        name: 'test-org-2',
       },
     ];
     (GitHubAPIService as jest.Mock).mockImplementation(() => ({
