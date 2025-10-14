@@ -2,7 +2,6 @@
 // smithy-typescript generated code
 import {
   ClientSideError,
-  InstallationData,
   InstallationRecord,
   ScopeDown,
   ServerSideError,
@@ -550,28 +549,14 @@ export const serializeValidationExceptionError = async(
 }
 
 /**
- * serializeAws_restJson1InstallationData
- */
-const se_InstallationData = (
-  input: InstallationData,
-  context: __SerdeContext
-): any => {
-  return take(input, {
-    'appId': [],
-    'installationId': [],
-    'nodeId': [],
-  });
-}
-
-/**
  * serializeAws_restJson1InstallationDataList
  */
 const se_InstallationDataList = (
-  input: (InstallationData)[],
+  input: (InstallationRecord)[],
   context: __SerdeContext
 ): any => {
   return input.filter((e: any) => e != null).map(entry => {
-    return se_InstallationData(entry, context);
+    return se_InstallationRecord(entry, context);
   });
 }
 

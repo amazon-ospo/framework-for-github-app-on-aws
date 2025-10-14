@@ -246,129 +246,6 @@ export namespace GetInstallationDataInput {
 /**
  * @public
  */
-export interface InstallationData {
-  nodeId?: string | undefined;
-  appId?: number | undefined;
-  installationId?: number | undefined;
-}
-
-export namespace InstallationData {
-  const memberValidators : {
-    nodeId?: __MultiConstraintValidator<string>,
-    appId?: __MultiConstraintValidator<number>,
-    installationId?: __MultiConstraintValidator<number>,
-  } = {};
-  /**
-   * @internal
-   */
-  export const validate = (obj: InstallationData, path: string = ""): __ValidationFailure[] => {
-    function getMemberValidator<T extends keyof typeof memberValidators>(member: T): NonNullable<typeof memberValidators[T]> {
-      if (memberValidators[member] === undefined) {
-        switch (member) {
-          case "nodeId": {
-            memberValidators["nodeId"] = new __NoOpValidator();
-            break;
-          }
-          case "appId": {
-            memberValidators["appId"] = new __NoOpValidator();
-            break;
-          }
-          case "installationId": {
-            memberValidators["installationId"] = new __NoOpValidator();
-            break;
-          }
-        }
-      }
-      return memberValidators[member]!!;
-    }
-    return [
-      ...getMemberValidator("nodeId").validate(obj.nodeId, `${path}/nodeId`),
-      ...getMemberValidator("appId").validate(obj.appId, `${path}/appId`),
-      ...getMemberValidator("installationId").validate(obj.installationId, `${path}/installationId`),
-    ];
-  }
-}
-
-/**
- * @public
- */
-export interface GetInstallationDataOutput {
-  installations?: (InstallationData)[] | undefined;
-}
-
-export namespace GetInstallationDataOutput {
-  const memberValidators : {
-    installations?: __MultiConstraintValidator<Iterable<InstallationData>>,
-  } = {};
-  /**
-   * @internal
-   */
-  export const validate = (obj: GetInstallationDataOutput, path: string = ""): __ValidationFailure[] => {
-    function getMemberValidator<T extends keyof typeof memberValidators>(member: T): NonNullable<typeof memberValidators[T]> {
-      if (memberValidators[member] === undefined) {
-        switch (member) {
-          case "installations": {
-            memberValidators["installations"] = new __CompositeCollectionValidator<InstallationData>(
-              new __NoOpValidator(),
-              new __CompositeStructureValidator<InstallationData>(
-                new __NoOpValidator(),
-                InstallationData.validate
-              )
-            );
-            break;
-          }
-        }
-      }
-      return memberValidators[member]!!;
-    }
-    return [
-      ...getMemberValidator("installations").validate(obj.installations, `${path}/installations`),
-    ];
-  }
-}
-
-/**
- * @public
- */
-export interface GetInstallationsInput {
-  maxResults?: number | undefined;
-  nextToken?: string | undefined;
-}
-
-export namespace GetInstallationsInput {
-  const memberValidators : {
-    maxResults?: __MultiConstraintValidator<number>,
-    nextToken?: __MultiConstraintValidator<string>,
-  } = {};
-  /**
-   * @internal
-   */
-  export const validate = (obj: GetInstallationsInput, path: string = ""): __ValidationFailure[] => {
-    function getMemberValidator<T extends keyof typeof memberValidators>(member: T): NonNullable<typeof memberValidators[T]> {
-      if (memberValidators[member] === undefined) {
-        switch (member) {
-          case "maxResults": {
-            memberValidators["maxResults"] = new __NoOpValidator();
-            break;
-          }
-          case "nextToken": {
-            memberValidators["nextToken"] = new __NoOpValidator();
-            break;
-          }
-        }
-      }
-      return memberValidators[member]!!;
-    }
-    return [
-      ...getMemberValidator("maxResults").validate(obj.maxResults, `${path}/maxResults`),
-      ...getMemberValidator("nextToken").validate(obj.nextToken, `${path}/nextToken`),
-    ];
-  }
-}
-
-/**
- * @public
- */
 export interface InstallationRecord {
   appId: number | undefined;
   installationId: number | undefined;
@@ -432,6 +309,83 @@ export namespace InstallationRecord {
       ...getMemberValidator("nodeId").validate(obj.nodeId, `${path}/nodeId`),
       ...getMemberValidator("targetType").validate(obj.targetType, `${path}/targetType`),
       ...getMemberValidator("name").validate(obj.name, `${path}/name`),
+    ];
+  }
+}
+
+/**
+ * @public
+ */
+export interface GetInstallationDataOutput {
+  installations?: (InstallationRecord)[] | undefined;
+}
+
+export namespace GetInstallationDataOutput {
+  const memberValidators : {
+    installations?: __MultiConstraintValidator<Iterable<InstallationRecord>>,
+  } = {};
+  /**
+   * @internal
+   */
+  export const validate = (obj: GetInstallationDataOutput, path: string = ""): __ValidationFailure[] => {
+    function getMemberValidator<T extends keyof typeof memberValidators>(member: T): NonNullable<typeof memberValidators[T]> {
+      if (memberValidators[member] === undefined) {
+        switch (member) {
+          case "installations": {
+            memberValidators["installations"] = new __CompositeCollectionValidator<InstallationRecord>(
+              new __NoOpValidator(),
+              new __CompositeStructureValidator<InstallationRecord>(
+                new __NoOpValidator(),
+                InstallationRecord.validate
+              )
+            );
+            break;
+          }
+        }
+      }
+      return memberValidators[member]!!;
+    }
+    return [
+      ...getMemberValidator("installations").validate(obj.installations, `${path}/installations`),
+    ];
+  }
+}
+
+/**
+ * @public
+ */
+export interface GetInstallationsInput {
+  maxResults?: number | undefined;
+  nextToken?: string | undefined;
+}
+
+export namespace GetInstallationsInput {
+  const memberValidators : {
+    maxResults?: __MultiConstraintValidator<number>,
+    nextToken?: __MultiConstraintValidator<string>,
+  } = {};
+  /**
+   * @internal
+   */
+  export const validate = (obj: GetInstallationsInput, path: string = ""): __ValidationFailure[] => {
+    function getMemberValidator<T extends keyof typeof memberValidators>(member: T): NonNullable<typeof memberValidators[T]> {
+      if (memberValidators[member] === undefined) {
+        switch (member) {
+          case "maxResults": {
+            memberValidators["maxResults"] = new __NoOpValidator();
+            break;
+          }
+          case "nextToken": {
+            memberValidators["nextToken"] = new __NoOpValidator();
+            break;
+          }
+        }
+      }
+      return memberValidators[member]!!;
+    }
+    return [
+      ...getMemberValidator("maxResults").validate(obj.maxResults, `${path}/maxResults`),
+      ...getMemberValidator("nextToken").validate(obj.nextToken, `${path}/nextToken`),
     ];
   }
 }

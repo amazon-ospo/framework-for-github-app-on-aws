@@ -2132,24 +2132,10 @@
                 }
             }
         },
-        "framework.api#InstallationData": {
-            "type": "structure",
-            "members": {
-                "nodeId": {
-                    "target": "smithy.api#String"
-                },
-                "appId": {
-                    "target": "smithy.api#Integer"
-                },
-                "installationId": {
-                    "target": "smithy.api#Integer"
-                }
-            }
-        },
         "framework.api#InstallationDataList": {
             "type": "list",
             "member": {
-                "target": "framework.api#InstallationData"
+                "target": "framework.api#InstallationRecord"
             }
         },
         "framework.api#InstallationRecord": {

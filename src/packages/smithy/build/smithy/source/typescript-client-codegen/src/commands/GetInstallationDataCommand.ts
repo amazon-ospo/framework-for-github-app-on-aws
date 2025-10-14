@@ -51,10 +51,12 @@ export interface GetInstallationDataCommandOutput extends GetInstallationDataOut
  * const response = await client.send(command);
  * // { // GetInstallationDataOutput
  * //   installations: [ // InstallationDataList
- * //     { // InstallationData
- * //       nodeId: "STRING_VALUE",
- * //       appId: Number("int"),
- * //       installationId: Number("int"),
+ * //     { // InstallationRecord
+ * //       appId: Number("int"), // required
+ * //       installationId: Number("int"), // required
+ * //       nodeId: "STRING_VALUE", // required
+ * //       targetType: "STRING_VALUE", // required
+ * //       name: "STRING_VALUE", // required
  * //     },
  * //   ],
  * // };

@@ -115,17 +115,19 @@ export interface GetInstallationDataInput {
 /**
  * @public
  */
-export interface InstallationData {
-  nodeId?: string | undefined;
-  appId?: number | undefined;
-  installationId?: number | undefined;
+export interface InstallationRecord {
+  appId: number | undefined;
+  installationId: number | undefined;
+  nodeId: string | undefined;
+  targetType: string | undefined;
+  name: string | undefined;
 }
 
 /**
  * @public
  */
 export interface GetInstallationDataOutput {
-  installations?: (InstallationData)[] | undefined;
+  installations?: (InstallationRecord)[] | undefined;
 }
 
 /**
@@ -134,17 +136,6 @@ export interface GetInstallationDataOutput {
 export interface GetInstallationsInput {
   maxResults?: number | undefined;
   nextToken?: string | undefined;
-}
-
-/**
- * @public
- */
-export interface InstallationRecord {
-  appId: number | undefined;
-  installationId: number | undefined;
-  nodeId: string | undefined;
-  targetType: string | undefined;
-  name: string | undefined;
 }
 
 /**
