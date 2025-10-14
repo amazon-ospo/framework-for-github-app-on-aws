@@ -15,6 +15,7 @@ export type InstallationRecord = {
   installationId: number;
   nodeId: string;
   targetType: string;
+  name: string;
 };
 
 type AppInstallations = {
@@ -118,6 +119,7 @@ export type PutInstallation = ({
   nodeId,
   installationId,
   targetType,
+  name,
   lastRefreshed,
 }: {
   tableName: string;
@@ -125,6 +127,7 @@ export type PutInstallation = ({
   nodeId: string;
   installationId: number;
   targetType: string;
+  name: string;
   lastRefreshed?: string;
 }) => Promise<void>;
 
@@ -134,6 +137,7 @@ export const putInstallationImpl: PutInstallation = async ({
   nodeId,
   installationId,
   targetType,
+  name,
   lastRefreshed,
 }): Promise<void> => {
   const tableOperations = new TableOperations({
@@ -145,6 +149,7 @@ export const putInstallationImpl: PutInstallation = async ({
     NodeId: { S: nodeId },
     InstallationId: { N: installationId.toString() },
     TargetType: { S: targetType },
+    Name: { S: name },
     LastRefreshed: { S: lastRefreshed || '' },
   };
 
@@ -248,12 +253,14 @@ export const getInstallationsImpl: GetInstallations = async ({ tableName }) => {
     const appId: number = item.AppId;
     const installationId: number = item.InstallationId;
     const targetType: string = item.targetType;
+    const name: string = item.Name ?? '';
     const nodeId: string = item.NodeId ?? '';
     result.push({
       appId,
       nodeId,
       installationId,
       targetType,
+      name,
     });
   });
   return result;
@@ -286,12 +293,14 @@ export const getInstallationsDataByNodeId: GetInstallationsByNodeId = async ({
     const appId: number = item.AppId;
     const itemNodeId: string = item.NodeId;
     const installationId: number = item.InstallationId;
-    const targetType: string = item.targetType;
+    const targetType: string = item.TargetType;
+    const name: string = item.Name ?? '';
     result.push({
       appId,
       nodeId: itemNodeId,
       installationId,
       targetType,
+      name,
     });
   });
 
@@ -353,13 +362,16 @@ export const getPaginatedInstallationsImpl: GetPaginatedInstallations = async ({
     const appId: number = item.AppId;
     const installationId: number = item.InstallationId;
     const targetType: string = item.TargetType;
+    const name: string = item.Name ?? '';
     const nodeId: string = item.NodeId ?? '';
     installations.push({
       appId,
       nodeId,
       installationId,
       targetType,
+      name,
     });
   });
+  console.log(installations);
   return { installations, LastEvaluatedKey };
 };

@@ -14,12 +14,14 @@ describe('getInstallationRecordsImpl', () => {
       installationId: 67890,
       nodeId: mockNodeId,
       targetType: 'Organization',
+      name: 'test-org-1',
     },
     {
       appId: 54321,
       installationId: 98765,
       nodeId: mockNodeId,
       targetType: 'Organization',
+      name: 'test-org-2',
     },
   ];
 
