@@ -58,6 +58,7 @@ export interface GetInstallationsCommandOutput extends GetInstallationsOutput, _
  * //       installationId: Number("int"), // required
  * //       nodeId: "STRING_VALUE", // required
  * //       targetType: "STRING_VALUE", // required
+ * //       name: "STRING_VALUE", // required
  * //     },
  * //   ],
  * // };

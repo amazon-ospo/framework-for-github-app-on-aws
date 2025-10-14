@@ -246,35 +246,57 @@ export namespace GetInstallationDataInput {
 /**
  * @public
  */
-export interface InstallationData {
-  nodeId?: string | undefined;
-  appId?: number | undefined;
-  installationId?: number | undefined;
+export interface InstallationRecord {
+  appId: number | undefined;
+  installationId: number | undefined;
+  nodeId: string | undefined;
+  targetType: string | undefined;
+  name: string | undefined;
 }
 
-export namespace InstallationData {
+export namespace InstallationRecord {
   const memberValidators : {
-    nodeId?: __MultiConstraintValidator<string>,
     appId?: __MultiConstraintValidator<number>,
     installationId?: __MultiConstraintValidator<number>,
+    nodeId?: __MultiConstraintValidator<string>,
+    targetType?: __MultiConstraintValidator<string>,
+    name?: __MultiConstraintValidator<string>,
   } = {};
   /**
    * @internal
    */
-  export const validate = (obj: InstallationData, path: string = ""): __ValidationFailure[] => {
+  export const validate = (obj: InstallationRecord, path: string = ""): __ValidationFailure[] => {
     function getMemberValidator<T extends keyof typeof memberValidators>(member: T): NonNullable<typeof memberValidators[T]> {
       if (memberValidators[member] === undefined) {
         switch (member) {
-          case "nodeId": {
-            memberValidators["nodeId"] = new __NoOpValidator();
-            break;
-          }
           case "appId": {
-            memberValidators["appId"] = new __NoOpValidator();
+            memberValidators["appId"] = new __CompositeValidator<number>([
+              new __RequiredValidator(),
+            ]);
             break;
           }
           case "installationId": {
-            memberValidators["installationId"] = new __NoOpValidator();
+            memberValidators["installationId"] = new __CompositeValidator<number>([
+              new __RequiredValidator(),
+            ]);
+            break;
+          }
+          case "nodeId": {
+            memberValidators["nodeId"] = new __CompositeValidator<string>([
+              new __RequiredValidator(),
+            ]);
+            break;
+          }
+          case "targetType": {
+            memberValidators["targetType"] = new __CompositeValidator<string>([
+              new __RequiredValidator(),
+            ]);
+            break;
+          }
+          case "name": {
+            memberValidators["name"] = new __CompositeValidator<string>([
+              new __RequiredValidator(),
+            ]);
             break;
           }
         }
@@ -282,9 +304,11 @@ export namespace InstallationData {
       return memberValidators[member]!!;
     }
     return [
-      ...getMemberValidator("nodeId").validate(obj.nodeId, `${path}/nodeId`),
       ...getMemberValidator("appId").validate(obj.appId, `${path}/appId`),
       ...getMemberValidator("installationId").validate(obj.installationId, `${path}/installationId`),
+      ...getMemberValidator("nodeId").validate(obj.nodeId, `${path}/nodeId`),
+      ...getMemberValidator("targetType").validate(obj.targetType, `${path}/targetType`),
+      ...getMemberValidator("name").validate(obj.name, `${path}/name`),
     ];
   }
 }
@@ -293,12 +317,12 @@ export namespace InstallationData {
  * @public
  */
 export interface GetInstallationDataOutput {
-  installations?: (InstallationData)[] | undefined;
+  installations?: (InstallationRecord)[] | undefined;
 }
 
 export namespace GetInstallationDataOutput {
   const memberValidators : {
-    installations?: __MultiConstraintValidator<Iterable<InstallationData>>,
+    installations?: __MultiConstraintValidator<Iterable<InstallationRecord>>,
   } = {};
   /**
    * @internal
@@ -308,11 +332,11 @@ export namespace GetInstallationDataOutput {
       if (memberValidators[member] === undefined) {
         switch (member) {
           case "installations": {
-            memberValidators["installations"] = new __CompositeCollectionValidator<InstallationData>(
+            memberValidators["installations"] = new __CompositeCollectionValidator<InstallationRecord>(
               new __NoOpValidator(),
-              new __CompositeStructureValidator<InstallationData>(
+              new __CompositeStructureValidator<InstallationRecord>(
                 new __NoOpValidator(),
-                InstallationData.validate
+                InstallationRecord.validate
               )
             );
             break;
@@ -362,67 +386,6 @@ export namespace GetInstallationsInput {
     return [
       ...getMemberValidator("maxResults").validate(obj.maxResults, `${path}/maxResults`),
       ...getMemberValidator("nextToken").validate(obj.nextToken, `${path}/nextToken`),
-    ];
-  }
-}
-
-/**
- * @public
- */
-export interface InstallationRecord {
-  appId: number | undefined;
-  installationId: number | undefined;
-  nodeId: string | undefined;
-  targetType: string | undefined;
-}
-
-export namespace InstallationRecord {
-  const memberValidators : {
-    appId?: __MultiConstraintValidator<number>,
-    installationId?: __MultiConstraintValidator<number>,
-    nodeId?: __MultiConstraintValidator<string>,
-    targetType?: __MultiConstraintValidator<string>,
-  } = {};
-  /**
-   * @internal
-   */
-  export const validate = (obj: InstallationRecord, path: string = ""): __ValidationFailure[] => {
-    function getMemberValidator<T extends keyof typeof memberValidators>(member: T): NonNullable<typeof memberValidators[T]> {
-      if (memberValidators[member] === undefined) {
-        switch (member) {
-          case "appId": {
-            memberValidators["appId"] = new __CompositeValidator<number>([
-              new __RequiredValidator(),
-            ]);
-            break;
-          }
-          case "installationId": {
-            memberValidators["installationId"] = new __CompositeValidator<number>([
-              new __RequiredValidator(),
-            ]);
-            break;
-          }
-          case "nodeId": {
-            memberValidators["nodeId"] = new __CompositeValidator<string>([
-              new __RequiredValidator(),
-            ]);
-            break;
-          }
-          case "targetType": {
-            memberValidators["targetType"] = new __CompositeValidator<string>([
-              new __RequiredValidator(),
-            ]);
-            break;
-          }
-        }
-      }
-      return memberValidators[member]!!;
-    }
-    return [
-      ...getMemberValidator("appId").validate(obj.appId, `${path}/appId`),
-      ...getMemberValidator("installationId").validate(obj.installationId, `${path}/installationId`),
-      ...getMemberValidator("nodeId").validate(obj.nodeId, `${path}/nodeId`),
-      ...getMemberValidator("targetType").validate(obj.targetType, `${path}/targetType`),
     ];
   }
 }

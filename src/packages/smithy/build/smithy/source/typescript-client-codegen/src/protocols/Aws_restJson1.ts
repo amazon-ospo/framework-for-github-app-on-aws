@@ -384,8 +384,6 @@ const de_CommandError = async(
 
   // se_ScopeDown omitted.
 
-  // de_InstallationData omitted.
-
   // de_InstallationDataList omitted.
 
   // de_InstallationRecord omitted.

@@ -111,14 +111,8 @@ structure GetInstallationDataInput {
     nodeId: String
 }
 
-structure InstallationData {
-    nodeId: String
-    appId: Integer
-    installationId: Integer
-}
-
 list InstallationDataList {
-    member: InstallationData
+    member: InstallationRecord
 }
 structure GetInstallationDataOutput {
     installations: InstallationDataList
@@ -138,6 +132,8 @@ structure InstallationRecord {
   nodeId: String
   @required
   targetType: String
+  @required
+  name: String
 }
 
 list InstallationRecordList {
