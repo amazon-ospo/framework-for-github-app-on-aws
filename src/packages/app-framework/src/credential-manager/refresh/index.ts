@@ -1,4 +1,4 @@
-import { Stack, Tags } from 'aws-cdk-lib';
+import {Duration, Stack, Tags} from 'aws-cdk-lib';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import {
@@ -35,6 +35,7 @@ export class InstallationRefresher extends Construct {
       },
       description: 'Refresh app installations',
       memorySize: 512,
+      timeout: Duration.minutes(5),
     });
     this.functionUrl = this.lambdaHandler.addFunctionUrl({
       authType: FunctionUrlAuthType.AWS_IAM,
