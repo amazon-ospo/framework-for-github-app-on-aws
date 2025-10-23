@@ -1,4 +1,4 @@
-import { Tags } from 'aws-cdk-lib';
+import { Tags, Duration } from 'aws-cdk-lib';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import {
   FunctionUrlAuthType,
@@ -43,6 +43,7 @@ export class GetInstallations extends Construct {
       },
       description: 'Get all Installations',
       memorySize: 512,
+      timeout: Duration.minutes(1),
     });
 
     // Create Function URL for the Lambda function with IAM authentication

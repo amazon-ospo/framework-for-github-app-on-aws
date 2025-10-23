@@ -1,4 +1,4 @@
-import { Tags } from 'aws-cdk-lib';
+import { Tags, Duration } from 'aws-cdk-lib';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import {
   FunctionUrlAuthType,
@@ -43,6 +43,7 @@ export class InstallationCachedData extends Construct {
       },
       description: 'Get Installations Recorded Data',
       memorySize: 512,
+      timeout: Duration.minutes(1),
     });
 
     // Create Function URL for the Lambda function with IAM authentication
