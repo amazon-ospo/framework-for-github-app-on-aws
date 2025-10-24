@@ -36,7 +36,7 @@ export class GitHubAppToken extends Construct {
       },
       description: 'Processes events for getting App token.',
       memorySize: 512,
-      timeout: Duration.seconds(10),
+      timeout: Duration.seconds(60),
     });
     // Enable Function URL
     this.functionUrl = this.lambdaHandler.addFunctionUrl({
