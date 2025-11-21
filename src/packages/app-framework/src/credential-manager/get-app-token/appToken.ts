@@ -26,8 +26,18 @@ export class GitHubAppToken extends Construct {
       bundling: {
         ...LAMBDA_DEFAULTS.bundling,
         // re2-wasm is used by the SSDK common library to do pattern validation, and uses
-        // a WASM module, so it's excluded from the bundle
-        nodeModules: ['re2-wasm'],
+        // a WASM module, so it's excluded from the bundle and copied from local node_modules.
+        // Change this method once we figure out a better way to interact
+        // with the network-blocked builder system.
+        externalModules: ['re2-wasm'],
+        commandHooks: {
+          beforeBundling: (): string[] => [],
+          beforeInstall: (): string[] => [],
+          afterBundling: (inputDir: string, outputDir: string): string[] => [
+            `mkdir -p ${outputDir}/node_modules`,
+            `cp -r ${inputDir}/node_modules/re2-wasm ${outputDir}/node_modules/`,
+          ],
+        },
       },
       environment: {
         [EnvironmentVariables.APP_TABLE_NAME]: props.appTableName,

@@ -25,7 +25,15 @@ export class InstallationTracker extends Construct {
       ...LAMBDA_DEFAULTS,
       bundling: {
         ...LAMBDA_DEFAULTS.bundling,
-        nodeModules: ['re2-wasm'],
+        externalModules: ['re2-wasm'],
+        commandHooks: {
+          beforeBundling: (): string[] => [],
+          beforeInstall: (): string[] => [],
+          afterBundling: (inputDir: string, outputDir: string): string[] => [
+            `mkdir -p ${outputDir}/node_modules`,
+            `cp -r ${inputDir}/node_modules/re2-wasm ${outputDir}/node_modules/`,
+          ],
+        },
       },
       environment: {
         [EnvironmentVariables.APP_TABLE_NAME]: props.AppTable.tableName,
