@@ -7,7 +7,7 @@ import {
 } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
-import { LAMBDA_DEFAULTS } from '../../lambdaDefaults';
+import { LAMBDA_DEFAULTS_WITH_RE2_WASM } from '../../lambdaDefaults';
 import { EnvironmentVariables, TAG_KEYS, TAG_VALUES } from '../constants';
 
 export interface InstallationCachedDataProps {
@@ -32,11 +32,7 @@ export class GetInstallations extends Construct {
     super(scope, id);
     // Create Lambda function for handling installation data requests
     this.lambdaHandler = new NodejsFunction(this, 'handler', {
-      ...LAMBDA_DEFAULTS,
-      bundling: {
-        ...LAMBDA_DEFAULTS.bundling,
-        nodeModules: ['re2-wasm'],
-      },
+      ...LAMBDA_DEFAULTS_WITH_RE2_WASM,
       environment: {
         [EnvironmentVariables.INSTALLATION_TABLE_NAME]:
           props.InstallationTable.tableName,

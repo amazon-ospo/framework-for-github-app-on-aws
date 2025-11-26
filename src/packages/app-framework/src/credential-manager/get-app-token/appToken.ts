@@ -7,7 +7,7 @@ import {
 } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
-import { LAMBDA_DEFAULTS } from '../../lambdaDefaults';
+import { LAMBDA_DEFAULTS_WITH_RE2_WASM } from '../../lambdaDefaults';
 import { EnvironmentVariables, TAG_KEYS, TAG_VALUES } from '../constants';
 
 export interface GitHubAppTokenProps {
@@ -22,13 +22,7 @@ export class GitHubAppToken extends Construct {
     super(scope, id);
     // Create Lambda function for GetAppToken API
     this.lambdaHandler = new NodejsFunction(this, 'handler', {
-      ...LAMBDA_DEFAULTS,
-      bundling: {
-        ...LAMBDA_DEFAULTS.bundling,
-        // re2-wasm is used by the SSDK common library to do pattern validation, and uses
-        // a WASM module, so it's excluded from the bundle
-        nodeModules: ['re2-wasm'],
-      },
+      ...LAMBDA_DEFAULTS_WITH_RE2_WASM,
       environment: {
         [EnvironmentVariables.APP_TABLE_NAME]: props.appTableName,
         [EnvironmentVariables.INSTALLATION_TABLE_NAME]:
