@@ -7,7 +7,7 @@ import {
 } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
-import { LAMBDA_DEFAULTS } from '../../lambdaDefaults';
+import { LAMBDA_DEFAULTS_WITH_RE2_WASM } from '../../lambdaDefaults';
 import { EnvironmentVariables, TAG_KEYS, TAG_VALUES } from '../constants';
 
 export interface GitHubAppTokenProps {
@@ -22,23 +22,7 @@ export class GitHubAppToken extends Construct {
     super(scope, id);
     // Create Lambda function for GetAppToken API
     this.lambdaHandler = new NodejsFunction(this, 'handler', {
-      ...LAMBDA_DEFAULTS,
-      bundling: {
-        ...LAMBDA_DEFAULTS.bundling,
-        // re2-wasm is used by the SSDK common library to do pattern validation, and uses
-        // a WASM module, so it's excluded from the bundle and copied from local node_modules.
-        // Change this method once we figure out a better way to interact
-        // with the network-blocked builder system.
-        externalModules: ['re2-wasm'],
-        commandHooks: {
-          beforeBundling: (): string[] => [],
-          beforeInstall: (): string[] => [],
-          afterBundling: (inputDir: string, outputDir: string): string[] => [
-            `mkdir -p ${outputDir}/node_modules`,
-            `cp -r ${inputDir}/node_modules/re2-wasm ${outputDir}/node_modules/`,
-          ],
-        },
-      },
+      ...LAMBDA_DEFAULTS_WITH_RE2_WASM,
       environment: {
         [EnvironmentVariables.APP_TABLE_NAME]: props.appTableName,
         [EnvironmentVariables.INSTALLATION_TABLE_NAME]:

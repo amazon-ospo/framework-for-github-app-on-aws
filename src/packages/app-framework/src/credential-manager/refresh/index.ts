@@ -8,7 +8,7 @@ import {
 } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
-import { LAMBDA_DEFAULTS } from '../../lambdaDefaults';
+import { LAMBDA_DEFAULTS_WITH_RE2_WASM } from '../../lambdaDefaults';
 import { EnvironmentVariables, TAG_KEYS, TAG_VALUES } from '../constants';
 
 export interface InstallationRefreshProps {
@@ -23,19 +23,7 @@ export class InstallationRefresher extends Construct {
     super(scope, id);
 
     this.lambdaHandler = new NodejsFunction(this, 'handler', {
-      ...LAMBDA_DEFAULTS,
-      bundling: {
-        ...LAMBDA_DEFAULTS.bundling,
-        externalModules: ['re2-wasm'],
-        commandHooks: {
-          beforeBundling: (): string[] => [],
-          beforeInstall: (): string[] => [],
-          afterBundling: (inputDir: string, outputDir: string): string[] => [
-            `mkdir -p ${outputDir}/node_modules`,
-            `cp -r ${inputDir}/node_modules/re2-wasm ${outputDir}/node_modules/`,
-          ],
-        },
-      },
+      ...LAMBDA_DEFAULTS_WITH_RE2_WASM,
       environment: {
         [EnvironmentVariables.APP_TABLE_NAME]: props.AppTable.tableName,
         [EnvironmentVariables.INSTALLATION_TABLE_NAME]:

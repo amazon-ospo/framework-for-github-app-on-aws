@@ -15,3 +15,24 @@ export const LAMBDA_DEFAULTS = {
     externalModules: [],
   },
 };
+
+// Bundling configuration for Lambdas that use re2-wasm
+// re2-wasm is used by the SSDK common library to do pattern validation, and uses
+// a WASM module, so it's excluded from the bundle and copied from local node_modules.
+// Change this method once we figure out a better way to interact
+// with the network-blocked builder system.
+export const LAMBDA_DEFAULTS_WITH_RE2_WASM = {
+  ...LAMBDA_DEFAULTS,
+  bundling: {
+    ...LAMBDA_DEFAULTS.bundling,
+    externalModules: ['re2-wasm'],
+    commandHooks: {
+      beforeBundling: (): string[] => [],
+      beforeInstall: (): string[] => [],
+      afterBundling: (inputDir: string, outputDir: string): string[] => [
+        `mkdir -p ${outputDir}/node_modules`,
+        `cp -r ${inputDir}/node_modules/re2-wasm ${outputDir}/node_modules/`,
+      ],
+    },
+  },
+};
