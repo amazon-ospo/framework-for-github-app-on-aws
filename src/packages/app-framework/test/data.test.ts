@@ -92,7 +92,7 @@ describe('getInstallationId', () => {
     mockTableOperations.prototype.getItem.mockResolvedValue({
       AppID: mockAppId,
       NodeID: mockNodeId,
-      InstallationID: mockInstallationId,
+      InstallationId: mockInstallationId,
     });
     const result = await getInstallationIdFromTableImpl({
       appId: mockAppId,

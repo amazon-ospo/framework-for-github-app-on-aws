@@ -222,12 +222,12 @@ export const getInstallationIdFromTableImpl: GetInstallationIdFromTable =
         AppId: { N: appId.toString() },
         NodeId: { S: nodeId as string },
       });
-      if (!result.InstallationID) {
+      if (!result.InstallationId) {
         throw new DataError(
           `Invalid data: Missing Installation ID for appId: ${appId} and nodeID: ${nodeId}`,
         );
       }
-      return result.InstallationID;
+      return result.InstallationId;
     } catch (error) {
       console.error('Error fetching Installation ID:', error);
       throw error;
