@@ -51,7 +51,7 @@ export const getAppTokenImpl: GetAppToken = async ({
       typ: 'JWT',
     };
     const now = Math.floor(Date.now() / 1000);
-    const exp = now + 10 * 60;
+    const exp = now + 8 * 60;
     const payload = {
       iat: now - 60,
       exp,

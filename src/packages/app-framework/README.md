@@ -367,6 +367,7 @@ The App Token Generator is a Lambda function
 that generates short-lived JWTs used to authenticate the GitHub App itself.
 It exposes a Function URL with AWS IAM authentication
 and performs RSA signing operations through KMS.
+The generated JWTs have an 8-minute expiration time to ensure compliance with GitHub's validation requirements while accounting for clock drift.
 Access is restricted to IAM principals explicitly granted through `grantGetAppToken`.
 
 - Permissions:
@@ -445,6 +446,16 @@ App ID, and installation ID.
 This enables proper tracking of API usage for each GitHub App.
 
 ## Security Considerations
+
+### JWT Token Expiration
+
+The Credential Manager generates GitHub App JWTs with an 8-minute expiration time (`exp`), 
+which is shorter than GitHub's documented maximum of 10 minutes. 
+This conservative approach ensures compatibility with GitHub's JWT validation, 
+which enforces that the time span between the issued-at time (`iat`) and expiration time (`exp`) 
+must not exceed 10 minutes. Since the `iat` is backdated by 60 seconds to account for clock drift, 
+using an 8-minute expiration ensures the total JWT lifetime stays well within GitHub's limits 
+and provides a safety margin for any timing variations between systems.
 
 ### Data Protection
 
