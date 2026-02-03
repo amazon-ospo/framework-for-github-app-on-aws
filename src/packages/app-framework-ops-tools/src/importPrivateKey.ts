@@ -667,7 +667,7 @@ export const validateJWTImpl: ValidateJWT = async ({ appId, signFunction }) => {
     const now = Math.floor(Date.now() / 1000);
     const payload = {
       iat: now - 60,
-      exp: now + 10 * 60,
+      exp: now + 8 * 60,
       iss: appId,
     };
     const encodedHeader = Buffer.from(JSON.stringify(header)).toString(
