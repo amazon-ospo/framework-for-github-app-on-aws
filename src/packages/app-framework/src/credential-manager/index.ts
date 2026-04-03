@@ -179,7 +179,7 @@ export class CredentialManager extends NestedStack {
   grantGetAppToken(grantee: IGrantable) {
     grantee.grantPrincipal.addToPrincipalPolicy(
       new PolicyStatement({
-        actions: ['lambda:InvokeFunctionUrl'],
+        actions: ['lambda:InvokeFunctionUrl', 'lambda:InvokeFunction'],
         effect: Effect.ALLOW,
         resources: [this.appTokenLambdaArn],
         conditions: {
@@ -194,7 +194,7 @@ export class CredentialManager extends NestedStack {
   grantGetInstallationAccessToken(grantee: IGrantable) {
     grantee.grantPrincipal.addToPrincipalPolicy(
       new PolicyStatement({
-        actions: ['lambda:InvokeFunctionUrl'],
+        actions: ['lambda:InvokeFunctionUrl', 'lambda:InvokeFunction'],
         effect: Effect.ALLOW,
         resources: [this.installationAccessLambdaArn],
         conditions: {
@@ -209,7 +209,7 @@ export class CredentialManager extends NestedStack {
   grantRefreshCachedData(grantee: IGrantable) {
     grantee.grantPrincipal.addToPrincipalPolicy(
       new PolicyStatement({
-        actions: ['lambda:InvokeFunctionUrl'],
+        actions: ['lambda:InvokeFunctionUrl', 'lambda:InvokeFunction'],
         effect: Effect.ALLOW,
         resources: [this.refreshCachedDataLambdaArn],
         conditions: {
@@ -224,7 +224,7 @@ export class CredentialManager extends NestedStack {
   grantGetInstallationRecord(grantee: IGrantable) {
     grantee.grantPrincipal.addToPrincipalPolicy(
       new PolicyStatement({
-        actions: ['lambda:InvokeFunctionUrl'],
+        actions: ['lambda:InvokeFunctionUrl', 'lambda:InvokeFunction'],
         effect: Effect.ALLOW,
         resources: [this.installationRecordLambdaArn],
         conditions: {
@@ -239,7 +239,7 @@ export class CredentialManager extends NestedStack {
   grantGetInstallations(grantee: IGrantable) {
     grantee.grantPrincipal.addToPrincipalPolicy(
       new PolicyStatement({
-        actions: ['lambda:InvokeFunctionUrl'],
+        actions: ['lambda:InvokeFunctionUrl', 'lambda:InvokeFunction'],
         effect: Effect.ALLOW,
         resources: [this.installationsLambdaArn],
         conditions: {
