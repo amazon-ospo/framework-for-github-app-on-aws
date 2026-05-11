@@ -147,6 +147,9 @@ project.package.file.addOverride("workspaces", [
   "src/packages/*",
   "src/packages/smithy/build/smithy/source/*",
 ]);
+project.package.file.addOverride("resolutions", {
+  "fast-uri": ">=3.1.2",
+});
 // Run Lerna build one package at a time and,
 // waits for each package to complete before showing its logs.
 project.preCompileTask.exec(
