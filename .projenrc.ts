@@ -149,7 +149,7 @@ project.package.file.addOverride("workspaces", [
 ]);
 project.package.file.addOverride("resolutions", {
   "fast-uri": ">=3.1.2",
-  // Force fast-xml-parser >=5.7.0 to address security vulnerabilities
+  // Force fast-xml-parser >=5.7.0 to address security vulnerabilities.
   // Critical advisories affect all versions <=5.6.0 (e.g. GHSA-m7jm-9gc2-mpf2,
   // GHSA-jmr7-xgp7-cmfj, GHSA-fj3w-jwp8-x2g3, GHSA-8gc5-j5rx-235r,
   // GHSA-jp2q-39xq-3w4g, GHSA-gh4j-gqv2-49f6). Includes vulnerable 4.4.1
