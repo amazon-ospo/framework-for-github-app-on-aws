@@ -155,6 +155,13 @@ project.package.file.addOverride("resolutions", {
   // GHSA-jp2q-39xq-3w4g, GHSA-gh4j-gqv2-49f6). Includes vulnerable 4.4.1
   // copies bundled inside @aws-sdk packages.
   "fast-xml-parser": ">=5.7.0",
+  // Force axios >=1.16.0 to address Dependabot alerts on the transitive
+  // axios 1.11.0 pulled in via lerna -> nx. Covers:
+  // GHSA-3p68-rc4w-qgx5 / CVE-2025-62718 (NO_PROXY hostname bypass, fixed 1.15.0)
+  // GHSA-3g43-6gmg-66jw / CVE-2026-44495 (prototype-pollution gadget in
+  // mergeConfig leading to credential theft / response hijacking, fixed 1.15.2)
+  // and the related grouped advisories Dependabot recommends 1.16.0+ for.
+  axios: ">=1.16.0",
 });
 // Run Lerna build one package at a time and,
 // waits for each package to complete before showing its logs.
