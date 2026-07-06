@@ -53,7 +53,7 @@
     "jsii-docgen": "^10.5.0",
     "jsii-pacmak": "^1.108.0",
     "jsii-rosetta": "~5.7.0",
-    "lerna": "^8.2.1",
+    "lerna": "^9.0.7",
     "markdown-eslint-parser": "^1.2.1",
     "prettier": "^3.5.2",
     "projen": "^0.91.13",
@@ -69,7 +69,7 @@
     "cdk"
   ],
   "engines": {
-    "node": ">18.0.0"
+    "node": ">=20.0.0"
   },
   "main": "lib/index.js",
   "license": "Apache-2.0",
